@@ -1,0 +1,1 @@
+# .net-api-hexagonal-skeleton
