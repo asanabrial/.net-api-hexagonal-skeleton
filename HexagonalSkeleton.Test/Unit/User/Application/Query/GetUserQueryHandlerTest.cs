@@ -4,30 +4,30 @@ using HexagonalSkeleton.API.Features.User.Application.Query;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Moq;
-using FluentValidation;
-using FluentValidation.Results;
-using Microsoft.Extensions.Logging;
-using HexagonalSkeleton.Test.Integration.User;
 using AutoFixture;
 using HexagonalSkeleton.API.Data;
 using HexagonalSkeleton.API.Features.User.Domain;
 
 namespace HexagonalSkeleton.Test.Unit.User.Application.Query
 {
-    public class GetUserQueryHandlerTest(UnitOfWorkFixture fixture) : IClassFixture<UnitOfWorkFixture>
+    public class GetUserQueryHandlerTest
     {
         [Theory, AutoData]
         public async Task GetUserQuery_Should_Return_All_Entities_Without_Deleted_Ones(CancellationTokenSource cts)
         {
             // Arrange
             var unitOfWorkMock = new Mock<IUnitOfWork>();
-            var user = new Fixture().Create<UserEntity>();
-            unitOfWorkMock.Setup(s => s.Users.FindOneAsync(user.Id, cts.Token)).ReturnsAsync(user);
+            var fixture = new Fixture();
+            fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
+                .ForEach(b => fixture.Behaviors.Remove(b));
+
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+            var user = fixture.Create<UserEntity>();
+            unitOfWorkMock.Setup(s => s.Users.GetProfileUserByIdAsync(user.Id, cts.Token)).ReturnsAsync(user);
 
             var validatorGetUserQueryMock = new GetUserQueryValidator();
             var getUserQueryHandlerMock = new Mock<GetUserQueryHandler>(
                 validatorGetUserQueryMock,
-                new Mock<ILogger<GetUserQueryHandler>>().Object,
                 unitOfWorkMock.Object);
 
             var expectedResult = new GetUserQueryResult(user);
@@ -40,21 +40,20 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Query
 
             result.Should().NotBeNull();
             result!.StatusCode.Should().Be(StatusCodes.Status200OK);
-            result!.Value.Should().BeEquivalentTo(expectedResult);
+            result.Value.Should().BeEquivalentTo(expectedResult);
         }
         [Theory, AutoData]
         public async Task GetUserQuery_Should_Return_NotFound_When_User_Not_Found(CancellationTokenSource cts)
         {
             // Arrange
-            int userId = 1;
+            const int userId = 1;
             var unitOfWorkMock = new Mock<IUnitOfWork>();
             UserEntity? user = null;
-            unitOfWorkMock.Setup(s => s.Users.FindOneAsync(userId, cts.Token)).ReturnsAsync(user);
+            unitOfWorkMock.Setup(s => s.Users.GetProfileUserByIdAsync(userId, cts.Token)).ReturnsAsync(user);
 
             var validatorGetUserQueryMock = new GetUserQueryValidator();
             var getUserQueryHandlerMock = new Mock<GetUserQueryHandler>(
                 validatorGetUserQueryMock,
-                new Mock<ILogger<GetUserQueryHandler>>().Object,
                 unitOfWorkMock.Object);
 
             // Act
@@ -71,13 +70,17 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Query
         {
             // Arrange
             var unitOfWorkMock = new Mock<IUnitOfWork>();
-            var user = new Fixture().Create<UserEntity>();
-            unitOfWorkMock.Setup(s => s.Users.FindOneAsync(user.Id, cts.Token)).ReturnsAsync(user);
+            var fixture = new Fixture();
+            fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
+                .ForEach(b => fixture.Behaviors.Remove(b));
+
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+            var user = fixture.Create<UserEntity>();
+            unitOfWorkMock.Setup(s => s.Users.GetProfileUserByIdAsync(user.Id, cts.Token)).ReturnsAsync(user);
 
             var validatorGetUserQueryMock = new GetUserQueryValidator();
             var getUserQueryHandlerMock = new Mock<GetUserQueryHandler>(
                 validatorGetUserQueryMock,
-                new Mock<ILogger<GetUserQueryHandler>>().Object,
                 unitOfWorkMock.Object);
 
             // Act
@@ -87,7 +90,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Query
 
             // Assert
             result.Should().NotBeNull();
-            result!.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+            result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
             problemDetails!.Errors.Should().HaveCount(1);
         }
     }

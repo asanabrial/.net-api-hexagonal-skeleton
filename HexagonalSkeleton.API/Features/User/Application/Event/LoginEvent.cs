@@ -1,10 +1,9 @@
-﻿using HexagonalSkeleton.API.Features.User.Domain;
-using HexagonalSkeleton.CommonCore.Event;
+﻿using HexagonalSkeleton.CommonCore.Event;
 
 namespace HexagonalSkeleton.API.Features.User.Application.Event
 {
-    public class LoginEvent(UserEntity user) : DomainEvent
+    public class LoginEvent(int userId) : DomainEvent
     {
-        public UserEntity User { get; } = user;
+        public int UserId { get; } = userId;
     }
 }

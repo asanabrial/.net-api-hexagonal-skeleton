@@ -1,31 +1,75 @@
 ﻿using System.Linq.Expressions;
 using HexagonalSkeleton.CommonCore.Data.Entity;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace HexagonalSkeleton.CommonCore.Data.Repository
 {
     public interface IGenericRepository<TEntity> where TEntity : class, IEntity
     {
-        List<TEntity> FindAll();
+        public List<TEntity> FindAll(bool tracking = false);
 
-        Task<List<TEntity>> FindAllAsync(CancellationToken cancellationToken);
+        Task<List<TEntity>> FindAllAsync(bool tracking = false, CancellationToken cancellationToken = default);
 
-        List<TEntity> Find(Expression<Func<TEntity, bool>> where);
 
-        Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> where, CancellationToken cancellationToken);
+        Task<bool> AnyAsync(Expression<Func<TEntity, bool>> where, CancellationToken cancellationToken = default);
 
-        TEntity? FindOne(Expression<Func<TEntity, bool>> where);
+        List<TEntity> Find<TProperty>(
+            Expression<Func<TEntity, bool>> where,
+            Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, TProperty>> include,
+            bool tracking = false);
 
-        Task<TEntity?> FindOneAsync(Expression<Func<TEntity, bool>> where, CancellationToken cancellationToken);
+        List<TEntity> Find(
+            Expression<Func<TEntity, bool>> where,
+            bool tracking = false);
 
-        TEntity? FindOne(int id);
+        Task<List<TEntity>> FindAsync<TProperty>(
+            Expression<Func<TEntity, bool>> where,
+            Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, TProperty>> include,
+            bool tracking = false,
+            CancellationToken cancellationToken = default);
 
-        Task<TEntity?> FindOneAsync(int id, CancellationToken cancellationToken);
+        Task<List<TEntity>> FindAsync(
+            Expression<Func<TEntity, bool>> where,
+            bool tracking = false,
+            CancellationToken cancellationToken = default);
 
-        Task Create(TEntity entity);
+        TEntity? FindOne<TProperty>(
+            Expression<Func<TEntity, bool>> where,
+            Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, TProperty>>? include = null,
+            bool tracking = false);
 
-        Task CreateAsync(TEntity entity, CancellationToken cancellationToken);
+        Task<TEntity?> FindOneAsync<TProperty>(
+            Expression<Func<TEntity, bool>> where,
+            Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, TProperty>> include,
+            bool tracking = false,
+            CancellationToken cancellationToken = default);
 
-        Task Update(int id, TEntity entity);
+        Task<TEntity?> FindOneAsync(
+            Expression<Func<TEntity, bool>> where,
+            bool tracking = false,
+            CancellationToken cancellationToken = default);
+
+        TEntity? FindOne<TProperty>(
+            int id,
+            Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, TProperty>> include,
+            bool tracking = false);
+
+
+        Task<TEntity?> FindOneAsync<TProperty>(
+            int id,
+            Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, TProperty>> include,
+            bool tracking = false,
+            CancellationToken cancellationToken = default);
+
+        Task<TEntity?> FindOneAsync(
+            int id,
+            bool tracking = false,
+            CancellationToken cancellationToken = default);
+
+        TEntity Create(TEntity entity);
+
+        Task<TEntity> CreateAsync(TEntity entity, CancellationToken cancellationToken = default);
+        Task Update(TEntity entity, params Expression<Func<TEntity, object>>[] properties);
 
         Task Update(TEntity entity);
 

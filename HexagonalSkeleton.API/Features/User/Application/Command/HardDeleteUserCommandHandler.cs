@@ -9,7 +9,6 @@ namespace HexagonalSkeleton.API.Features.User.Application.Command
     /// </summary>
     public class HardDeleteUserCommandHandler(
         IValidator<HardDeleteUserCommand> validator,
-        ILogger<HardDeleteUserCommandHandler> logger,
         IUnitOfWork unitOfWork)
         : IRequestHandler<HardDeleteUserCommand, IResult>
     {
@@ -19,7 +18,7 @@ namespace HexagonalSkeleton.API.Features.User.Application.Command
             if (!result.IsValid)
                 return Results.ValidationProblem(result.ToDictionary());
 
-            await unitOfWork.Users.HardDelete(request.Id);
+            await unitOfWork.Users.HardDeleteUser(request.Id);
 
             return Results.Ok(await unitOfWork.SaveChangesAsync(cancellationToken));
         }

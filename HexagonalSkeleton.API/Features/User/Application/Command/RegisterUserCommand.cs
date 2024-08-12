@@ -6,7 +6,17 @@ namespace HexagonalSkeleton.API.Features.User.Application.Command
     /// <summary>
     /// This class represents a command for logging in a user.
     /// </summary>
-    public class RegisterUserCommand(string email, string password, string passwordConfirmation, string name, string surname, DateTime birthdate) : IRequest<IResult>
+    public class RegisterUserCommand(
+        string email,
+        string password, 
+        string passwordConfirmation, 
+        string name,
+        string surname,
+        DateTime birthdate,
+        string phoneNumber,
+        double latitude,
+        double longitude,
+        string aboutMe) : IRequest<IResult>
     {
         /// <summary>
         /// Gets or sets the email.
@@ -38,6 +48,12 @@ namespace HexagonalSkeleton.API.Features.User.Application.Command
         /// </summary>
         public DateTime Birthdate { get; set; } = birthdate;
 
+        public string PhoneNumber { get; set; } = phoneNumber;
+
+        public double Latitude { get; set; } = latitude;
+        public double Longitude { get; set; } = longitude;
+
+        public string AboutMe { get; set; } = aboutMe;
 
         /// <summary>
         /// Method to convert the DTO to a domain entity
@@ -45,7 +61,18 @@ namespace HexagonalSkeleton.API.Features.User.Application.Command
         /// <returns></returns>
         public UserEntity ToDomainEntity()
         {
-            return new UserEntity(Email, Name, Surname, Birthdate);
+            return new UserEntity(
+                email: Email,
+                passwordSalt: Password,
+                passwordHash: PasswordConfirmation,
+                name: Name,
+                surname: Surname,
+                birthdate: Birthdate,
+                phoneNumber: PhoneNumber,
+                latitude : Latitude,
+                longitude: Longitude,
+                aboutMe: AboutMe
+            );
         }
     }
 }

@@ -1,120 +1,167 @@
 ﻿using System.Linq.Expressions;
 using HexagonalSkeleton.CommonCore.Data.Entity;
+using HexagonalSkeleton.CommonCore.Data.Extension;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace HexagonalSkeleton.CommonCore.Data.Repository
 {
-    public class GenericRepository<TEntity>(DbContext dbContext) : IGenericRepository<TEntity>
+    public class GenericRepository<TEntity>(DbContext dbContext)
         where TEntity : class, IEntity, new()
     {
-        private readonly DbSet<TEntity> _repository = dbContext.Set<TEntity>();
+        internal readonly DbSet<TEntity> Repository = dbContext.Set<TEntity>();
 
-        public List<TEntity> FindAll()
-        {
-            return _repository.Where(w => !w.IsDeleted).AsNoTracking().ToList();
-        }
+        protected List<TEntity> FindAll(
+            bool tracking = false,
+            bool isDeleted = true)
+            => tracking 
+                ? [..Repository.Where(w => w.IsDeleted == isDeleted)]
+                : [..Repository.Where(w => w.IsDeleted == isDeleted).AsNoTracking()];
+                                                                                                                                                                                                                                                                                                                
+        protected async Task<List<TEntity>> FindAllAsync(
+            bool tracking = false,
+            bool isDeleted = false,
+            CancellationToken cancellationToken = default)
+            => tracking 
+                ? await Repository.Where(w => w.IsDeleted == isDeleted).ToListAsync(cancellationToken)
+                : await Repository.Where(w => w.IsDeleted == isDeleted).AsNoTracking().ToListAsync(cancellationToken);
+        
 
-        public async Task<List<TEntity>> FindAllAsync(CancellationToken cancellationToken)
-        {
-            return await _repository.Where(w => !w.IsDeleted).AsNoTracking().ToListAsync(cancellationToken);
-        }
+        protected async Task<bool> AnyAsync(Expression<Func<TEntity, bool>> where, CancellationToken cancellationToken = default)
+            => await Repository.AnyAsync(where, cancellationToken);
 
-        public List<TEntity> Find(Expression<Func<TEntity, bool>> where)
-        {
-            if (where is null) throw new ArgumentNullException(nameof(where));
-            return _repository
-                .AsNoTracking()
-                .Where(where)
-                .ToList();
-        }
+        protected List<TEntity> Find<TProperty>(
+            Expression<Func<TEntity, bool>> where,
+            Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, TProperty>> include,
+            bool tracking = false)
+            => [.. Queryable(tracking).ParseInclude(include).Where(where)];
 
-        public async Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> where, CancellationToken cancellationToken)
-        {
-            if (where is null) throw new ArgumentNullException(nameof(where));
-            return await _repository
-                .AsNoTracking()
-                .Where(where)
-                .ToListAsync(cancellationToken);
-        }
+        protected List<TEntity> Find(
+            Expression<Func<TEntity, bool>> where,
+            bool tracking = false)
+            => [.. Queryable(tracking).Where(where)];
 
-        public TEntity? FindOne(Expression<Func<TEntity, bool>> where)
-        {
-            if (where is null) throw new ArgumentNullException(nameof(where));
-            return _repository
-                .AsNoTracking()
-                .FirstOrDefault(where);
-        }
+        protected async Task<List<TEntity>> FindAsync<TProperty>(
+            Expression<Func<TEntity, bool>> where,
+            Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, TProperty>> include,
+            bool tracking = false,
+            CancellationToken cancellationToken = default)
+            => await Queryable(tracking).ParseInclude(include).Where(where).ToListAsync(cancellationToken);
 
-        public async Task<TEntity?> FindOneAsync(Expression<Func<TEntity, bool>> where, CancellationToken cancellationToken)
-        {
-            if (where is null) throw new ArgumentNullException(nameof(where));
-            return await _repository
-                .AsNoTracking()
-                .FirstOrDefaultAsync(where, cancellationToken);
-        }
+        protected async Task<List<TEntity>> FindAsync(
+            Expression<Func<TEntity, bool>> where,
+            bool tracking = false,
+            CancellationToken cancellationToken = default)
+            => await Queryable(tracking).Where(where).ToListAsync(cancellationToken);
 
-        public TEntity? FindOne(int id)
-        {
-            return _repository
-                .AsNoTracking()
-                .FirstOrDefault(e => e.Id == id && !e.IsDeleted);
-        }
+        protected TEntity? FindOne<TProperty>(
+            Expression<Func<TEntity, bool>> where,
+            Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, TProperty>>? include = null,
+            bool tracking = false)
+            => Queryable(tracking).ParseInclude(include).FirstOrDefault(where);
 
-        public async Task<TEntity?> FindOneAsync(int id, CancellationToken cancellationToken)
-        {
-            return await _repository
-                        .AsNoTracking()
-                        .FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted, cancellationToken);
-        }
+        protected async Task<TEntity?> FindOneAsync<TProperty>(
+            Expression<Func<TEntity, bool>> where,
+            Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, TProperty>> include,
+            bool tracking = false,
+            CancellationToken cancellationToken = default)
+            => await Queryable(tracking).ParseInclude(include).FirstOrDefaultAsync(where, cancellationToken);
 
-        public Task Create(TEntity entity)
+        protected async Task<TEntity?> FindOneAsync(
+            Expression<Func<TEntity, bool>> where,
+            bool tracking = false,
+            CancellationToken cancellationToken = default)
+            => await Queryable(tracking).FirstOrDefaultAsync(where, cancellationToken);
+
+        protected TEntity? FindOne<TProperty>(
+            int id,
+            Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, TProperty>> include,
+            bool isDeleted = false,
+            bool tracking = false)
+            => Queryable(tracking).ParseInclude(include).FirstOrDefault(e => e.Id == id && e.IsDeleted == isDeleted);
+        
+
+        protected async Task<TEntity?> FindOneAsync<TProperty>(
+            int id,
+            Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, TProperty>> include,
+            bool isDeleted = false,
+            bool tracking = false,
+            CancellationToken cancellationToken = default)
+            => await Queryable(tracking).ParseInclude(include).FirstOrDefaultAsync(e => e.Id == id && e.IsDeleted == isDeleted, cancellationToken);
+
+        protected async Task<TEntity?> FindOneAsync(
+            int id,
+            bool isDeleted = false,
+            bool tracking = false,
+            CancellationToken cancellationToken = default)
+            => await Queryable(tracking).FirstOrDefaultAsync(e => e.Id == id && e.IsDeleted == isDeleted, cancellationToken);
+
+        protected TEntity Create(TEntity entity)
+            => Repository.Add(entity).Entity;
+
+        protected async Task CreateAsync(TEntity entity, CancellationToken cancellationToken = default)
+            => await Repository.AddAsync(entity, cancellationToken);
+        protected Task Update(TEntity entity, params Expression<Func<TEntity, object>>[] properties)
         {
-            entity.CreatedAt = DateTime.UtcNow;
-            _repository.Add(entity);
+            Detach(entity.Id);
+            UpdateSpecificField(entity, properties);
+
             return Task.CompletedTask;
         }
 
-        public async Task CreateAsync(TEntity entity, CancellationToken cancellationToken)
+        protected Task Update(TEntity entity)
         {
-            entity.CreatedAt = DateTime.UtcNow;
-            await _repository.AddAsync(entity, cancellationToken);
-        }
-
-        public Task Update(int id, TEntity entity)
-        {
-            entity.UpdatedAt = DateTime.UtcNow;
-            var entry = _repository.Entry(new TEntity() { Id = id });
-            entry.CurrentValues.SetValues(entity);
-            entry.State = EntityState.Modified;
+            Detach(entity.Id);
+            Repository.Update(entity);
             return Task.CompletedTask;
         }
 
-        public Task Update(TEntity entity)
+        protected Task HardDelete(int id)
         {
-            entity.UpdatedAt = DateTime.UtcNow;
-            _repository.Entry(entity).State = EntityState.Modified;
+            Detach(id);
+            Repository
+                .Entry(new TEntity() { Id = id })
+                .State = EntityState.Deleted;
             return Task.CompletedTask;
         }
 
-        public Task HardDelete(int id)
+        protected Task SoftDelete(int id)
         {
-            var entity = new TEntity() { Id = id };
-            _repository.Entry(entity).State = EntityState.Deleted;
+            Detach(id);
+            var entity = new TEntity() { Id = id, IsDeleted = true };
+            UpdateSpecificField(entity, p => p.IsDeleted);
+
             return Task.CompletedTask;
         }
 
-        public async Task HardDeleteAsync(Expression<Func<TEntity, bool>> expression, CancellationToken cancellationToken)
-            => await _repository.Where(expression).ExecuteDeleteAsync(cancellationToken);
-
-        public Task SoftDelete(int id)
+        protected Task Restore(int id)
         {
-            var entry = _repository.Entry(new TEntity() { Id = id });
-            entry.Entity.IsDeleted = true;
-            entry.Entity.DeletedAt = DateTime.UtcNow;
-            entry.State = EntityState.Modified;
+            Detach(id);
+            var entity = new TEntity() { Id = id, IsDeleted = false };
+            UpdateSpecificField(entity, p => p.IsDeleted);
 
             return Task.CompletedTask;
         }
+
+        private void Detach(int id)
+        {
+            var entityAttached = GetAttached(id);
+
+            if (entityAttached is not null)
+                Repository.Entry(entityAttached).State = EntityState.Detached;
+        }
+
+        private TEntity? GetAttached(int id)
+            => Repository.Local.FirstOrDefault(e => e.Id == id);
+        
+
+        private void UpdateSpecificField(TEntity entity, params Expression<Func<TEntity, object>>[] updatedProperties)
+        {
+            foreach (var property in updatedProperties)
+                Repository.Entry(entity).Property(property).IsModified = true;
+        }
+
+        private IQueryable<TEntity> Queryable(bool tracking)
+            => tracking ? Repository : Repository.AsNoTracking();
     }
 }

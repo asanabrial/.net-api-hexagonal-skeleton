@@ -1,6 +1,4 @@
-﻿using HexagonalSkeleton.API.Data;
-
-namespace HexagonalSkeleton.API.Config
+﻿namespace HexagonalSkeleton.API.Config
 {
     public static class TransientServiceExtension
     {
@@ -11,8 +9,6 @@ namespace HexagonalSkeleton.API.Config
         /// <returns>Return the service collection for further configuration.</returns>
         public static IServiceCollection AddTransients(this IServiceCollection services)
         {
-            services.AddTransient<IUnitOfWork, UnitOfWork>();
-
             return services;
         }
     }

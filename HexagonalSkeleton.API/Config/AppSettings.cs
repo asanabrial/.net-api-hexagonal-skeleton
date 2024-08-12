@@ -2,6 +2,9 @@
 {
     public class AppSettings()
     {
+        public required string ContentUserFolder { get; set; }
+        public required string ContentImgFolder { get; set; }
+        public required string[] AllowedFileExtensions { get; set; }
         public required string Pepper { get; set; }
         public required TokenSecuritySettings Jwt { get; set; }
     }

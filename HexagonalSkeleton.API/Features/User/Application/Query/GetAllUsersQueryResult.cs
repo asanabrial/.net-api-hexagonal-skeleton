@@ -2,9 +2,6 @@
 
 namespace HexagonalSkeleton.API.Features.User.Application.Query
 {
-    /// <summary>
-    /// This class is a Data Transfer Object (DTO) used to encapsulate data for the response.
-    /// </summary>
     public class GetAllUsersQueryResult(UserEntity userEntity)
     {
         public int Id { get; set; } = userEntity.Id;
@@ -14,6 +11,6 @@ namespace HexagonalSkeleton.API.Features.User.Application.Query
         public string? Email { get; set; } = userEntity.Email;
         public DateTime LastLogin { get; set; } = userEntity.LastLogin;
         public DateTime CreatedAt { get; set; } = userEntity.CreatedAt;
-        public DateTime UpdatedAt { get; set; } = userEntity.UpdatedAt;
+        public DateTime? UpdatedAt { get; set; } = userEntity.UpdatedAt;
     }
 }

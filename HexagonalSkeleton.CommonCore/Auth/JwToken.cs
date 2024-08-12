@@ -17,7 +17,7 @@ namespace HexagonalSkeleton.CommonCore.Auth
             {
                 Issuer = issuer,
                 Audience = audience,
-                Subject = new ClaimsIdentity(new[] { new Claim("id", id) }),
+                Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, id) }),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };

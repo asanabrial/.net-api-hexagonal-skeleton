@@ -48,7 +48,7 @@ namespace HexagonalSkeleton.API.Config
             var info = new OpenApiInfo()
             {
                 Version = "v1",
-                Title = ".NET API Hexagonal Skeleton",
+                Title = "HexagonalSkeleton API",
                 Description = "",
                 Contact = contact,
             };

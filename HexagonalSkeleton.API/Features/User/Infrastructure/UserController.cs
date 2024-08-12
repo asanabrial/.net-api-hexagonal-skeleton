@@ -8,8 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace HexagonalSkeleton.API.Features.User.Infrastructure
 {
     /// <summary>
-    /// This class is a module that implements ICarterModule to provide routes for login.
+    /// This class is a controller that handles HTTP requests for the User entity.
     /// </summary>
+    /// <param name="mediator">Mediator service</param>
     [ApiController]
     [Route(template:"api/[controller]")]
     public class UserController(ISender mediator) : ControllerBase
@@ -17,8 +18,11 @@ namespace HexagonalSkeleton.API.Features.User.Infrastructure
         [HttpPost, Route(template: "[action]")]
         public async Task<IResult> Login(LoginQuery query) => await mediator.Send(query);
 
-        [HttpPost, Authorize]
+        [HttpPost]
         public async Task<IResult> Post(RegisterUserCommand command) => await mediator.Send(command);
+
+        [HttpPost("upload-profile-image"), Authorize]
+        public async Task<IResult> UploadImage(IFormFile imageProfile) => await mediator.Send(new UploadProfileImageCommand(imageProfile, User.GetUserId()));
 
         [HttpPut, Authorize]
         public async Task<IResult> Put(UpdateUserCommand command) => await mediator.Send(command);

@@ -38,9 +38,12 @@ namespace HexagonalSkeleton.API.Config
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = false,
-                    ValidateIssuerSigningKey = true
+                    ValidateIssuerSigningKey = true,
                 };
             });
+
+            //services.Configure<IdentityOptions>(options =>
+            //    options.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier);
 
             return services;
         }

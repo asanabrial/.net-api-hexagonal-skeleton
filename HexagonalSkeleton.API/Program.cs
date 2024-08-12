@@ -4,6 +4,7 @@ using HexagonalSkeleton.API.Data;
 using HexagonalSkeleton.API.Handler;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Custom configuration
@@ -11,6 +12,7 @@ var configSection = builder.Configuration.GetSection(key: "AppSettings");
 var appSettings = configSection.Get<AppSettings>()!;
 
 builder.Services.AddScopes();
+builder.Services.AddSingletons();
 builder.Services.AddTransients();
 builder.Services.AddSwagger();
 builder.Services.AddAuthentication(appSettings);
@@ -31,7 +33,7 @@ builder.Services.AddOptions();
 var connectionStr = builder.Configuration.GetConnectionString("HexagonalSkeleton");
 var serverVersion = ServerVersion.AutoDetect(connectionStr);
 
-builder.Services.AddDbContext<AppDbContext>(
+builder.Services.AddDbContextPool<AppDbContext>(
     dbContextOptions =>
         dbContextOptions.UseMySql(connectionStr, serverVersion)
         // The following three options help with debugging, but should
@@ -53,16 +55,20 @@ builder.Services.AddRouting(opt =>
 });
 
 builder.Services.AddOptions();
+builder.Services.AddHttpContextAccessor();
 
 
 
 builder.Services.Configure<AppSettings>(configSection);
 
 var app = builder.Build();
+
+app.UseStaticFiles();
 app.MapControllers();
 app.UseExceptionHandler();
 app.MapSwagger();
 app.UseSerilogRequestLogging();
+
 app.Run();
 
 public partial class Program

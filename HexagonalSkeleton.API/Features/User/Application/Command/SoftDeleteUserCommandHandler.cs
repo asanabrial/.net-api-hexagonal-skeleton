@@ -1,8 +1,6 @@
 ﻿using FluentValidation;
-using HexagonalSkeleton.API.Config;
 using HexagonalSkeleton.API.Data;
 using MediatR;
-using Microsoft.Extensions.Options;
 
 namespace HexagonalSkeleton.API.Features.User.Application.Command
 {
@@ -20,7 +18,7 @@ namespace HexagonalSkeleton.API.Features.User.Application.Command
             if (!result.IsValid)
                 return Results.ValidationProblem(result.ToDictionary());
 
-            await unitOfWork.Users.SoftDelete(request.Id);
+            await unitOfWork.Users.SoftDeleteUser(request.Id);
 
 
             return Results.Ok(await unitOfWork.SaveChangesAsync(cancellationToken));

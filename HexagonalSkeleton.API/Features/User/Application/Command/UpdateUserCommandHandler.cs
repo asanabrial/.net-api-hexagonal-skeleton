@@ -1,14 +1,9 @@
 ﻿using FluentValidation;
-using HexagonalSkeleton.API.Config;
 using HexagonalSkeleton.API.Data;
 using MediatR;
-using Microsoft.Extensions.Options;
 
 namespace HexagonalSkeleton.API.Features.User.Application.Command
 {
-    /// <summary>
-    /// This class handles a LoginCommand.
-    /// </summary>
     public class UpdateUserCommandHandler(
         IValidator<UpdateUserCommand> validator,
         IUnitOfWork unitOfWork)
@@ -21,7 +16,7 @@ namespace HexagonalSkeleton.API.Features.User.Application.Command
                 return Results.ValidationProblem(result.ToDictionary());
 
             var user = request.ToDomainEntity();
-            await unitOfWork.Users.Update(user);
+            await unitOfWork.Users.UpdateUser(user);
             return Results.Ok(await unitOfWork.SaveChangesAsync(cancellationToken));
         }
     }

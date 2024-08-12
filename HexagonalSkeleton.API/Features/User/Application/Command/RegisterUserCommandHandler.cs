@@ -8,9 +8,6 @@ using Microsoft.Extensions.Options;
 
 namespace HexagonalSkeleton.API.Features.User.Application.Command
 {
-    /// <summary>
-    /// This class handles a LoginCommand.
-    /// </summary>
     public class RegisterUserCommandHandler(
         IValidator<RegisterUserCommand> validator,
         IPublisher publisher,
@@ -29,12 +26,12 @@ namespace HexagonalSkeleton.API.Features.User.Application.Command
             entity.PasswordSalt = PasswordHasher.GenerateSalt();
             entity.PasswordHash = PasswordHasher.ComputeHash(request.Password, entity.PasswordSalt, appSettings.Value.Pepper);
 
-            await unitOfWork.Users.CreateAsync(entity, cancellationToken);
+            await unitOfWork.Users.CreateUserAsync(entity, cancellationToken);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             var response = await GenerateJwtToken(entity.Id);
 
-            await publisher.Publish(new LoginEvent(request.ToDomainEntity()), cancellationToken);
+            await publisher.Publish(new LoginEvent(entity.Id), cancellationToken);
             return Results.Ok(response);
         }
 

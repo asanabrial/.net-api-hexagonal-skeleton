@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using AutoFixture.Xunit2;
+﻿using System.Security.Claims;
 using FluentAssertions;
 using HexagonalSkeleton.API.Features.User.Application.Command;
 using HexagonalSkeleton.API.Features.User.Application.Query;
@@ -65,7 +58,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Infrastructure
             // Arrange
             Mock<IMediator> mediator = new();
             Mock<UserController> userController = new(mediator.Object);
-            RegisterUserCommand command = new("test@test.com", "Pa$$w0rd", "Pa$$w0rd", "Test", "Test", DateTime.Now);
+            RegisterUserCommand command = new("test@test.com", "Pa$$w0rd", "Pa$$w0rd", "Test", "Test", DateTime.Now, "123456789", 0, 0, "Test");
             var expectedResult = Results.Ok(new RegisterUserCommandResult("token"));
             mediator.Setup(s => s.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(expectedResult);
 
@@ -84,7 +77,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Infrastructure
             // Arrange
             Mock<IMediator> mediator = new();
             Mock<UserController> userController = new(mediator.Object);
-            RegisterUserCommand command = new("test@test.com", "Pa$$w0rd", "Pa$$w0rd", "Test", "Test", DateTime.Now);
+            RegisterUserCommand command = new("test@test.com", "Pa$$w0rd", "Pa$$w0rd", "Test", "Test", DateTime.Now, "123456789", 0, 0, "Test");
             var expectedResult = Results.BadRequest();
             mediator.Setup(s => s.Send(command, It.IsAny<CancellationToken>())).ReturnsAsync(expectedResult);
 
@@ -525,17 +518,22 @@ namespace HexagonalSkeleton.Test.Unit.User.Infrastructure
         {
 
             // Arrange
-            Mock<IMediator> mediator = new();
-            Mock<UserController> userController = new(mediator.Object);
-            userController.Object.ControllerContext = new ControllerContext()
+            Mock<ISender> mediator = new();
+            Mock<UserController> userController = new (mediator.Object)
             {
-                HttpContext = new DefaultHttpContext
+                Object =
                 {
-                    User = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>()
+                    ControllerContext = new ControllerContext()
                     {
-                        new (JwtRegisteredClaimNames.NameId, "1"),
-                    }))
+                        HttpContext = new DefaultHttpContext
+                        {
+                            User = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>()
+                            {
+                                new (ClaimTypes.NameIdentifier, "1"),
+                            }))
 
+                        }
+                    }
                 }
             };
 

@@ -1,7 +1,4 @@
-﻿using HexagonalSkeleton.CommonCore.Data.Entity;
-using HexagonalSkeleton.CommonCore.Data.Repository;
-
-namespace HexagonalSkeleton.CommonCore.Data.UnitOfWork
+﻿namespace HexagonalSkeleton.CommonCore.Data.UnitOfWork
 {
     public interface IGenericUnitOfWork : IDisposable
     {

@@ -21,12 +21,12 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Query
             // Arrange
             var mediator = new Mock<IMediator>();
             var unitOfWorkMock = new Mock<IUnitOfWork>();
-            var user = new Fixture().Create<UserEntity>();
+            var user = fixture.Fixture.Create<UserEntity>();
             var passwordRaw = Guid.NewGuid().ToString();
             user.PasswordSalt = PasswordHasher.GenerateSalt();
             user.PasswordHash = PasswordHasher.ComputeHash(passwordRaw, user.PasswordSalt, fixture.Settings.Value.Pepper);
 
-            unitOfWorkMock.Setup(s => s.Users.GetByEmail(user.Email!, cts.Token)).ReturnsAsync(user);
+            unitOfWorkMock.Setup(s => s.Users.GetByEmailAsync(user.Email!, cts.Token)).ReturnsAsync(user);
 
             var validatorLoginQuery = new LoginQueryValidator();
             var getUserQueryHandlerMock = new Mock<LoginQueryHandler>(
@@ -36,7 +36,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Query
                 fixture.Settings);
 
             // Act
-            var resultResponse = await getUserQueryHandlerMock.Object.Handle(new LoginQuery(user.Email!, passwordRaw!), cts.Token);
+            var resultResponse = await getUserQueryHandlerMock.Object.Handle(new LoginQuery(user.Email!, passwordRaw), cts.Token);
             var result = resultResponse as Ok<LoginQueryResult>;
 
             // Assert
@@ -55,9 +55,9 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Query
             var mediator = new Mock<IMediator>();
             var unitOfWorkMock = new Mock<IUnitOfWork>();
             UserEntity? user = null;
-            string email = Guid.NewGuid().ToString();
-            string password = Guid.NewGuid().ToString();
-            unitOfWorkMock.Setup(s => s.Users.GetByEmail(email, cts.Token)).ReturnsAsync(user);
+            var email = Guid.NewGuid().ToString();
+            var password = Guid.NewGuid().ToString();
+            unitOfWorkMock.Setup(s => s.Users.GetByEmailAsync(email, cts.Token)).ReturnsAsync(user);
 
             var validatorLoginQuery = new LoginQueryValidator();
             var getUserQueryHandlerMock = new Mock<LoginQueryHandler>(
@@ -67,14 +67,14 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Query
                 fixture.Settings);
 
             // Act
-            var resultResponse = await getUserQueryHandlerMock.Object.Handle(new LoginQuery(email, password), cts.Token);
-            var result = resultResponse as Ok<LoginQueryResult>;
+            var resultResponse =
+                await getUserQueryHandlerMock.Object.Handle(new LoginQuery(email, password), cts.Token);
+            
+            var result = resultResponse as UnauthorizedHttpResult;
 
             // Assert
             result.Should().NotBeNull();
-            result!.StatusCode.Should().Be(StatusCodes.Status200OK);
-            result.Value.Should().NotBeNull();
-            result.Value!.AccessToken.Should().BeNull();
+            result!.StatusCode.Should().Be(StatusCodes.Status401Unauthorized);
         }
         [Theory, AutoData]
         public async Task Login_Should_Return_Validation_Error_When_Email_Is_Empty(CancellationTokenSource cts)
@@ -96,7 +96,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Query
 
             // Assert
             result.Should().NotBeNull();
-            result!.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+            result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
             problemDetails!.Errors.Should().HaveCount(1);
             problemDetails.Errors.Should().ContainKey("Email");
         }
@@ -119,7 +119,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Query
 
             // Assert
             result.Should().NotBeNull();
-            result!.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+            result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
             problemDetails!.Errors.Should().HaveCount(1);
             problemDetails.Errors.Should().ContainKey("Password");
         }

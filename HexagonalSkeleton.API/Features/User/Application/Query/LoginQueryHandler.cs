@@ -24,26 +24,24 @@ namespace HexagonalSkeleton.API.Features.User.Application.Query
             if (!result.IsValid)
                 return Results.ValidationProblem(result.ToDictionary());
 
-            var response = await GenerateJwtToken(request.Email, request.Password, cancellationToken);
+            var entity = unitOfWork.Users.GetByEmailAsync(request.Email, cancellationToken).Result;
+            if (entity is null 
+                || entity.PasswordHash != PasswordHasher.ComputeHash(request.Password, entity.PasswordSalt!, appSettings.Value.Pepper))
+                return Results.Unauthorized();
 
-            await publisher.Publish(new LoginEvent(request.ToDomainEntity()), cancellationToken);
+            var response = await GenerateJwtToken(entity.Id.ToString(), cancellationToken);
+
+            await publisher.Publish(new LoginEvent(entity.Id), cancellationToken);
             return Results.Ok(response);
         }
 
-        public async Task<LoginQueryResult> GenerateJwtToken(string email, string password, CancellationToken cancellationToken)
+        public async Task<LoginQueryResult> GenerateJwtToken(string id, CancellationToken cancellationToken)
         {
-            var result = unitOfWork.Users.GetByEmail(email, cancellationToken).Result;
-            string? accessToken = null;
-            if (result == null) return await Task.FromResult(new LoginQueryResult(accessToken));
-
-            if (result.PasswordHash == PasswordHasher.ComputeHash(password, result.PasswordSalt, appSettings.Value.Pepper))
-            {
-                accessToken = JwToken.GenerateJwtToken(
-                    result.Id.ToString(),
-                    appSettings.Value.Jwt.Secret,
-                    appSettings.Value.Jwt.Issuer,
-                    appSettings.Value.Jwt.Audience);
-            }
+            var accessToken = JwToken.GenerateJwtToken(
+                id,
+                appSettings.Value.Jwt.Secret,
+                appSettings.Value.Jwt.Issuer,
+                appSettings.Value.Jwt.Audience);
 
             return await Task.FromResult(new LoginQueryResult(accessToken));
         }

@@ -10,8 +10,10 @@ namespace HexagonalSkeleton.API.Features.User.Application.Event
     {
         public async Task Handle(LoginEvent notification, CancellationToken cancellationToken)
         {
-            logger.LogInformation("New notification: User logged in. {User}", notification.User);
-            await unitOfWork.Users.SetLastLogin(notification.User.Email, cancellationToken);
+            logger.LogInformation("New notification: User logged in. UserId: {User}", notification.UserId);
+
+            await unitOfWork.Users.SetLastLogin(notification.UserId, cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 }

@@ -6,18 +6,44 @@ namespace HexagonalSkeleton.API.Features.User.Infrastructure
 {
     public class UserRepository(AppDbContext dbContext) : GenericRepository<UserEntity>(dbContext), IUserRepository
     {
-        public async Task<UserEntity?> GetByEmail(string email, CancellationToken cancellationToken)
+        public async Task<UserEntity?> GetByEmailAsync(string email, CancellationToken cancellationToken)
+            => await FindOneAsync(where: e => e.Email == email, cancellationToken: cancellationToken);
+        
+
+        public async Task SetLastLogin(int userId, CancellationToken cancellationToken)
         {
-            return await FindOneAsync(e => e.Email == email, cancellationToken);
+            var e = new UserEntity() { LastLogin = DateTime.Now, Id = userId };
+            await Update(e, p => p.LastLogin);
         }
 
-        public async Task SetLastLogin(string email, CancellationToken cancellationToken)
-        {
-            var user = await GetByEmail(email, cancellationToken);
-            if (user == null) return;
+        public async Task CreateUserAsync(UserEntity entity, CancellationToken cancellationToken = default)
+            => await CreateAsync(entity: entity, cancellationToken: cancellationToken);
 
-            user.LastLogin = DateTime.Now;
-            await Update(user.Id, user);
-        }
+        public Task UpdateUser(UserEntity entity)
+            => Update(entity);
+
+        public async Task<UserEntity?> GetProfileUserByIdAsync(int id, CancellationToken cancellationToken = default)
+            => await FindOneAsync(
+                id: id,
+                cancellationToken: cancellationToken);
+
+        public async Task<UserEntity?> GetTrackedUserByIdAsync(int id, CancellationToken cancellationToken = default)
+            => await FindOneAsync(
+                id: id,
+                tracking: true,
+                cancellationToken: cancellationToken);
+
+        public async Task<UserEntity?> GetUserByIdAsync(int id, CancellationToken cancellationToken = default)
+            => await FindOneAsync(
+                id: id,
+                cancellationToken: cancellationToken);
+        public async Task<List<UserEntity>> GetAllUsersAsync(CancellationToken cancellationToken = default)
+            => await FindAllAsync(cancellationToken: cancellationToken);
+
+        public async Task SoftDeleteUser(int id)
+            => await SoftDelete(id: id);
+
+        public async Task HardDeleteUser(int id)
+            => await HardDelete(id: id);
     }
 }

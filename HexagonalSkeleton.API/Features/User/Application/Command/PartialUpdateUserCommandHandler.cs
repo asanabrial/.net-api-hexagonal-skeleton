@@ -1,8 +1,6 @@
 ﻿using FluentValidation;
-using HexagonalSkeleton.API.Config;
 using HexagonalSkeleton.API.Data;
 using MediatR;
-using Microsoft.Extensions.Options;
 
 namespace HexagonalSkeleton.API.Features.User.Application.Command
 {
@@ -20,11 +18,11 @@ namespace HexagonalSkeleton.API.Features.User.Application.Command
             if (!result.IsValid)
                 return Results.ValidationProblem(result.ToDictionary());
 
-            var user = await unitOfWork.Users.FindOneAsync(request.Id, cancellationToken);
+            var user = await unitOfWork.Users.GetUserByIdAsync(id: request.Id, cancellationToken: cancellationToken);
             if (user is null) return Results.NotFound();
 
             request.ToDomainEntity(user);
-            await unitOfWork.Users.Update(user);
+            await unitOfWork.Users.UpdateUser(user);
             return Results.Ok(await unitOfWork.SaveChangesAsync(cancellationToken));
         }
     }

@@ -4,12 +4,8 @@ using MediatR;
 
 namespace HexagonalSkeleton.API.Features.User.Application.Query
 {
-    /// <summary>
-    /// This class handles a GetUserCommand.
-    /// </summary>
     public class GetUserQueryHandler(
         IValidator<GetUserQuery> validator,
-        ILogger<GetUserQueryHandler> logger,
         IUnitOfWork unitOfWork)
         : IRequestHandler<GetUserQuery, IResult>
     {
@@ -18,8 +14,10 @@ namespace HexagonalSkeleton.API.Features.User.Application.Query
             var result = await validator.ValidateAsync(request, cancellationToken);
             if (!result.IsValid)
                 return Results.ValidationProblem(result.ToDictionary());
-
-            var userEntity = await unitOfWork.Users.FindOneAsync(request.Id, cancellationToken);
+            
+            var userEntity = await unitOfWork.Users.GetProfileUserByIdAsync(
+                id: request.Id,
+                cancellationToken: cancellationToken);
 
             return userEntity is null ? Results.NotFound() : Results.Ok(new GetUserQueryResult(userEntity));
         }
