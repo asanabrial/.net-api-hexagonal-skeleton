@@ -455,7 +455,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Infrastructure
             // Arrange
             Mock<IMediator> mediator = new();
             Mock<UserController> userController = new(mediator.Object);
-            PartialUpdateUserCommand command = new(1, "", "", "", DateTime.Now);
+            UpdateProfileUserCommand command = new(1, "", "", "", DateTime.Now);
             var expectedResult = Results.Ok(true);
 
             mediator.Setup(s => s.Send(command, It.IsAny<CancellationToken>()))
@@ -476,7 +476,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Infrastructure
             // Arrange
             Mock<IMediator> mediator = new();
             Mock<UserController> userController = new(mediator.Object);
-            PartialUpdateUserCommand command = new(1, "", "", "", DateTime.Now);
+            UpdateProfileUserCommand command = new(1, "", "", "", DateTime.Now);
             var expectedResult = Results.NotFound();
 
             mediator.Setup(s => s.Send(command, It.IsAny<CancellationToken>()))
@@ -498,7 +498,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Infrastructure
             // Arrange
             Mock<IMediator> mediator = new();
             Mock<UserController> userController = new(mediator.Object);
-            PartialUpdateUserCommand command = new(1, "", "", "", DateTime.Now);
+            UpdateProfileUserCommand command = new(1, "", "", "", DateTime.Now);
             var expectedResult = Results.Unauthorized();
 
             mediator.Setup(s => s.Send(command, It.IsAny<CancellationToken>()))

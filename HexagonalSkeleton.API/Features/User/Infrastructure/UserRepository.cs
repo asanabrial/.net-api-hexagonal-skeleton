@@ -22,7 +22,14 @@ namespace HexagonalSkeleton.API.Features.User.Infrastructure
         public Task UpdateUser(UserEntity entity)
             => Update(entity);
 
-        public async Task<UserEntity?> GetProfileUserByIdAsync(int id, CancellationToken cancellationToken = default)
+        public Task UpdateProfileUser(UserEntity entity)
+            => Update(
+                entity: entity,
+                e => e.AboutMe,
+                e => e.Birthdate,
+                e => e.Name, 
+                e => e.Surname);
+        public async Task<UserEntity?> GetUserByIdAsync(int id, CancellationToken cancellationToken = default)
             => await FindOneAsync(
                 id: id,
                 cancellationToken: cancellationToken);
@@ -31,11 +38,6 @@ namespace HexagonalSkeleton.API.Features.User.Infrastructure
             => await FindOneAsync(
                 id: id,
                 tracking: true,
-                cancellationToken: cancellationToken);
-
-        public async Task<UserEntity?> GetUserByIdAsync(int id, CancellationToken cancellationToken = default)
-            => await FindOneAsync(
-                id: id,
                 cancellationToken: cancellationToken);
         public async Task<List<UserEntity>> GetAllUsersAsync(CancellationToken cancellationToken = default)
             => await FindAllAsync(cancellationToken: cancellationToken);

@@ -1,6 +1,4 @@
 ﻿using HexagonalSkeleton.API.Data;
-using HexagonalSkeleton.API.Features.User.Domain;
-using HexagonalSkeleton.API.Features.User.Infrastructure;
 
 namespace HexagonalSkeleton.API.Config
 {

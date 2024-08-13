@@ -1,5 +1,4 @@
-﻿
-namespace HexagonalSkeleton.API.Features.User.Domain
+﻿namespace HexagonalSkeleton.API.Features.User.Domain
 {
     public interface IUserRepository
     {
@@ -7,9 +6,9 @@ namespace HexagonalSkeleton.API.Features.User.Domain
         Task SetLastLogin(int userId, CancellationToken cancellationToken);
         Task CreateUserAsync(UserEntity entity, CancellationToken cancellationToken = default);
         Task UpdateUser(UserEntity entity);
-        Task<UserEntity?> GetProfileUserByIdAsync(int id, CancellationToken cancellationToken = default);
-        Task<UserEntity?> GetTrackedUserByIdAsync(int id, CancellationToken cancellationToken = default);
+        Task UpdateProfileUser(UserEntity entity);
         Task<UserEntity?> GetUserByIdAsync(int id, CancellationToken cancellationToken = default);
+        Task<UserEntity?> GetTrackedUserByIdAsync(int id, CancellationToken cancellationToken = default);
         Task<List<UserEntity>> GetAllUsersAsync(CancellationToken cancellationToken = default);
         Task SoftDeleteUser(int id);
         Task HardDeleteUser(int id);

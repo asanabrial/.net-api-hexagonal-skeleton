@@ -2,9 +2,6 @@
 
 namespace HexagonalSkeleton.API.Features.User.Application.Command
 {
-    /// <summary>
-    /// This class represents a command for logging in a user.
-    /// </summary>
     public class HardDeleteUserCommand(int id) : IRequest<IResult>
     {
         /// <summary>

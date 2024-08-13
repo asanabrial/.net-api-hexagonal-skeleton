@@ -7,10 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HexagonalSkeleton.API.Features.User.Infrastructure
 {
-    /// <summary>
-    /// This class is a controller that handles HTTP requests for the User entity.
-    /// </summary>
-    /// <param name="mediator">Mediator service</param>
     [ApiController]
     [Route(template:"api/[controller]")]
     public class UserController(ISender mediator) : ControllerBase
@@ -28,7 +24,7 @@ namespace HexagonalSkeleton.API.Features.User.Infrastructure
         public async Task<IResult> Put(UpdateUserCommand command) => await mediator.Send(command);
 
         [HttpPatch, Authorize]
-        public async Task<IResult> Patch(PartialUpdateUserCommand command) => await mediator.Send(command);
+        public async Task<IResult> Patch(UpdateProfileUserCommand command) => await mediator.Send(command);
 
         [HttpDelete, Route(template: "hard/{id:int}"), Authorize]
         public async Task<IResult> HardDelete(int id) => await mediator.Send( new HardDeleteUserCommand(id));

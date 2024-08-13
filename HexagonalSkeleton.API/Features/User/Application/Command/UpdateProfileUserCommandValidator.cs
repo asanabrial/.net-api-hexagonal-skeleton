@@ -2,14 +2,11 @@
 
 namespace HexagonalSkeleton.API.Features.User.Application.Command
 {
-    /// <summary>
-    /// This class validates a LoginCommand.
-    /// </summary>
-    public class PartialUpdateUserCommandValidator : AbstractValidator<PartialUpdateUserCommand>
+    public class UpdateProfileUserCommandValidator : AbstractValidator<UpdateProfileUserCommand>
     {
-        public PartialUpdateUserCommandValidator()
+        public UpdateProfileUserCommandValidator()
         {
-            RuleFor(r => r.Email)
+            RuleFor(r => r.AboutMe)
                 .NotEmpty();
 
             RuleFor(r => r.Name)

@@ -4,9 +4,6 @@ using MediatR;
 
 namespace HexagonalSkeleton.API.Features.User.Application.Query
 {
-    /// <summary>
-    /// This class handles a GetAllUsersCommand.
-    /// </summary>
     public class GetAllUsersQueryHandler(
         IUnitOfWork unitOfWork)
         : IRequestHandler<GetAllUsersQuery, IResult>

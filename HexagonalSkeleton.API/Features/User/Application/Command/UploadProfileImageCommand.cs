@@ -11,6 +11,10 @@ namespace HexagonalSkeleton.API.Features.User.Application.Command
 
         public int UserId { get; set; } = userId;
 
+        /// <summary>
+        /// Method to convert the DTO to a domain entity
+        /// </summary>
+        /// <returns></returns>
         public UserEntity ToDomainEntity()
         {
             return new UserEntity(

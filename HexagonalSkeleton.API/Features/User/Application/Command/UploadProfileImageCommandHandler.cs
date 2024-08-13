@@ -32,7 +32,7 @@ namespace HexagonalSkeleton.API.Features.User.Application.Command
             var imgFolder = appSettings.Value.ContentImgFolder;
             var path = Path.Combine(env.WebRootPath, userFolder, userId, imgFolder);
 
-            if (entity.ProfileImageName is not null)
+            if (entity!.ProfileImageName is not null)
             {
                 var fileToDelete = Path.Combine(path, entity.ProfileImageName);
                 if (File.Exists(fileToDelete))

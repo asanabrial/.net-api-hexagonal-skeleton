@@ -15,7 +15,7 @@ namespace HexagonalSkeleton.API.Features.User.Application.Query
             if (!result.IsValid)
                 return Results.ValidationProblem(result.ToDictionary());
             
-            var userEntity = await unitOfWork.Users.GetProfileUserByIdAsync(
+            var userEntity = await unitOfWork.Users.GetUserByIdAsync(
                 id: request.Id,
                 cancellationToken: cancellationToken);
 

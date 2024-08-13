@@ -42,9 +42,6 @@ namespace HexagonalSkeleton.API.Config
                 };
             });
 
-            //services.Configure<IdentityOptions>(options =>
-            //    options.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier);
-
             return services;
         }
     }

@@ -4,9 +4,6 @@ using MediatR;
 
 namespace HexagonalSkeleton.API.Features.User.Application.Command
 {
-    /// <summary>
-    /// This class handles a LoginCommand.
-    /// </summary>
     public class SoftDeleteUserCommandHandler(
         IValidator<SoftDeleteUserCommand> validator,
         IUnitOfWork unitOfWork)

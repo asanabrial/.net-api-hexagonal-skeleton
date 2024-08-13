@@ -7,7 +7,7 @@ namespace HexagonalSkeleton.API.Features.User.Application.Command
         public SoftDeleteUserCommandValidator()
         {
             RuleFor(r => r.Id)
-                .NotEmpty();
+                .NotEmpty(); ;
         }
     }
 }

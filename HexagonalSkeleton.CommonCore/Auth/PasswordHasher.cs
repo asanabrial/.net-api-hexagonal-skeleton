@@ -5,7 +5,8 @@ namespace HexagonalSkeleton.CommonCore.Auth
 {
     public static class PasswordHasher
     {
-        public static string ComputeHash(string password, string salt, string pepper)
+
+        public static string? ComputeHash(string password, string salt, string pepper)
         {
             using var sha256 = SHA256.Create();
             var passwordSaltPepper = $"{password}{salt}{pepper}";

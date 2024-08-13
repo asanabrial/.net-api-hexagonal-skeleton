@@ -12,19 +12,17 @@ namespace HexagonalSkeleton.CommonCore.Data.Repository
         internal readonly DbSet<TEntity> Repository = dbContext.Set<TEntity>();
 
         protected List<TEntity> FindAll(
-            bool tracking = false,
-            bool isDeleted = true)
+            bool tracking = false)
             => tracking 
-                ? [..Repository.Where(w => w.IsDeleted == isDeleted)]
-                : [..Repository.Where(w => w.IsDeleted == isDeleted).AsNoTracking()];
+                ? [..Repository]
+                : [..Repository.AsNoTracking()];
                                                                                                                                                                                                                                                                                                                 
         protected async Task<List<TEntity>> FindAllAsync(
             bool tracking = false,
-            bool isDeleted = false,
             CancellationToken cancellationToken = default)
             => tracking 
-                ? await Repository.Where(w => w.IsDeleted == isDeleted).ToListAsync(cancellationToken)
-                : await Repository.Where(w => w.IsDeleted == isDeleted).AsNoTracking().ToListAsync(cancellationToken);
+                ? await Repository.ToListAsync(cancellationToken)
+                : await Repository.AsNoTracking().ToListAsync(cancellationToken);
         
 
         protected async Task<bool> AnyAsync(Expression<Func<TEntity, bool>> where, CancellationToken cancellationToken = default)
@@ -76,32 +74,29 @@ namespace HexagonalSkeleton.CommonCore.Data.Repository
         protected TEntity? FindOne<TProperty>(
             int id,
             Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, TProperty>> include,
-            bool isDeleted = false,
             bool tracking = false)
-            => Queryable(tracking).ParseInclude(include).FirstOrDefault(e => e.Id == id && e.IsDeleted == isDeleted);
+            => Queryable(tracking).ParseInclude(include).FirstOrDefault(e => e.Id == id);
         
 
         protected async Task<TEntity?> FindOneAsync<TProperty>(
             int id,
             Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, TProperty>> include,
-            bool isDeleted = false,
             bool tracking = false,
             CancellationToken cancellationToken = default)
-            => await Queryable(tracking).ParseInclude(include).FirstOrDefaultAsync(e => e.Id == id && e.IsDeleted == isDeleted, cancellationToken);
+            => await Queryable(tracking).ParseInclude(include).FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
 
         protected async Task<TEntity?> FindOneAsync(
             int id,
-            bool isDeleted = false,
             bool tracking = false,
             CancellationToken cancellationToken = default)
-            => await Queryable(tracking).FirstOrDefaultAsync(e => e.Id == id && e.IsDeleted == isDeleted, cancellationToken);
+            => await Queryable(tracking).FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
 
         protected TEntity Create(TEntity entity)
             => Repository.Add(entity).Entity;
 
         protected async Task CreateAsync(TEntity entity, CancellationToken cancellationToken = default)
             => await Repository.AddAsync(entity, cancellationToken);
-        protected Task Update(TEntity entity, params Expression<Func<TEntity, object>>[] properties)
+        protected Task Update(TEntity entity, params Expression<Func<TEntity, object?>>[] properties)
         {
             Detach(entity.Id);
             UpdateSpecificField(entity, properties);
@@ -155,7 +150,7 @@ namespace HexagonalSkeleton.CommonCore.Data.Repository
             => Repository.Local.FirstOrDefault(e => e.Id == id);
         
 
-        private void UpdateSpecificField(TEntity entity, params Expression<Func<TEntity, object>>[] updatedProperties)
+        private void UpdateSpecificField(TEntity entity, params Expression<Func<TEntity, object?>>[] updatedProperties)
         {
             foreach (var property in updatedProperties)
                 Repository.Entry(entity).Property(property).IsModified = true;

@@ -4,15 +4,12 @@ using MediatR;
 
 namespace HexagonalSkeleton.API.Features.User.Application.Command
 {
-    /// <summary>
-    /// This class handles a LoginCommand.
-    /// </summary>
-    public class PartialUpdateUserCommandHandler(
-        IValidator<PartialUpdateUserCommand> validator,
+    public class UpdateProfileUserCommandHandler(
+        IValidator<UpdateProfileUserCommand> validator,
         IUnitOfWork unitOfWork)
-        : IRequestHandler<PartialUpdateUserCommand, IResult>
+        : IRequestHandler<UpdateProfileUserCommand, IResult>
     {
-        public async Task<IResult> Handle(PartialUpdateUserCommand request, CancellationToken cancellationToken)
+        public async Task<IResult> Handle(UpdateProfileUserCommand request, CancellationToken cancellationToken)
         {
             var result = await validator.ValidateAsync(request, cancellationToken);
             if (!result.IsValid)
@@ -21,8 +18,8 @@ namespace HexagonalSkeleton.API.Features.User.Application.Command
             var user = await unitOfWork.Users.GetUserByIdAsync(id: request.Id, cancellationToken: cancellationToken);
             if (user is null) return Results.NotFound();
 
-            request.ToDomainEntity(user);
-            await unitOfWork.Users.UpdateUser(user);
+            var entity = request.ToDomainEntity();
+            await unitOfWork.Users.UpdateProfileUser(entity);
             return Results.Ok(await unitOfWork.SaveChangesAsync(cancellationToken));
         }
     }

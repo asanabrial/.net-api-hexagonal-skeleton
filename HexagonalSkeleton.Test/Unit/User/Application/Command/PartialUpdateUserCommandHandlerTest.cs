@@ -23,14 +23,14 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
             unitOfWorkMock.Setup(s => s.Users.UpdateUser(user)).Returns(Task.CompletedTask);
             unitOfWorkMock.Setup(s => s.SaveChangesAsync(cts.Token)).ReturnsAsync(true);
 
-            Mock<PartialUpdateUserCommandHandler> partialUpdateUserCommandHandlerMock = new(
-                new PartialUpdateUserCommandValidator(),
+            Mock<UpdateProfileUserCommandHandler> partialUpdateUserCommandHandlerMock = new(
+                new UpdateProfileUserCommandValidator(),
                 unitOfWorkMock.Object);
 
             // Act
             var resultResponse =
                 await partialUpdateUserCommandHandlerMock.Object.Handle(
-                    new PartialUpdateUserCommand(
+                    new UpdateProfileUserCommand(
                         userId,
                         "test@test.com",
                         "Test",
