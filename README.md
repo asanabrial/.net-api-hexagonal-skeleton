@@ -1,5 +1,5 @@
 <p align="center"><img src="https://github.com/user-attachments/assets/5d55f501-ed98-4245-a0ef-b620991c35df" alt="dotnet-icon" width="150" /></p>
-<h1>Hexagonal Architecture, DDD & CQRS in .NET 8</h1>
+<h1>Hexagonal Architecture, DDD & CQRS in .NET 9</h1>
 
 <p align="center">
  Example of a <strong> skeleton .NET API application</strong> that uses the principles of Domain-Driven Design (DDD) and Command Query Responsibility Segregation (CQRS).
