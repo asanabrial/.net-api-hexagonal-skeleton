@@ -23,7 +23,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Query
 
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             var user = fixture.Create<UserEntity>();
-            unitOfWorkMock.Setup(s => s.Users.GetProfileUserByIdAsync(user.Id, cts.Token)).ReturnsAsync(user);
+            unitOfWorkMock.Setup(s => s.Users.GetUserByIdAsync(user.Id, cts.Token)).ReturnsAsync(user);
 
             var validatorGetUserQueryMock = new GetUserQueryValidator();
             var getUserQueryHandlerMock = new Mock<GetUserQueryHandler>(
@@ -49,7 +49,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Query
             const int userId = 1;
             var unitOfWorkMock = new Mock<IUnitOfWork>();
             UserEntity? user = null;
-            unitOfWorkMock.Setup(s => s.Users.GetProfileUserByIdAsync(userId, cts.Token)).ReturnsAsync(user);
+            unitOfWorkMock.Setup(s => s.Users.GetUserByIdAsync(userId, cts.Token)).ReturnsAsync(user);
 
             var validatorGetUserQueryMock = new GetUserQueryValidator();
             var getUserQueryHandlerMock = new Mock<GetUserQueryHandler>(
@@ -76,7 +76,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Query
 
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             var user = fixture.Create<UserEntity>();
-            unitOfWorkMock.Setup(s => s.Users.GetProfileUserByIdAsync(user.Id, cts.Token)).ReturnsAsync(user);
+            unitOfWorkMock.Setup(s => s.Users.GetUserByIdAsync(user.Id, cts.Token)).ReturnsAsync(user);
 
             var validatorGetUserQueryMock = new GetUserQueryValidator();
             var getUserQueryHandlerMock = new Mock<GetUserQueryHandler>(
