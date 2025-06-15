@@ -1,7 +1,7 @@
 ﻿using AutoFixture.Xunit2;
 using FluentAssertions;
 using HexagonalSkeleton.API.Data;
-using HexagonalSkeleton.API.Features.User.Application.Command;
+using HexagonalSkeleton.Application.Command;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Moq;

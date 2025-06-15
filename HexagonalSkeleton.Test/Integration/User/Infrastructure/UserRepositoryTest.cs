@@ -1,6 +1,6 @@
 ﻿using AutoFixture.Xunit2;
 using FluentAssertions;
-using HexagonalSkeleton.API.Features.User.Domain;
+using HexagonalSkeleton.Domain;
 
 namespace HexagonalSkeleton.Test.Integration.User.Infrastructure
 {

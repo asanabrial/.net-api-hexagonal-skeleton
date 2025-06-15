@@ -1,7 +1,7 @@
 ﻿using AutoFixture;
 using EntityFrameworkCore.AutoFixture.InMemory;
 using HexagonalSkeleton.API.Data;
-using HexagonalSkeleton.API.Features.User.Domain;
+using HexagonalSkeleton.Domain;
 
 namespace HexagonalSkeleton.Test.Integration.User
 {

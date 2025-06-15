@@ -31,11 +31,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HexagonalSkeleton.Application\HexagonalSkeleton.Application.csproj" />
     <ProjectReference Include="..\HexagonalSkeleton.CommonCore\HexagonalSkeleton.CommonCore.csproj" />
+    <ProjectReference Include="..\HexagonalSkeleton.Domain\HexagonalSkeleton.Domain.csproj" />
+    <ProjectReference Include="..\HexagonalSkeleton.Infrastructure\HexagonalSkeleton.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Migrations\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

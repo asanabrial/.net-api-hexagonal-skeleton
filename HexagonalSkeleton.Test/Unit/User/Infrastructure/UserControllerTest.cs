@@ -1,9 +1,9 @@
 ﻿using System.Security.Claims;
 using FluentAssertions;
-using HexagonalSkeleton.API.Features.User.Application.Command;
-using HexagonalSkeleton.API.Features.User.Application.Query;
-using HexagonalSkeleton.API.Features.User.Domain;
-using HexagonalSkeleton.API.Features.User.Infrastructure;
+using HexagonalSkeleton.Application.Command;
+using HexagonalSkeleton.Application.Query;
+using HexagonalSkeleton.Domain;
+using HexagonalSkeleton.Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;

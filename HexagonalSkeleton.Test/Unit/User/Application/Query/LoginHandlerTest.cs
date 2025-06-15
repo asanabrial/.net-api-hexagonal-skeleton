@@ -1,14 +1,14 @@
 ﻿using AutoFixture.Xunit2;
 using FluentAssertions;
-using HexagonalSkeleton.API.Features.User.Application.Query;
+using HexagonalSkeleton.Application.Query;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Moq;
 using MediatR;
 using AutoFixture;
 using HexagonalSkeleton.API.Data;
-using HexagonalSkeleton.API.Features.User.Application.Event;
-using HexagonalSkeleton.API.Features.User.Domain;
+using HexagonalSkeleton.Application.Event;
+using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.CommonCore.Auth;
 
 namespace HexagonalSkeleton.Test.Unit.User.Application.Query

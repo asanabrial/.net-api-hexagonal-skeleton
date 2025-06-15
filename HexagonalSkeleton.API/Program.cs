@@ -1,7 +1,7 @@
 using FluentValidation;
 using HexagonalSkeleton.API.Config;
-using HexagonalSkeleton.API.Data;
 using HexagonalSkeleton.API.Handler;
+using HexagonalSkeleton.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -16,6 +16,8 @@ builder.Services.AddSingletons();
 builder.Services.AddTransients();
 builder.Services.AddSwagger();
 builder.Services.AddAuthentication(appSettings);
+// Añadir AutoMapper
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();

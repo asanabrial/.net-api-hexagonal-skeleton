@@ -11,6 +11,9 @@ namespace HexagonalSkeleton.CommonCore.Data.Repository
     {
         internal readonly DbSet<TEntity> Repository = dbContext.Set<TEntity>();
 
+        public bool SaveChanges() => dbContext.SaveChanges() > 0;
+        public async Task<bool> SaveChangesAsync(CancellationToken cancellationToken) => await dbContext.SaveChangesAsync(cancellationToken: cancellationToken) > 0;
+
         protected List<TEntity> FindAll(
             bool tracking = false)
             => tracking 

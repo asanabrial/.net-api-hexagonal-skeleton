@@ -7,6 +7,7 @@ namespace HexagonalSkeleton.API.Config
         public static IServiceCollection AddSingletons(this IServiceCollection services)
         {
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
             return services;
         }
     }

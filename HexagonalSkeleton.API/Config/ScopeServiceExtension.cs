@@ -1,4 +1,5 @@
-﻿using HexagonalSkeleton.API.Data;
+﻿using HexagonalSkeleton.Domain;
+using HexagonalSkeleton.Infrastructure;
 
 namespace HexagonalSkeleton.API.Config
 {
@@ -11,7 +12,7 @@ namespace HexagonalSkeleton.API.Config
         /// <returns>Return the service collection for further configuration.</returns>
         public static IServiceCollection AddScopes(this IServiceCollection services)
         {
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IUserRepository, UserRepository>();
 
             return services;
         }

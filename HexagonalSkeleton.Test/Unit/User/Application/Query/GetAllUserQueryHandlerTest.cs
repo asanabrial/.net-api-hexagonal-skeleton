@@ -2,8 +2,8 @@
 using AutoFixture.Xunit2;
 using FluentAssertions;
 using HexagonalSkeleton.API.Data;
-using HexagonalSkeleton.API.Features.User.Application.Query;
-using HexagonalSkeleton.API.Features.User.Domain;
+using HexagonalSkeleton.Application.Query;
+using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Test.Integration.User;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
