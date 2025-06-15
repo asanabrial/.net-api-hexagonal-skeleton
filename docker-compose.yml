@@ -1,0 +1,23 @@
+services:
+    mariadb:
+        image: mariadb:11.4
+        container_name: hexagonal-mariadb
+        environment:
+            MYSQL_ROOT_PASSWORD: root123
+            MYSQL_DATABASE: HexagonalSkeleton
+            MYSQL_USER: hexagonal_user
+            MYSQL_PASSWORD: hexagonal_password
+        ports:
+            - "3306:3306"
+        volumes:
+            - mariadb_data:/var/lib/mysql
+        healthcheck:
+            test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+            interval: 10s
+            timeout: 5s
+            retries: 3
+            start_period: 30s
+        restart: unless-stopped
+
+volumes:
+    mariadb_data:
