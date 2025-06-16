@@ -2,25 +2,38 @@ using AutoMapper;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
 using Microsoft.EntityFrameworkCore;
+using MediatR;
 
 namespace HexagonalSkeleton.Infrastructure.Adapters
 {
+    /// <summary>
+    /// Adapter for user write operations
+    /// Implements the outbound port for data persistence
+    /// Ensures domain events are published after successful persistence
+    /// </summary>
     public class UserWriteRepositoryAdapter : IUserWriteRepository
     {
         private readonly AppDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
-        public UserWriteRepositoryAdapter(AppDbContext dbContext, IMapper mapper)
+        public UserWriteRepositoryAdapter(AppDbContext dbContext, IMapper mapper, IMediator mediator)
         {
             _dbContext = dbContext;
             _mapper = mapper;
-        }
-
-        public async Task<int> CreateAsync(User user, CancellationToken cancellationToken = default)
+            _mediator = mediator;
+        }        public async Task<int> CreateAsync(User user, CancellationToken cancellationToken = default)
         {
             var entity = _mapper.Map<UserEntity>(user);
             _dbContext.Users.Add(entity);
+            
             await _dbContext.SaveChangesAsync(cancellationToken);
+            
+            // The ID is handled by the mapping profile, so no need to set it manually
+            
+            // Publish domain events after successful save
+            await PublishDomainEventsAsync(user, cancellationToken);
+            
             return entity.Id;
         }
 
@@ -28,37 +41,17 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
         {
             var entity = _mapper.Map<UserEntity>(user);
             _dbContext.Users.Update(entity);
+            
             await _dbContext.SaveChangesAsync(cancellationToken);
-        }
-
-        public async Task UpdateProfileAsync(User user, CancellationToken cancellationToken = default)
-        {
-            var entity = await _dbContext.Users.FindAsync(user.Id);
-            if (entity != null)
-            {
-                entity.Name = user.Name;
-                entity.Surname = user.Surname;
-                entity.Birthdate = user.Birthdate;
-                entity.AboutMe = user.AboutMe;
-                
-                await _dbContext.SaveChangesAsync(cancellationToken);
-            }
-        }
-
-        public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
+            
+            // Publish domain events after successful save
+            await PublishDomainEventsAsync(user, cancellationToken);
+        }        public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
         {
             var entity = await _dbContext.Users.FindAsync(id);
             if (entity != null)
             {
                 _dbContext.Users.Remove(entity);
-                await _dbContext.SaveChangesAsync(cancellationToken);
-            }
-        }        public async Task SoftDeleteAsync(int id, CancellationToken cancellationToken = default)
-        {
-            var entity = await _dbContext.Users.FindAsync(id);
-            if (entity != null)
-            {
-                entity.IsDeleted = true;
                 await _dbContext.SaveChangesAsync(cancellationToken);
             }
         }
@@ -69,6 +62,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
             if (entity != null)
             {
                 entity.LastLogin = DateTime.UtcNow;
+                entity.UpdatedAt = DateTime.UtcNow;
                 await _dbContext.SaveChangesAsync(cancellationToken);
             }
         }
@@ -82,6 +76,21 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
         public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// Publish domain events from the aggregate
+        /// </summary>
+        private async Task PublishDomainEventsAsync(User user, CancellationToken cancellationToken)
+        {
+            var domainEvents = user.DomainEvents.ToList();
+            
+            foreach (var domainEvent in domainEvents)
+            {
+                await _mediator.Publish(domainEvent, cancellationToken);
+            }
+            
+            user.ClearDomainEvents();
         }
     }
 }

@@ -3,11 +3,10 @@
 namespace HexagonalSkeleton.Application.Command
 {
     public class HardDeleteUserCommandValidator : AbstractValidator<HardDeleteUserCommand>
-    {
-        public HardDeleteUserCommandValidator()
+    {        public HardDeleteUserCommandValidator()
         {
             RuleFor(r => r.Id)
-                .NotEmpty(); ;
+                .GreaterThan(0);
         }
     }
 }

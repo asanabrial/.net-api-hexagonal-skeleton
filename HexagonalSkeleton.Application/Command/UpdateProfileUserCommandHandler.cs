@@ -16,14 +16,13 @@ namespace HexagonalSkeleton.Application.Command
         {
             var result = await validator.ValidateAsync(request, cancellationToken);
             if (!result.IsValid)
-                return new ResultDto(result.ToDictionary());
-
-            var user = await userReadRepository.GetByIdAsync(id: request.Id, cancellationToken: cancellationToken);
+                return new ResultDto(result.ToDictionary());            var user = await userReadRepository.GetByIdAsync(id: request.Id, cancellationToken: cancellationToken);
             if (user is null) 
-                return new ResultDto("User not found");
-
-            UserDomainService.UpdateUserProfile(user, request.Name, request.Surname, request.Birthdate, request.AboutMe);
-            await userWriteRepository.UpdateProfileAsync(user, cancellationToken);
+                return new ResultDto(new Dictionary<string, string[]> 
+                { 
+                    { "User", new[] { "User not found" } } 
+                });user.UpdateProfile(request.FirstName, request.LastName, request.Birthdate, request.AboutMe);
+            await userWriteRepository.UpdateAsync(user, cancellationToken);
             return new ResultDto(true);
         }
     }

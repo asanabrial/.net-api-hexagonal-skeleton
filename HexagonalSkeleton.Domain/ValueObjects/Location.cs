@@ -15,10 +15,11 @@ namespace HexagonalSkeleton.Domain.ValueObjects
 
             Latitude = latitude;
             Longitude = longitude;
-        }
-
-        public double CalculateDistanceTo(Location other)
+        }        public double CalculateDistanceTo(Location other)
         {
+            if (other == null)
+                throw new ArgumentNullException(nameof(other));
+
             const double earthRadius = 6371; // km
 
             var lat1Rad = Latitude * Math.PI / 180;
@@ -35,6 +36,6 @@ namespace HexagonalSkeleton.Domain.ValueObjects
             return earthRadius * c;
         }
 
-        public override string ToString() => $"({Latitude}, {Longitude})";
+        public override string ToString() => $"({Latitude.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)}, {Longitude.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)})";
     }
 }

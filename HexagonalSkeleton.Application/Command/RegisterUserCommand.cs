@@ -24,27 +24,6 @@ namespace HexagonalSkeleton.Application.Command
         public DateTime Birthdate { get; set; } = birthdate;
         public string PhoneNumber { get; set; } = phoneNumber;
         public double Latitude { get; set; } = latitude;
-        public double Longitude { get; set; } = longitude;
-        public string AboutMe { get; set; } = aboutMe;
-
-        /// <summary>
-        /// Method to convert the DTO to a domain entity
-        /// </summary>
-        /// <returns></returns>
-        public User ToDomainEntity()
-        {
-            return new User(
-                email: Email,
-                passwordSalt: Password,
-                passwordHash: PasswordConfirmation,
-                name: Name,
-                surname: Surname,
-                birthdate: Birthdate,
-                phoneNumber: PhoneNumber,
-                latitude : Latitude,
-                longitude: Longitude,
-                aboutMe: AboutMe
-            );
-        }
+        public double Longitude { get; set; } = longitude;        public string AboutMe { get; set; } = aboutMe;
     }
 }

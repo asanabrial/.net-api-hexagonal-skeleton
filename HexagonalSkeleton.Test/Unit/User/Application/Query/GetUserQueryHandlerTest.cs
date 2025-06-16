@@ -1,97 +1,113 @@
-﻿using AutoFixture.Xunit2;
-using FluentAssertions;
-using HexagonalSkeleton.Application.Query;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Xunit;
 using Moq;
-using AutoFixture;
-using HexagonalSkeleton.Domain;
+using FluentValidation;
+using HexagonalSkeleton.Application.Query;
+using HexagonalSkeleton.Application.Dto;
 using HexagonalSkeleton.Domain.Ports;
+using HexagonalSkeleton.Domain;
 
-namespace HexagonalSkeleton.Test.Unit.User.Application.Query
+namespace HexagonalSkeleton.Test.Unit.User.Application.Query;
+
+public class GetUserQueryHandlerTest
 {
-    public class GetUserQueryHandlerTest
+    private readonly Mock<IValidator<GetUserQuery>> _mockValidator;
+    private readonly Mock<IUserReadRepository> _mockUserReadRepository;
+    private readonly GetUserQueryHandler _handler;
+
+    public GetUserQueryHandlerTest()
     {
-        [Theory, AutoData]
-        public async Task GetUserQuery_Should_Return_All_Entities_Without_Deleted_Ones(CancellationTokenSource cts)
-        {
-            // Arrange
-            var userReadRepositoryMock = new Mock<IUserReadRepository>();
-            var fixture = new Fixture();
-            fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
-                .ForEach(b => fixture.Behaviors.Remove(b));
+        _mockValidator = new Mock<IValidator<GetUserQuery>>();
+        _mockUserReadRepository = new Mock<IUserReadRepository>();
 
-            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-            var user = fixture.Create<User>();
-            userReadRepositoryMock.Setup(s => s.GetUserByIdAsync(user.Id, cts.Token)).ReturnsAsync(user);
+        _handler = new GetUserQueryHandler(
+            _mockValidator.Object,
+            _mockUserReadRepository.Object);
+    }
 
-            var validatorGetUserQueryMock = new GetUserQueryValidator();
-            var getUserQueryHandler = new GetUserQueryHandler(
-                validatorGetUserQueryMock,
-                userReadRepositoryMock.Object);
+    [Fact]
+    public async Task Handle_ValidQuery_ShouldReturnUser()
+    {
+        // Arrange
+        var userId = 1;
+        var query = new GetUserQuery(userId);
+        var cancellationToken = CancellationToken.None;
+        var user = TestHelper.CreateTestUser();
 
-            var expectedResult = new GetUserQueryResult(user);
+        _mockValidator
+            .Setup(v => v.ValidateAsync(It.IsAny<GetUserQuery>(), cancellationToken))
+            .ReturnsAsync(new FluentValidation.Results.ValidationResult());
 
-            // Act
-            var resultResponse = await getUserQueryHandler.Handle(new GetUserQuery(expectedResult.Id), cts.Token);
-            var result = resultResponse as Ok<GetUserQueryResult>;
+        _mockUserReadRepository
+            .Setup(r => r.GetByIdAsync(userId, cancellationToken))
+            .ReturnsAsync(user);
 
-            // Assert
+        // Act
+        var result = await _handler.Handle(query, cancellationToken);
 
-            result.Should().NotBeNull();
-            result!.StatusCode.Should().Be(StatusCodes.Status200OK);
-            result.Value.Should().BeEquivalentTo(expectedResult);
-        }
-        [Theory, AutoData]
-        public async Task GetUserQuery_Should_Return_NotFound_When_User_Not_Found(CancellationTokenSource cts)
-        {
-            // Arrange
-            const int userId = 1;
-            var userReadRepositoryMock = new Mock<IUserReadRepository>();
-            User? user = null;
-            userReadRepositoryMock.Setup(s => s.GetUserByIdAsync(userId, cts.Token)).ReturnsAsync(user);
+        // Assert
+        Assert.NotNull(result);
+        Assert.True(result.IsValid);
+        Assert.NotNull(result.Data);
+        
+        var userData = result.Data as GetUserQueryResult;
+        Assert.NotNull(userData);
+        Assert.Equal(user.Id, userData.Id);
+        Assert.Equal(user.FullName.FirstName, userData.FirstName);
+        Assert.Equal(user.FullName.LastName, userData.LastName);
+        Assert.Equal(user.Email.Value, userData.Email);
 
-            var validatorGetUserQueryMock = new GetUserQueryValidator();
-            var getUserQueryHandler = new GetUserQueryHandler(
-                validatorGetUserQueryMock,
-                userReadRepositoryMock.Object);
+        _mockUserReadRepository.Verify(r => r.GetByIdAsync(userId, cancellationToken), Times.Once);
+    }
 
-            // Act
-            var resultResponse = await getUserQueryHandler.Handle(new GetUserQuery(userId), cts.Token);
-            var result = resultResponse as NotFound;
+    [Fact]
+    public async Task Handle_InvalidQuery_ShouldReturnValidationErrors()
+    {
+        // Arrange
+        var query = new GetUserQuery(0); // Invalid ID
+        var cancellationToken = CancellationToken.None;
+        var validationErrors = new FluentValidation.Results.ValidationResult();
+        validationErrors.Errors.Add(new FluentValidation.Results.ValidationFailure("Id", "Id must be greater than 0"));
 
-            // Assert
-            result.Should().NotBeNull();
-            result!.StatusCode.Should().Be(StatusCodes.Status404NotFound);
-        }
+        _mockValidator
+            .Setup(v => v.ValidateAsync(It.IsAny<GetUserQuery>(), cancellationToken))
+            .ReturnsAsync(validationErrors);
 
-        [Theory, AutoData]
-        public async Task GetUserQuery_Should_Return_ValidationProblem_When_Validation_Fails(CancellationTokenSource cts)
-        {
-            // Arrange
-            var userReadRepositoryMock = new Mock<IUserReadRepository>();
-            var fixture = new Fixture();
-            fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
-                .ForEach(b => fixture.Behaviors.Remove(b));
+        // Act
+        var result = await _handler.Handle(query, cancellationToken);
 
-            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-            var user = fixture.Create<User>();
-            userReadRepositoryMock.Setup(s => s.GetUserByIdAsync(user.Id, cts.Token)).ReturnsAsync(user);
+        // Assert
+        Assert.NotNull(result);
+        Assert.False(result.IsValid);
+        Assert.Single(result.Errors);
 
-            var validatorGetUserQueryMock = new GetUserQueryValidator();
-            var getUserQueryHandler = new GetUserQueryHandler(
-                validatorGetUserQueryMock,
-                userReadRepositoryMock.Object);
+        _mockUserReadRepository.Verify(r => r.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
 
-            // Act
-            var resultResponse = await getUserQueryHandler.Handle(new GetUserQuery(default), cts.Token);
-            var result = resultResponse as ProblemHttpResult;
-            var problemDetails = result!.ProblemDetails as HttpValidationProblemDetails;
+    [Fact]
+    public async Task Handle_UserNotFound_ShouldReturnError()
+    {
+        // Arrange
+        var userId = 999;
+        var query = new GetUserQuery(userId);
+        var cancellationToken = CancellationToken.None;
 
-            // Assert
-            result.Should().NotBeNull();
-            result.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
-            problemDetails!.Errors.Should().HaveCount(1);
-        }
+        _mockValidator
+            .Setup(v => v.ValidateAsync(It.IsAny<GetUserQuery>(), cancellationToken))
+            .ReturnsAsync(new FluentValidation.Results.ValidationResult());
+
+        _mockUserReadRepository
+            .Setup(r => r.GetByIdAsync(userId, cancellationToken))
+            .ReturnsAsync((HexagonalSkeleton.Domain.User?)null);
+
+        // Act
+        var result = await _handler.Handle(query, cancellationToken);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.False(result.IsValid);
+        Assert.Single(result.Errors);
+        Assert.Contains("User not found", result.Errors.Values.SelectMany(x => x));
+
+        _mockUserReadRepository.Verify(r => r.GetByIdAsync(userId, cancellationToken), Times.Once);
     }
 }

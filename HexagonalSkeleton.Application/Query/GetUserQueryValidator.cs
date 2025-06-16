@@ -3,11 +3,10 @@
 namespace HexagonalSkeleton.Application.Query
 {
     public class GetUserQueryValidator : AbstractValidator<GetUserQuery>
-    {
-        public GetUserQueryValidator()
+    {        public GetUserQueryValidator()
         {
             RuleFor(r => r.Id)
-                .NotEmpty();
+                .GreaterThan(0);
         }
     }
 }

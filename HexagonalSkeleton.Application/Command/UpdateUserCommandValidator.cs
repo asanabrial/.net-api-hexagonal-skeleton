@@ -3,19 +3,18 @@
 namespace HexagonalSkeleton.Application.Command
 {
     public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
-    {
-        public UpdateUserCommandValidator()
+    {        public UpdateUserCommandValidator()
         {
-            RuleFor(r => r.Email)
+            RuleFor(r => r.FirstName)
                 .NotEmpty();
 
-            RuleFor(r => r.Name)
-                .NotEmpty();
-
-            RuleFor(r => r.Surname)
+            RuleFor(r => r.LastName)
                 .NotEmpty();
 
             RuleFor(r => r.Birthdate)
+                .NotEmpty();
+
+            RuleFor(r => r.PhoneNumber)
                 .NotEmpty();
         }
     }

@@ -4,6 +4,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using AutoFixture;
+using HexagonalSkeleton.Domain;
+using HexagonalSkeleton.Domain.ValueObjects;
 
 namespace HexagonalSkeleton.Test.Unit
 {
@@ -16,6 +18,12 @@ namespace HexagonalSkeleton.Test.Unit
                 .ForEach(b => Fixture.Behaviors.Remove(b));
 
             Fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+            // Configure AutoFixture for value objects
+            Fixture.Register(() => new Email("test@example.com"));
+            Fixture.Register(() => new FullName("John", "Doe"));
+            Fixture.Register(() => new PhoneNumber("123456789"));
+            Fixture.Register(() => new Location(40.7128, -74.0060));
         }
 
         public Fixture Fixture { get; set; }

@@ -1,5 +1,4 @@
 ﻿using HexagonalSkeleton.Application.Dto;
-using HexagonalSkeleton.Domain;
 using MediatR;
 
 namespace HexagonalSkeleton.Application.Query
@@ -18,14 +17,5 @@ namespace HexagonalSkeleton.Application.Query
         /// Gets or sets the password.
         /// </summary>
         public string Password { get; set; } = password;
-
-        /// <summary>
-        /// Method to convert the DTO to a domain entity
-        /// </summary>
-        /// <returns></returns>
-        public User ToDomainEntity()
-        {
-            return new User(Email);
-        }
     }
 }

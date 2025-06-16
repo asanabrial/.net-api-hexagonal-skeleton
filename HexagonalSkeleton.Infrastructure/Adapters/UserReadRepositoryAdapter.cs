@@ -42,5 +42,19 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
             
             return _mapper.Map<List<User>>(entities);
         }
+
+        public async Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Users
+                .AsNoTracking()
+                .AnyAsync(u => u.Email == email, cancellationToken);
+        }
+
+        public async Task<bool> ExistsByPhoneNumberAsync(string phoneNumber, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Users
+                .AsNoTracking()
+                .AnyAsync(u => u.PhoneNumber == phoneNumber, cancellationToken);
+        }
     }
 }

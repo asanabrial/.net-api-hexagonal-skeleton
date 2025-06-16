@@ -1,10 +1,17 @@
 ﻿namespace HexagonalSkeleton.Application.Dto
-{
-    public class ResultDto
+{    public class ResultDto
     {
         public ResultDto(IDictionary<string, string[]> errors)
         {
             Errors = errors;
+        }
+
+        public ResultDto(string error)
+        {
+            Errors = new Dictionary<string, string[]>
+            {
+                { "Error", new[] { error } }
+            };
         }
 
         public ResultDto(object data)

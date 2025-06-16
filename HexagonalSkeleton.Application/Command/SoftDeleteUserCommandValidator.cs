@@ -3,11 +3,10 @@
 namespace HexagonalSkeleton.Application.Command
 {
     public class SoftDeleteUserCommandValidator : AbstractValidator<SoftDeleteUserCommand>
-    {
-        public SoftDeleteUserCommandValidator()
+    {        public SoftDeleteUserCommandValidator()
         {
             RuleFor(r => r.Id)
-                .NotEmpty(); ;
+                .GreaterThan(0);
         }
     }
 }

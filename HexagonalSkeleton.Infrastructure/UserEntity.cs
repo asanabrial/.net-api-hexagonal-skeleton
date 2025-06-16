@@ -6,46 +6,10 @@ using Microsoft.EntityFrameworkCore;
 namespace HexagonalSkeleton.Infrastructure
 {
     [Index(nameof(Email), IsUnique = true)]
-    [Index(nameof(PhoneNumber), IsUnique = true)]
-    public class UserEntity : Entity
+    [Index(nameof(PhoneNumber), IsUnique = true)]    public class UserEntity : Entity
     {
+        // Entity Framework requires a parameterless constructor
         public UserEntity() { }
-
-        public UserEntity(string email)
-        {
-            Email = email;
-        }
-
-        public UserEntity(int userId, IFormFile profileImage)
-        {
-            Id = userId;
-            ProfileImageName = profileImage.FileName;
-        }
-
-        public UserEntity(
-            string email,
-            string passwordSalt,
-            string passwordHash, 
-            string name,
-            string surname,
-            DateTime birthdate, 
-            string phoneNumber,
-            double latitude,
-            double longitude,
-            string aboutMe)
-        {
-            Email = email;
-            PasswordSalt = passwordSalt;
-            PasswordHash = passwordHash;
-            Name = name;
-            Surname = surname;
-            Birthdate = birthdate;
-            PhoneNumber = phoneNumber;
-            AboutMe = aboutMe;
-            Latitude = latitude;
-            Longitude = longitude;
-        }
-
 
         [MaxLength(100)]
         public string? Name { get; set; }
