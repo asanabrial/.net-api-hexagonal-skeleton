@@ -10,9 +10,7 @@
     <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
+  </ItemGroup>  <ItemGroup>
     <ProjectReference Include="..\HexagonalSkeleton.CommonCore\HexagonalSkeleton.CommonCore.csproj" />
     <ProjectReference Include="..\HexagonalSkeleton.Domain\HexagonalSkeleton.Domain.csproj" />
   </ItemGroup>

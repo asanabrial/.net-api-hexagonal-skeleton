@@ -1,13 +1,15 @@
 ﻿using FluentValidation;
 using HexagonalSkeleton.Application.Dto;
-using HexagonalSkeleton.Domain;
+using HexagonalSkeleton.Domain.Ports;
+using HexagonalSkeleton.Domain.Services;
 using MediatR;
 
 namespace HexagonalSkeleton.Application.Command
 {
     public class UpdateProfileUserCommandHandler(
         IValidator<UpdateProfileUserCommand> validator,
-        IUserRepository unitOfWork)
+        IUserReadRepository userReadRepository,
+        IUserWriteRepository userWriteRepository)
         : IRequestHandler<UpdateProfileUserCommand, ResultDto>
     {
         public async Task<ResultDto> Handle(UpdateProfileUserCommand request, CancellationToken cancellationToken)
@@ -16,12 +18,13 @@ namespace HexagonalSkeleton.Application.Command
             if (!result.IsValid)
                 return new ResultDto(result.ToDictionary());
 
-            var user = await unitOfWork.GetUserByIdAsync(id: request.Id, cancellationToken: cancellationToken);
-            //if (user is null) return Results.NotFound();
+            var user = await userReadRepository.GetByIdAsync(id: request.Id, cancellationToken: cancellationToken);
+            if (user is null) 
+                return new ResultDto("User not found");
 
-            var entity = request.ToDomainEntity();
-            await unitOfWork.UpdateProfileUser(entity);
-            return new ResultDto(await unitOfWork.SaveChangesAsync(cancellationToken));
+            UserDomainService.UpdateUserProfile(user, request.Name, request.Surname, request.Birthdate, request.AboutMe);
+            await userWriteRepository.UpdateProfileAsync(user, cancellationToken);
+            return new ResultDto(true);
         }
     }
 }

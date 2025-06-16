@@ -16,7 +16,7 @@ builder.Services.AddSingletons();
 builder.Services.AddTransients();
 builder.Services.AddSwagger();
 builder.Services.AddAuthentication(appSettings);
-// Añadir AutoMapper
+// Aï¿½adir AutoMapper
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 builder.Services.AddSwaggerGen();
@@ -48,9 +48,10 @@ builder.Services.AddDbContextPool<AppDbContext>(
 
 builder.Services.AddMediatR(cfg => {
     cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+    cfg.RegisterServicesFromAssemblyContaining<HexagonalSkeleton.Application.Command.RegisterUserCommand>();
 });
 
-builder.Services.AddValidatorsFromAssemblyContaining(typeof(Program));
+builder.Services.AddValidatorsFromAssemblyContaining<HexagonalSkeleton.Application.Command.RegisterUserCommand>();
 builder.Services.AddRouting(opt =>
 {
     opt.LowercaseUrls = true;

@@ -1,8 +1,8 @@
 ﻿using AutoFixture.Xunit2;
 using FluentAssertions;
-using HexagonalSkeleton.API.Data;
 using HexagonalSkeleton.Application.Command;
 using HexagonalSkeleton.Domain;
+using HexagonalSkeleton.Domain.Ports;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Moq;
@@ -17,18 +17,17 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
         {
             // Arrange
             const int userId = 1;
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
-            var user = new UserEntity(){Id = userId};
-            unitOfWorkMock.Setup(s => s.Users.UpdateUser(user)).Returns(Task.CompletedTask);
-            unitOfWorkMock.Setup(s => s.SaveChangesAsync(cts.Token)).ReturnsAsync(true);
+            var userWriteRepositoryMock = new Mock<IUserWriteRepository>();
+            var user = new User { Id = userId };
+            userWriteRepositoryMock.Setup(s => s.UpdateUser(It.IsAny<User>())).Returns(Task.CompletedTask);
 
-            Mock<UpdateUserCommandHandler> partialUpdateUserCommandHandlerMock = new(
+            var updateUserCommandHandler = new UpdateUserCommandHandler(
                 new UpdateUserCommandValidator(),
-                unitOfWorkMock.Object);
+                userWriteRepositoryMock.Object);
 
             // Act
             var resultResponse =
-                await partialUpdateUserCommandHandlerMock.Object.Handle(
+                await updateUserCommandHandler.Handle(
                     new UpdateUserCommand()
                     {
                         Id = userId,
@@ -52,6 +51,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
             result.Should().NotBeNull();
             result!.StatusCode.Should().Be(StatusCodes.Status200OK);
             result.Value.Should().BeTrue();
+            userWriteRepositoryMock.Verify(x => x.UpdateUser(It.IsAny<User>()), Times.Once);
         }
     }
 }

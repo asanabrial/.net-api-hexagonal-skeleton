@@ -1,8 +1,8 @@
 ﻿using AutoFixture.Xunit2;
 using FluentAssertions;
-using HexagonalSkeleton.API.Data;
 using HexagonalSkeleton.Application.Command;
 using HexagonalSkeleton.Domain;
+using HexagonalSkeleton.Domain.Ports;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Moq;
@@ -17,19 +17,20 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
         {
             // Arrange
             const int userId = 1;
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
-            var user = new UserEntity();
-            unitOfWorkMock.Setup(s => s.Users.GetUserByIdAsync(userId, cts.Token)).ReturnsAsync(user);
-            unitOfWorkMock.Setup(s => s.Users.UpdateUser(user)).Returns(Task.CompletedTask);
-            unitOfWorkMock.Setup(s => s.SaveChangesAsync(cts.Token)).ReturnsAsync(true);
+            var userReadRepositoryMock = new Mock<IUserReadRepository>();
+            var userWriteRepositoryMock = new Mock<IUserWriteRepository>();
+            var user = new User { Id = userId };
+            userReadRepositoryMock.Setup(s => s.GetUserByIdAsync(userId, cts.Token)).ReturnsAsync(user);
+            userWriteRepositoryMock.Setup(s => s.UpdateUser(user)).Returns(Task.CompletedTask);
 
-            Mock<UpdateProfileUserCommandHandler> partialUpdateUserCommandHandlerMock = new(
+            var partialUpdateUserCommandHandler = new UpdateProfileUserCommandHandler(
                 new UpdateProfileUserCommandValidator(),
-                unitOfWorkMock.Object);
+                userReadRepositoryMock.Object,
+                userWriteRepositoryMock.Object);
 
             // Act
             var resultResponse =
-                await partialUpdateUserCommandHandlerMock.Object.Handle(
+                await partialUpdateUserCommandHandler.Handle(
                     new UpdateProfileUserCommand(
                         userId,
                         "test@test.com",

@@ -1,13 +1,12 @@
 ﻿using FluentValidation;
 using HexagonalSkeleton.Application.Dto;
-using HexagonalSkeleton.Domain;
+using HexagonalSkeleton.Domain.Ports;
 using MediatR;
 
 namespace HexagonalSkeleton.Application.Command
-{
-    public class UpdateUserCommandHandler(
+{    public class UpdateUserCommandHandler(
         IValidator<UpdateUserCommand> validator,
-        IUserRepository unitOfWork)
+        IUserWriteRepository userWriteRepository)
         : IRequestHandler<UpdateUserCommand, ResultDto>
     {
         public async Task<ResultDto> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
@@ -17,8 +16,8 @@ namespace HexagonalSkeleton.Application.Command
                 return new ResultDto(result.ToDictionary());
 
             var user = request.ToDomainEntity();
-            await unitOfWork.UpdateUser(user);
-            return new ResultDto(await unitOfWork.SaveChangesAsync(cancellationToken));
+            await userWriteRepository.UpdateAsync(user, cancellationToken);
+            return new ResultDto(true);
         }
     }
 }

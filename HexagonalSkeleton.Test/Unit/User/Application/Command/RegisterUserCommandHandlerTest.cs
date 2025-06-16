@@ -1,8 +1,8 @@
 ﻿using AutoFixture.Xunit2;
 using FluentAssertions;
-using HexagonalSkeleton.API.Data;
 using HexagonalSkeleton.Application.Command;
 using HexagonalSkeleton.Application.Event;
+using HexagonalSkeleton.Domain.Ports;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -18,7 +18,8 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
         {
             // Arrange
             var mediator = new Mock<IMediator>();
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
+            var userWriteRepositoryMock = new Mock<IUserWriteRepository>();
+            var authenticationServiceMock = new Mock<IAuthenticationService>();
             var user = new RegisterUserCommand(
                 "test@test.com",
                 "Pa$$w0rd",
@@ -30,18 +31,19 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
                 0,
                 0,
                 "Test");
-            unitOfWorkMock.Setup(s => s.Users.CreateUserAsync(user.ToDomainEntity(), cts.Token)).Returns(Task.CompletedTask);
-            unitOfWorkMock.Setup(s => s.SaveChangesAsync(cts.Token)).ReturnsAsync(true);
+            userWriteRepositoryMock.Setup(s => s.CreateUserAsync(It.IsAny<Domain.User>(), cts.Token)).Returns(Task.CompletedTask);
+            authenticationServiceMock.Setup(s => s.GenerateJwtToken(It.IsAny<Domain.User>())).Returns("fake-token");
 
-            Mock<RegisterUserCommandHandler> registerUserCommandHandlerMock = new(
+            var registerUserCommandHandler = new RegisterUserCommandHandler(
                 new RegisterUserCommandValidator(),
                 mediator.Object,
-                unitOfWorkMock.Object,
+                userWriteRepositoryMock.Object,
+                authenticationServiceMock.Object,
                 fixture.Settings);
 
             // Act
             var resultResponse =
-                await registerUserCommandHandlerMock.Object.Handle(
+                await registerUserCommandHandler.Handle(
                     user,
                     cts.Token);
             var result = resultResponse as Ok<RegisterUserCommandResult>;
@@ -51,7 +53,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
             result!.StatusCode.Should().Be(StatusCodes.Status200OK);
             result.Value.Should().NotBeNull();
             result.Value!.AccessToken.Should().NotBeNull();
-            fixture.ValidateToken(result.Value.AccessToken!).Should().BeTrue();
+            result.Value.AccessToken.Should().Be("fake-token");
             mediator.Verify(x => x.Publish(It.IsAny<LoginEvent>(), cts.Token));
         }
     }
