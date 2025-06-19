@@ -14,7 +14,7 @@ namespace HexagonalSkeleton.Application.Command
         string phoneNumber,
         double latitude,
         double longitude,
-        string aboutMe) : IRequest<ResultDto>
+        string aboutMe) : IRequest<RegisterUserCommandResult>
     {
         public string Email { get; set; } = email;
         public string Password { get; set; } = password;

@@ -1,12 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using HexagonalSkeleton.CommonCore.Data.Entity;
+using HexagonalSkeleton.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace HexagonalSkeleton.Infrastructure
 {
     [Index(nameof(Email), IsUnique = true)]
-    [Index(nameof(PhoneNumber), IsUnique = true)]    public class UserEntity : Entity
+    [Index(nameof(PhoneNumber), IsUnique = true)]    public class UserEntity : BaseEntity
     {
         // Entity Framework requires a parameterless constructor
         public UserEntity() { }

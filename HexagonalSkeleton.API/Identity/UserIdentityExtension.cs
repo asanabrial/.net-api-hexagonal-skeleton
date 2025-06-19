@@ -1,5 +1,5 @@
 ﻿using System.Security.Claims;
-using HexagonalSkeleton.CommonCore.Constants;
+using HexagonalSkeleton.API.Constants;
 
 namespace HexagonalSkeleton.API.Identity
 {

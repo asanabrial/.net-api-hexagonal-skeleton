@@ -5,8 +5,6 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HexagonalSkeleton.API", "HexagonalSkeleton.API\HexagonalSkeleton.API.csproj", "{22D58B29-08E5-48CF-99F1-AC5E08CFA8FD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HexagonalSkeleton.CommonCore", "HexagonalSkeleton.CommonCore\HexagonalSkeleton.CommonCore.csproj", "{935371C6-01F1-4C80-8B4B-AE2EF823E8A9}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexagonalSkeleton.Infrastructure", "HexagonalSkeleton.Infrastructure\HexagonalSkeleton.Infrastructure.csproj", "{A0B15F06-86E2-4B53-950F-DE030E7114D3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HexagonalSkeleton.Domain", "HexagonalSkeleton.Domain\HexagonalSkeleton.Domain.csproj", "{A63F9A14-7205-402C-AB06-9D46FBF4F216}"
@@ -39,18 +37,6 @@ Global
 		{22D58B29-08E5-48CF-99F1-AC5E08CFA8FD}.Release|x64.Build.0 = Release|Any CPU
 		{22D58B29-08E5-48CF-99F1-AC5E08CFA8FD}.Release|x86.ActiveCfg = Release|Any CPU
 		{22D58B29-08E5-48CF-99F1-AC5E08CFA8FD}.Release|x86.Build.0 = Release|Any CPU
-		{935371C6-01F1-4C80-8B4B-AE2EF823E8A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{935371C6-01F1-4C80-8B4B-AE2EF823E8A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{935371C6-01F1-4C80-8B4B-AE2EF823E8A9}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{935371C6-01F1-4C80-8B4B-AE2EF823E8A9}.Debug|x64.Build.0 = Debug|Any CPU
-		{935371C6-01F1-4C80-8B4B-AE2EF823E8A9}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{935371C6-01F1-4C80-8B4B-AE2EF823E8A9}.Debug|x86.Build.0 = Debug|Any CPU
-		{935371C6-01F1-4C80-8B4B-AE2EF823E8A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{935371C6-01F1-4C80-8B4B-AE2EF823E8A9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{935371C6-01F1-4C80-8B4B-AE2EF823E8A9}.Release|x64.ActiveCfg = Release|Any CPU
-		{935371C6-01F1-4C80-8B4B-AE2EF823E8A9}.Release|x64.Build.0 = Release|Any CPU
-		{935371C6-01F1-4C80-8B4B-AE2EF823E8A9}.Release|x86.ActiveCfg = Release|Any CPU
-		{935371C6-01F1-4C80-8B4B-AE2EF823E8A9}.Release|x86.Build.0 = Release|Any CPU
 		{A0B15F06-86E2-4B53-950F-DE030E7114D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A0B15F06-86E2-4B53-950F-DE030E7114D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A0B15F06-86E2-4B53-950F-DE030E7114D3}.Debug|x64.ActiveCfg = Debug|Any CPU

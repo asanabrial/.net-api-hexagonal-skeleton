@@ -6,12 +6,12 @@ namespace HexagonalSkeleton.Application.Query
 {
     public class GetAllUsersQueryHandler(
         IUserReadRepository userReadRepository)
-        : IRequestHandler<GetAllUsersQuery, ResultDto>
+        : IRequestHandler<GetAllUsersQuery, GetAllUsersQueryResult>
     {
-        public async Task<ResultDto> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
+        public async Task<GetAllUsersQueryResult> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
         {
             var users = await userReadRepository.GetAllAsync(cancellationToken: cancellationToken);
-            return new ResultDto(users.Select(s => new GetAllUsersQueryResult(s)));
+            return new GetAllUsersQueryResult(users);
         }
     }
 }

@@ -3,7 +3,7 @@ using MediatR;
 
 namespace HexagonalSkeleton.Application.Query
 {
-    public class GetUserQuery(int id) : IRequest<ResultDto>
+    public class GetUserQuery(int id) : IRequest<GetUserQueryResult>
     {
         /// <summary>
         /// Gets or sets the user id.

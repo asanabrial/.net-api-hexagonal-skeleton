@@ -1,8 +1,10 @@
 using Xunit;
 using Moq;
 using FluentValidation;
+using FluentAssertions;
 using HexagonalSkeleton.Application.Query;
 using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
 
@@ -22,9 +24,7 @@ public class GetUserQueryHandlerTest
         _handler = new GetUserQueryHandler(
             _mockValidator.Object,
             _mockUserReadRepository.Object);
-    }
-
-    [Fact]
+    }    [Fact]
     public async Task Handle_ValidQuery_ShouldReturnUser()
     {
         // Arrange
@@ -45,22 +45,17 @@ public class GetUserQueryHandlerTest
         var result = await _handler.Handle(query, cancellationToken);
 
         // Assert
-        Assert.NotNull(result);
-        Assert.True(result.IsValid);
-        Assert.NotNull(result.Data);
-        
-        var userData = result.Data as GetUserQueryResult;
-        Assert.NotNull(userData);
-        Assert.Equal(user.Id, userData.Id);
-        Assert.Equal(user.FullName.FirstName, userData.FirstName);
-        Assert.Equal(user.FullName.LastName, userData.LastName);
-        Assert.Equal(user.Email.Value, userData.Email);
+        result.Should().NotBeNull();
+        result.Id.Should().Be(user.Id);
+        result.FirstName.Should().Be(user.FullName.FirstName);
+        result.LastName.Should().Be(user.FullName.LastName);
+        result.Email.Should().Be(user.Email.Value);
 
         _mockUserReadRepository.Verify(r => r.GetByIdAsync(userId, cancellationToken), Times.Once);
     }
 
     [Fact]
-    public async Task Handle_InvalidQuery_ShouldReturnValidationErrors()
+    public async Task Handle_InvalidQuery_ShouldThrowValidationException()
     {
         // Arrange
         var query = new GetUserQuery(0); // Invalid ID
@@ -73,18 +68,13 @@ public class GetUserQueryHandlerTest
             .ReturnsAsync(validationErrors);
 
         // Act
-        var result = await _handler.Handle(query, cancellationToken);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.False(result.IsValid);
-        Assert.Single(result.Errors);
-
+        var act = async () => await _handler.Handle(query, cancellationToken);        // Assert
+        await act.Should().ThrowAsync<HexagonalSkeleton.Application.Exceptions.ValidationException>();
         _mockUserReadRepository.Verify(r => r.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
-    public async Task Handle_UserNotFound_ShouldReturnError()
+    public async Task Handle_UserNotFound_ShouldThrowNotFoundException()
     {
         // Arrange
         var userId = 999;
@@ -100,13 +90,9 @@ public class GetUserQueryHandlerTest
             .ReturnsAsync((HexagonalSkeleton.Domain.User?)null);
 
         // Act
-        var result = await _handler.Handle(query, cancellationToken);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.False(result.IsValid);
-        Assert.Single(result.Errors);
-        Assert.Contains("User not found", result.Errors.Values.SelectMany(x => x));
+        var act = async () => await _handler.Handle(query, cancellationToken);        // Assert
+        await act.Should().ThrowAsync<NotFoundException>()
+            .WithMessage("User with identifier '999' was not found");
 
         _mockUserReadRepository.Verify(r => r.GetByIdAsync(userId, cancellationToken), Times.Once);
     }

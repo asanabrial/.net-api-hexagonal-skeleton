@@ -13,14 +13,13 @@ namespace HexagonalSkeleton.Application.Command
         IPublisher publisher,
         IUserWriteRepository userWriteRepository,
         IUserReadRepository userReadRepository,
-        IAuthenticationService authenticationService)
-        : IRequestHandler<RegisterUserCommand, ResultDto>
+        IAuthenticationService authenticationService)        : IRequestHandler<RegisterUserCommand, RegisterUserCommandResult>
     {
-        public async Task<ResultDto> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+        public async Task<RegisterUserCommandResult> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
             var result = await validator.ValidateAsync(request, cancellationToken);
             if (!result.IsValid)
-                return new ResultDto(result.ToDictionary());
+                return new RegisterUserCommandResult(result.ToDictionary());
 
             // Check uniqueness using domain service
             var isUnique = await UserDomainService.IsUserRegistrationDataUniqueAsync(
@@ -30,11 +29,11 @@ namespace HexagonalSkeleton.Application.Command
                 cancellationToken);
             
             if (!isUnique)
-                return new ResultDto("Email or phone number already exists");
+                return new RegisterUserCommandResult("Email or phone number already exists", true);
 
             // Validate password strength
             if (!UserDomainService.IsPasswordStrong(request.Password))
-                return new ResultDto("Password does not meet strength requirements");
+                return new RegisterUserCommandResult("Password does not meet strength requirements", true);
 
             var passwordSalt = authenticationService.GenerateSalt();
             var passwordHash = authenticationService.HashPassword(request.Password, passwordSalt);
@@ -54,10 +53,9 @@ namespace HexagonalSkeleton.Application.Command
             var userId = await userWriteRepository.CreateAsync(user, cancellationToken);
             
             var jwtToken = await authenticationService.GenerateJwtTokenAsync(userId, cancellationToken);
-            var response = new RegisterUserCommandResult(jwtToken);
 
             await publisher.Publish(new LoginEvent(userId), cancellationToken);
-            return new ResultDto(response);
+            return new RegisterUserCommandResult(jwtToken);
         }
     }
 }

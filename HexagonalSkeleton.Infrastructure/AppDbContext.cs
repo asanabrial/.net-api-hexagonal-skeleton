@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using HexagonalSkeleton.CommonCore.Data.Extension;
+using HexagonalSkeleton.Infrastructure.Extensions;
 
 namespace HexagonalSkeleton.Infrastructure
 {

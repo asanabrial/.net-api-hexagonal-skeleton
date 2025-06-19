@@ -2,7 +2,7 @@ using FluentAssertions;
 using FluentValidation;
 using FluentValidation.Results;
 using HexagonalSkeleton.Application.Command;
-using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Test.Unit.User.Domain;
 using Moq;
@@ -27,10 +27,8 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
                 _mockValidator.Object,
                 _mockUserReadRepository.Object,
                 _mockUserWriteRepository.Object);
-        }
-
-        [Fact]
-        public async Task Handle_WithValidCommand_ShouldReturnSuccessResult()
+        }        [Fact]
+        public async Task Handle_WithValidCommand_ShouldCompleteSuccessfully()
         {
             // Arrange
             var command = new HardDeleteUserCommand(1);
@@ -46,16 +44,13 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
                 .Returns(Task.CompletedTask);
 
             // Act
-            var result = await _handler.Handle(command, CancellationToken.None);            // Assert
-            result.Should().NotBeNull();
-            result.IsValid.Should().BeTrue();
-            result.Errors.Should().BeEmpty();
+            var act = async () => await _handler.Handle(command, CancellationToken.None);
 
+            // Assert
+            await act.Should().NotThrowAsync();
             _mockUserWriteRepository.Verify(x => x.DeleteAsync(command.Id, It.IsAny<CancellationToken>()), Times.Once);
-        }
-
-        [Fact]
-        public async Task Handle_WithInvalidCommand_ShouldReturnValidationErrors()
+        }        [Fact]
+        public async Task Handle_WithInvalidCommand_ShouldThrowValidationException()
         {
             // Arrange
             var command = new HardDeleteUserCommand(0);
@@ -66,21 +61,17 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
             var validationResult = new ValidationResult(validationErrors);
 
             _mockValidator.Setup(x => x.ValidateAsync(command, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(validationResult);
+                .ReturnsAsync(validationResult);            // Act & Assert
+            var exception = await Assert.ThrowsAsync<HexagonalSkeleton.Application.Exceptions.ValidationException>(() =>
+                _handler.Handle(command, CancellationToken.None));
 
-            // Act
-            var result = await _handler.Handle(command, CancellationToken.None);            // Assert
-            result.Should().NotBeNull();
-            result.IsValid.Should().BeFalse();
-            result.Errors.Should().ContainKey("Id");
-            result.Errors["Id"].Should().Contain("Id must be greater than 0");
+            exception.Errors.Should().ContainKey("Id");
+            exception.Errors["Id"].Should().Contain("Id must be greater than 0");
 
             _mockUserReadRepository.Verify(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
             _mockUserWriteRepository.Verify(x => x.DeleteAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
-        }
-
-        [Fact]
-        public async Task Handle_WithNonExistentUser_ShouldReturnUserNotFoundError()
+        }        [Fact]
+        public async Task Handle_WithNonExistentUser_ShouldThrowNotFoundException()
         {
             // Arrange
             var command = new HardDeleteUserCommand(999);
@@ -89,14 +80,12 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
                 .ReturnsAsync(new ValidationResult());            _mockUserReadRepository.Setup(x => x.GetByIdAsync(command.Id, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((DomainUser?)null);
 
-            // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
+                _handler.Handle(command, CancellationToken.None));
 
-            // Assert
-            result.Should().NotBeNull();
-            result.IsValid.Should().BeFalse();
-            result.Errors.Should().ContainKey("User");
-            result.Errors["User"].Should().Contain("User not found");
+            exception.Message.Should().Contain("User");
+            exception.Message.Should().Contain("999");
 
             _mockUserWriteRepository.Verify(x => x.DeleteAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
         }
@@ -130,9 +119,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
             _mockUserWriteRepository.InSequence(sequence)
                 .Setup(x => x.DeleteAsync(command.Id, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
-        }
-
-        [Theory]
+        }        [Theory]
         [InlineData(1)]
         [InlineData(5)]
         [InlineData(100)]
@@ -152,9 +139,10 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
                 .Returns(Task.CompletedTask);
 
             // Act
-            var result = await _handler.Handle(command, CancellationToken.None);            // Assert
-            result.Should().NotBeNull();
-            result.IsValid.Should().BeTrue();
+            var act = async () => await _handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            await act.Should().NotThrowAsync();
             _mockUserWriteRepository.Verify(x => x.DeleteAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
         }
 

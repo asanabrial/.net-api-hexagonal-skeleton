@@ -72,19 +72,13 @@ public class RegisterUserCommandHandlerTest
 
         _mockAuthenticationService
             .Setup(a => a.GenerateJwtTokenAsync(userId, cancellationToken))
-            .ReturnsAsync(jwtToken);
-
-        // Act
+            .ReturnsAsync(jwtToken);        // Act
         var result = await _handler.Handle(command, cancellationToken);
 
         // Assert
         Assert.NotNull(result);
         Assert.True(result.IsValid);
-        Assert.NotNull(result.Data);
-        
-        var response = result.Data as RegisterUserCommandResult;
-        Assert.NotNull(response);
-        Assert.Equal(jwtToken, response.AccessToken);
+        Assert.Equal(jwtToken, result.AccessToken);
 
         _mockUserWriteRepository.Verify(r => r.CreateAsync(
             It.Is<HexagonalSkeleton.Domain.User>(u => u.Email.Value == command.Email), 

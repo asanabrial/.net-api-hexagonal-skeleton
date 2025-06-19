@@ -3,7 +3,7 @@ using MediatR;
 
 namespace HexagonalSkeleton.Application.Command
 {
-    public class UpdateProfileUserCommand(int id, string aboutMe, string firstName, string lastName, DateTime birthdate) : IRequest<ResultDto>
+    public class UpdateProfileUserCommand(int id, string aboutMe, string firstName, string lastName, DateTime birthdate) : IRequest<UpdateProfileUserCommandResult>
     {
         public int Id { get; set; } = id;
         public string FirstName { get; set; } = firstName;

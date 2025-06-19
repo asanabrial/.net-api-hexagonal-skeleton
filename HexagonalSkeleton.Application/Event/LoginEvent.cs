@@ -1,4 +1,4 @@
-﻿using HexagonalSkeleton.CommonCore.Event;
+﻿using HexagonalSkeleton.Domain.Common;
 
 namespace HexagonalSkeleton.Application.Event
 {

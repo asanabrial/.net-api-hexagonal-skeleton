@@ -13,18 +13,18 @@ namespace HexagonalSkeleton.Application.Command
         IValidator<SoftDeleteUserCommand> validator,
         IUserReadRepository userReadRepository,
         IUserWriteRepository userWriteRepository)
-        : IRequestHandler<SoftDeleteUserCommand, ResultDto>
+        : IRequestHandler<SoftDeleteUserCommand, SoftDeleteUserCommandResult>
     {
-        public async Task<ResultDto> Handle(SoftDeleteUserCommand request, CancellationToken cancellationToken)
+        public async Task<SoftDeleteUserCommandResult> Handle(SoftDeleteUserCommand request, CancellationToken cancellationToken)
         {
             var result = await validator.ValidateAsync(request, cancellationToken);
             if (!result.IsValid)
-                return new ResultDto(result.ToDictionary());
+                return new SoftDeleteUserCommandResult(result.ToDictionary());
 
             // Get the user aggregate to apply business rules
             var user = await userReadRepository.GetByIdAsync(request.Id, cancellationToken);
             if (user == null)
-                return new ResultDto(new Dictionary<string, string[]> 
+                return new SoftDeleteUserCommandResult(new Dictionary<string, string[]> 
                 { 
                     { "User", new[] { "User not found" } } 
                 });
@@ -35,7 +35,7 @@ namespace HexagonalSkeleton.Application.Command
             // Persist the changes through the write repository
             await userWriteRepository.UpdateAsync(user, cancellationToken);
 
-            return new ResultDto(true);
+            return new SoftDeleteUserCommandResult();
         }
     }
 }

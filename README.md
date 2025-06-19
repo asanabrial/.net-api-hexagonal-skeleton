@@ -103,11 +103,6 @@ All necessary settings are in the appsettings.json of the API. The connection st
 │   ├───Identity // Identity management of our JWT
 │   ├───Migrations // Migrations generated with EF Core
 │   └───Properties
-├───HexagonalSkeleton.CommonCore // Generic layer, and reusable for other projects
-│   ├───Auth
-│   ├───Constants
-│   ├───Data
-│   │   ├───Entity
 │   │   ├───Repository
 │   │   └───UnitOfWork
 │   ├───Event

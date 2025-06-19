@@ -12,8 +12,13 @@ namespace HexagonalSkeleton.API.Config
         /// <param name="services">Service collection</param>
         /// <param name="configuration">Configuration manager</param>
         /// <returns>Return the service collection for further configuration.</returns>
-        public static IServiceCollection AddAuthentication(this IServiceCollection services, AppSettings configuration)
+        public static IServiceCollection AddAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
+            var jwtSection = configuration.GetSection("AppSettings:Jwt");
+            var issuer = jwtSection["Issuer"] ?? throw new InvalidOperationException("JWT Issuer not configured");
+            var audience = jwtSection["Audience"] ?? throw new InvalidOperationException("JWT Audience not configured");
+            var secret = jwtSection["Secret"] ?? throw new InvalidOperationException("JWT Secret not configured");
+
             // Add and configure JWT authentication.
             services.AddAuthentication(o =>
             {
@@ -27,12 +32,11 @@ namespace HexagonalSkeleton.API.Config
                 o.TokenValidationParameters = new TokenValidationParameters
                 {
                     // Set the valid issuer and audience from configuration.
-                    ValidIssuer = configuration.Jwt.Issuer,
-                    ValidAudience = configuration.Jwt.Audience,
+                    ValidIssuer = issuer,                    ValidAudience = audience,
 
                     // Set the symmetric security key for signing the token.
                     IssuerSigningKey = new SymmetricSecurityKey
-                        (Encoding.UTF8.GetBytes(configuration.Jwt.Secret)),
+                        (Encoding.UTF8.GetBytes(secret)),
 
                     // Set validation rules: issuer, audience, lifetime, and issuer signing key should be validated.
                     ValidateIssuer = true,

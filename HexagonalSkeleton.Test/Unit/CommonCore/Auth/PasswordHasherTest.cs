@@ -1,5 +1,5 @@
 using FluentAssertions;
-using HexagonalSkeleton.CommonCore.Auth;
+using HexagonalSkeleton.Infrastructure.Auth;
 using Xunit;
 
 namespace HexagonalSkeleton.Test.Unit.CommonCore.Auth
@@ -89,13 +89,19 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Auth
 
             // Assert
             hash1.Should().NotBe(hash2);
+        }        [Theory]
+        [InlineData("", "salt", "pepper")]
+        [InlineData("password", "", "pepper")]
+        public void ComputeHash_WithEmptyInputs_ShouldThrowArgumentException(string password, string salt, string pepper)
+        {
+            // Act & Assert
+            FluentActions.Invoking(() => PasswordHasher.ComputeHash(password, salt, pepper))
+                .Should().Throw<ArgumentException>();
         }
 
         [Theory]
-        [InlineData("", "salt", "pepper")]
-        [InlineData("password", "", "pepper")]
         [InlineData("password", "salt", "")]
-        public void ComputeHash_WithEmptyInputs_ShouldStillReturnHash(string password, string salt, string pepper)
+        public void ComputeHash_WithEmptyPepper_ShouldStillReturnHash(string password, string salt, string pepper)
         {
             // Act
             var hash = PasswordHasher.ComputeHash(password, salt, pepper);

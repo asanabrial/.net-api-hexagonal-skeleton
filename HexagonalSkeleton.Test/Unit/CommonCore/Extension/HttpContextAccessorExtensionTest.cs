@@ -1,5 +1,5 @@
 using FluentAssertions;
-using HexagonalSkeleton.CommonCore.Extension;
+using HexagonalSkeleton.API.Extensions;
 using Microsoft.AspNetCore.Http;
 using Moq;
 using Xunit;

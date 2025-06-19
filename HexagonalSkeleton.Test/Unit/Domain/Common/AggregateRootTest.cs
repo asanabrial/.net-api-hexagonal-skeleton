@@ -1,6 +1,5 @@
 using Xunit;
 using HexagonalSkeleton.Domain.Common;
-using HexagonalSkeleton.CommonCore.Event;
 
 namespace HexagonalSkeleton.Test.Unit.Domain.Common;
 

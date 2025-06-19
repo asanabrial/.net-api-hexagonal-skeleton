@@ -7,7 +7,7 @@ namespace HexagonalSkeleton.Application.Command
     /// <summary>
     /// Command to authenticate a user and record login
     /// </summary>
-    public class LoginCommand : IRequest<ResultDto>
+    public class LoginCommand : IRequest<LoginCommandResult>
     {
         public required string Email { get; set; }
         public required string Password { get; set; }

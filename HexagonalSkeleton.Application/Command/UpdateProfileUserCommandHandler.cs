@@ -10,20 +10,22 @@ namespace HexagonalSkeleton.Application.Command
         IValidator<UpdateProfileUserCommand> validator,
         IUserReadRepository userReadRepository,
         IUserWriteRepository userWriteRepository)
-        : IRequestHandler<UpdateProfileUserCommand, ResultDto>
+        : IRequestHandler<UpdateProfileUserCommand, UpdateProfileUserCommandResult>
     {
-        public async Task<ResultDto> Handle(UpdateProfileUserCommand request, CancellationToken cancellationToken)
+        public async Task<UpdateProfileUserCommandResult> Handle(UpdateProfileUserCommand request, CancellationToken cancellationToken)
         {
             var result = await validator.ValidateAsync(request, cancellationToken);
             if (!result.IsValid)
-                return new ResultDto(result.ToDictionary());            var user = await userReadRepository.GetByIdAsync(id: request.Id, cancellationToken: cancellationToken);
+                return new UpdateProfileUserCommandResult(result.ToDictionary());
+
+            var user = await userReadRepository.GetByIdAsync(id: request.Id, cancellationToken: cancellationToken);
             if (user is null) 
-                return new ResultDto(new Dictionary<string, string[]> 
+                return new UpdateProfileUserCommandResult(new Dictionary<string, string[]> 
                 { 
                     { "User", new[] { "User not found" } } 
-                });user.UpdateProfile(request.FirstName, request.LastName, request.Birthdate, request.AboutMe);
+                });            user.UpdateProfile(request.FirstName, request.LastName, request.Birthdate, request.AboutMe);
             await userWriteRepository.UpdateAsync(user, cancellationToken);
-            return new ResultDto(true);
+            return new UpdateProfileUserCommandResult(user);
         }
     }
 }

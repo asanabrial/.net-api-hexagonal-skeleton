@@ -31,23 +31,16 @@ public class GetAllUsersQueryHandlerTest
 
         _mockUserReadRepository
             .Setup(r => r.GetAllAsync(cancellationToken))
-            .ReturnsAsync(users);
-
-        // Act
+            .ReturnsAsync(users);        // Act
         var result = await _handler.Handle(query, cancellationToken);
 
         // Assert
         Assert.NotNull(result);
         Assert.True(result.IsValid);
-        Assert.NotNull(result.Data);
+        Assert.NotNull(result.Users);
+        Assert.Equal(2, result.Users.Count);
         
-        var usersData = result.Data as IEnumerable<GetAllUsersQueryResult>;
-        Assert.NotNull(usersData);
-        
-        var usersList = usersData.ToList();
-        Assert.Equal(2, usersList.Count);
-        
-        var firstUser = usersList[0];
+        var firstUser = result.Users[0];
         Assert.Equal(users[0].Id, firstUser.Id);
         Assert.Equal(users[0].FullName.FirstName, firstUser.FirstName);
         Assert.Equal(users[0].FullName.LastName, firstUser.LastName);
@@ -62,9 +55,7 @@ public class GetAllUsersQueryHandlerTest
         // Arrange
         var query = new GetAllUsersQuery();
         var cancellationToken = CancellationToken.None;
-        var users = new List<HexagonalSkeleton.Domain.User>();
-
-        _mockUserReadRepository
+        var users = new List<HexagonalSkeleton.Domain.User>();        _mockUserReadRepository
             .Setup(r => r.GetAllAsync(cancellationToken))
             .ReturnsAsync(users);
 
@@ -74,11 +65,8 @@ public class GetAllUsersQueryHandlerTest
         // Assert
         Assert.NotNull(result);
         Assert.True(result.IsValid);
-        Assert.NotNull(result.Data);
-        
-        var usersData = result.Data as IEnumerable<GetAllUsersQueryResult>;
-        Assert.NotNull(usersData);
-        Assert.Empty(usersData);
+        Assert.NotNull(result.Users);
+        Assert.Empty(result.Users);
 
         _mockUserReadRepository.Verify(r => r.GetAllAsync(cancellationToken), Times.Once);
     }

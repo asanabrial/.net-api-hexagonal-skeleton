@@ -6,7 +6,7 @@ namespace HexagonalSkeleton.Application.Query
     /// <summary>
     /// This class represents a command for logging in a user.
     /// </summary>
-    public class LoginQuery(string email, string password) : IRequest<ResultDto>
+    public class LoginQuery(string email, string password) : IRequest<LoginQueryResult>
     {
         /// <summary>
         /// Gets or sets the email.

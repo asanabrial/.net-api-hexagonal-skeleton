@@ -1,6 +1,7 @@
 using Xunit;
 using Moq;
 using FluentValidation;
+using FluentAssertions;
 using MediatR;
 using HexagonalSkeleton.Application.Command;
 using HexagonalSkeleton.Application.Query;
@@ -74,12 +75,10 @@ public class UserWorkflowIntegrationTest
             .ReturnsAsync(jwtToken);
 
         // Act - Execute the registration command
-        var registrationResult = await registerHandler.Handle(command, cancellationToken);
-
-        // Assert - Verify registration was successful
+        var registrationResult = await registerHandler.Handle(command, cancellationToken);        // Assert - Verify registration was successful
         Assert.NotNull(registrationResult);
         Assert.True(registrationResult.IsValid);
-        Assert.NotNull(registrationResult.Data);
+        Assert.NotNull(registrationResult.AccessToken);
 
         // Verify the domain service was used correctly
         mockUserWriteRepository.Verify(r => r.CreateAsync(It.Is<HexagonalSkeleton.Domain.User>(u => 
@@ -102,22 +101,15 @@ public class UserWorkflowIntegrationTest
 
         mockUserReadRepository
             .Setup(r => r.GetByIdAsync(userId, cancellationToken))
-            .ReturnsAsync(createdUser);
-
-        var getUserQuery = new GetUserQuery(userId);
+            .ReturnsAsync(createdUser);        var getUserQuery = new GetUserQuery(userId);
         var getUserResult = await getUserHandler.Handle(getUserQuery, cancellationToken);
 
         // Assert - Verify user retrieval was successful
-        Assert.NotNull(getUserResult);
-        Assert.True(getUserResult.IsValid);
-        Assert.NotNull(getUserResult.Data);
-
-        var userData = getUserResult.Data as GetUserQueryResult;
-        Assert.NotNull(userData);
-        Assert.Equal(userId, userData.Id);
-        Assert.Equal(command.Email.ToLowerInvariant(), userData.Email);
-        Assert.Equal(command.Name, userData.FirstName);
-        Assert.Equal(command.Surname, userData.LastName);
+        getUserResult.Should().NotBeNull();
+        getUserResult.Id.Should().Be(userId);
+        getUserResult.Email.Should().Be(command.Email.ToLowerInvariant());
+        getUserResult.FirstName.Should().Be(command.Name);
+        getUserResult.LastName.Should().Be(command.Surname);
 
         // Verify all repository interactions
         mockUserReadRepository.Verify(r => r.ExistsByEmailAsync(command.Email, cancellationToken), Times.Once);

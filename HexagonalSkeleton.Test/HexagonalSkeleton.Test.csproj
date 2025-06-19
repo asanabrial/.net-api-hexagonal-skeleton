@@ -25,9 +25,9 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.2.1" />
+    </PackageReference>    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.2.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.0" />
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.2.1" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
@@ -46,10 +46,8 @@
   <ItemGroup>
     <Folder Include="Unit\User\Domain\" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\HexagonalSkeleton.API\HexagonalSkeleton.API.csproj" />
-    <ProjectReference Include="..\HexagonalSkeleton.CommonCore\HexagonalSkeleton.CommonCore.csproj" />
   </ItemGroup>
 
 </Project>
