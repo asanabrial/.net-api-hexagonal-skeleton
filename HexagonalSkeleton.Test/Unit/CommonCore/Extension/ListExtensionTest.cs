@@ -1,5 +1,5 @@
 using FluentAssertions;
-using HexagonalSkeleton.API.Extensions;
+using HexagonalSkeleton.Domain.Common.Extensions;
 using Xunit;
 
 namespace HexagonalSkeleton.Test.Unit.CommonCore.Extension

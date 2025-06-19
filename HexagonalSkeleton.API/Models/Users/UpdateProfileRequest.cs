@@ -1,0 +1,35 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace HexagonalSkeleton.API.Models.Users
+{
+    /// <summary>
+    /// Request model for updating user profile (partial update)
+    /// </summary>
+    public class UpdateProfileRequest
+    {
+        /// <summary>
+        /// User's first name
+        /// </summary>
+        [StringLength(50, ErrorMessage = "First name cannot exceed 50 characters")]
+        public string? FirstName { get; set; }
+
+        /// <summary>
+        /// User's last name
+        /// </summary>
+        [StringLength(50, ErrorMessage = "Last name cannot exceed 50 characters")]
+        public string? LastName { get; set; }
+
+        /// <summary>
+        /// User's phone number
+        /// </summary>
+        [Phone(ErrorMessage = "Invalid phone number format")]
+        [StringLength(20, ErrorMessage = "Phone number cannot exceed 20 characters")]
+        public string? PhoneNumber { get; set; }
+
+        /// <summary>
+        /// User's birth date
+        /// </summary>
+        [DataType(DataType.Date)]
+        public DateTime? Birthdate { get; set; }
+    }
+}

@@ -1,6 +1,6 @@
 ﻿using HexagonalSkeleton.API.Identity;
-using HexagonalSkeleton.API.Dto;
-using HexagonalSkeleton.API.Extensions;
+using HexagonalSkeleton.API.Models.Auth;
+using HexagonalSkeleton.API.Models.Users;
 using HexagonalSkeleton.Application.Command;
 using HexagonalSkeleton.Application.Query;
 using AutoMapper;
@@ -17,79 +17,78 @@ namespace HexagonalSkeleton.API.Controllers
     [Route("api/[controller]")]
     [Produces("application/json")]
     public class UserController(ISender mediator, IMapper mapper) : ControllerBase
-    {
-        /// <summary>
+    {        /// <summary>
         /// Authenticate user and initiate login session
         /// </summary>
-        /// <param name="command">Login credentials</param>
+        /// <param name="request">Login credentials</param>
         /// <returns>Authentication result with token</returns>
         [HttpPost("login")]
-        [ProducesResponseType(typeof(LoginApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> Login(LoginCommand command)        {
+        public async Task<IActionResult> Login(LoginRequest request)
+        {
+            var command = mapper.Map<LoginCommand>(request);
             var result = await mediator.Send(command);
-            return this.ToApiResult<LoginCommandResult, LoginApiResponse>(result, mapper);
-        }
-
-        /// <summary>
+            return Ok(mapper.Map<LoginResponse>(result));
+        }        /// <summary>
         /// Register a new user
         /// </summary>
-        /// <param name="command">User registration data</param>
+        /// <param name="request">User registration data</param>
         /// <returns>Created user information</returns>
         [HttpPost]
-        [ProducesResponseType(typeof(RegisterUserApiResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Register(RegisterUserCommand command)
+        public async Task<IActionResult> Register(CreateUserRequest request)
         {
+            var command = mapper.Map<RegisterUserCommand>(request);
             var result = await mediator.Send(command);
-            return this.ToApiResult<RegisterUserCommandResult, RegisterUserApiResponse>(result, mapper);
-        }
-
-        /// <summary>
+            return Created("", mapper.Map<LoginResponse>(result));
+        }/// <summary>
         /// Update user information (full update)
         /// </summary>
-        /// <param name="command">Complete user data</param>
+        /// <param name="request">Complete user data</param>
         /// <returns>Update result</returns>
         [HttpPut]
         [Authorize]
-        [ProducesResponseType(typeof(UpdateUserApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Update(UpdateUserCommand command)        {
+        public async Task<IActionResult> Update(UpdateUserRequest request)
+        {
+            var command = mapper.Map<UpdateUserCommand>(request);
             var result = await mediator.Send(command);
-            return this.ToApiResultWithNotFound<UpdateUserCommandResult, UpdateUserApiResponse>(result, mapper);
-        }
-
-        /// <summary>
+            return Ok(mapper.Map<UserResponse>(result));
+        }        /// <summary>
         /// Update user profile (partial update)
         /// </summary>
-        /// <param name="command">Profile update data</param>
+        /// <param name="request">Profile update data</param>
         /// <returns>Update result</returns>
         [HttpPatch("profile")]
         [Authorize]
-        [ProducesResponseType(typeof(UpdateProfileApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateProfile(UpdateProfileUserCommand command)
+        public async Task<IActionResult> UpdateProfile(UpdateProfileRequest request)
         {
+            var command = mapper.Map<UpdateProfileUserCommand>(request);
+            // Set the user ID from the authenticated user context
+            command.Id = User.GetUserId();
             var result = await mediator.Send(command);
-            return this.ToApiResultWithNotFound<UpdateProfileUserCommandResult, UpdateProfileApiResponse>(result, mapper);
-        }
-
-        /// <summary>
+            return Ok(mapper.Map<UserResponse>(result));
+        }        /// <summary>
         /// Permanently delete a user (hard delete)
         /// </summary>
         /// <param name="id">User identifier</param>
         /// <returns>Deletion result</returns>
         [HttpDelete("{id:int}")]
         [Authorize]
-        [ProducesResponseType(typeof(DeleteUserApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(DeleteUserResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await mediator.Send(new HardDeleteUserCommand(id));
-            return this.ToApiResultWithNotFound<HardDeleteUserCommandResult, DeleteUserApiResponse>(result, mapper);
+            return Ok(mapper.Map<DeleteUserResponse>(result));
         }        /// <summary>
         /// Soft delete a user (logical deletion)
         /// </summary>
@@ -97,49 +96,48 @@ namespace HexagonalSkeleton.API.Controllers
         /// <returns>Deletion result</returns>
         [HttpPost("{id:int}/soft-delete")]
         [Authorize]
-        [ProducesResponseType(typeof(DeleteUserApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(DeleteUserResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> SoftDelete(int id)        {
+        public async Task<IActionResult> SoftDelete(int id)
+        {
             var result = await mediator.Send(new SoftDeleteUserCommand(id));
-            return this.ToApiResultWithNotFound<SoftDeleteUserCommandResult, DeleteUserApiResponse>(result, mapper);
-        }
-
-        /// <summary>
+            return Ok(mapper.Map<DeleteUserResponse>(result));
+        }        /// <summary>
         /// Get user by identifier
         /// </summary>
         /// <param name="id">User identifier</param>
         /// <returns>User information</returns>
         [HttpGet("{id:int}")]
         [Authorize]
-        [ProducesResponseType(typeof(GetUserApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await mediator.Send(new GetUserQuery(id));
-            return this.ToApiResultWithNotFound<GetUserQueryResult, GetUserApiResponse>(result, mapper);
+            return Ok(mapper.Map<UserResponse>(result));
         }        /// <summary>
         /// Get current authenticated user's information
         /// </summary>
         /// <returns>Current user information</returns>
         [HttpGet("me")]
         [Authorize]
-        [ProducesResponseType(typeof(GetUserApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetMe()
         {
             var result = await mediator.Send(new GetUserQuery(User.GetUserId()));
-            return this.ToApiResultWithNotFound<GetUserQueryResult, GetUserApiResponse>(result, mapper);
+            return Ok(mapper.Map<UserResponse>(result));
         }        /// <summary>
         /// Get all users (admin functionality)
         /// </summary>
         /// <returns>List of all users</returns>
         [HttpGet]
         [Authorize]
-        [ProducesResponseType(typeof(GetAllUsersApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(UsersResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll()
         {
             var result = await mediator.Send(new GetAllUsersQuery());
-            return this.ToApiResult<GetAllUsersQueryResult, GetAllUsersApiResponse>(result, mapper);
+            return Ok(mapper.Map<UsersResponse>(result));
         }
     }
 }
