@@ -88,34 +88,94 @@ All necessary settings are in the appsettings.json of the API. The connection st
 ### Hexagonal Architecture
 
 ```scala
-├───HexagonalSkeleton.API // API project
-│   ├───Config // Configs for the Program.cs
-│   ├───Data // Data classes like DBContext
-│   ├───Features
-│   │   └───User // Feature example
-│   │       ├───Application // The application of our feature
-│   │       │   ├───Command
-│   │       │   ├───Event
-│   │       │   └───Query
-│   │       ├───Domain // The domain of our feature
-│   │       └───Infrastructure // The infrastructure of our feature
-│   ├───Handler // Handlers for the API
-│   ├───Identity // Identity management of our JWT
-│   ├───Migrations // Migrations generated with EF Core
-│   └───Properties
-│   │   ├───Repository
-│   │   └───UnitOfWork
-│   ├───Event
-│   ├───Extension
-└───HexagonalSkeleton.Test // Project intended to execute unit and integration tests
-    ├───Integration
-    │   └───User
-    │       └───Infrastructure
-    └───Unit
-        └───User
-            ├───Application
-            │   ├───Command
-            │   └───Query
-            ├───Domain
-            └───Infrastructure
+├───HexagonalSkeleton.API // API Layer - Controllers, Models, Configuration
+│   ├───Config // DI Configuration and service extensions
+│   ├───Controllers // REST API Controllers
+│   ├───Extensions // API-specific extension methods
+│   ├───Handler // Exception handlers and middleware
+│   ├───Identity // JWT authentication and authorization
+│   ├───Mapping // AutoMapper profiles for API models
+│   ├───Models // API Request/Response models organized by feature
+│   │   ├───Auth // Authentication models (LoginRequest, LoginResponse)
+│   │   ├───Users // User management models (CreateUserRequest, UserResponse)
+│   │   └───Common // Shared models (BaseApiResponse, PagedResponse)
+│   └───Properties // Launch settings
+│
+├───HexagonalSkeleton.Application // Application Layer - Use Cases, Commands, Queries
+│   ├───Command // Commands and handlers (CQRS Write operations)
+│   ├───Query // Queries and handlers (CQRS Read operations)
+│   ├───Dto // Application DTOs (internal to application layer)
+│   ├───Event // Application events
+│   ├───EventHandlers // Event handlers
+│   ├───Exceptions // Custom application exceptions
+│   └───Ports // Interfaces for external dependencies
+│
+├───HexagonalSkeleton.Domain // Domain Layer - Business Logic, Entities, Value Objects
+│   ├───Common // Pure domain concepts (AggregateRoot, DomainEvent)
+│   ├───Shared // Technical utilities accessible from all layers
+│   │   └───Extensions // Generic extension methods (ListExtension)
+│   ├───Events // Domain events
+│   ├───Ports // Domain interfaces
+│   ├───Services // Domain services
+│   ├───ValueObjects // Value objects (Email, FullName, Location, etc.)
+│   └───User.cs // User aggregate root
+│
+├───HexagonalSkeleton.Infrastructure // Infrastructure Layer - External Concerns
+│   ├───Adapters // Implementations of domain/application ports
+│   ├───Auth // Authentication and JWT services
+│   ├───Extensions // Infrastructure-specific extensions
+│   ├───Mapping // Entity mapping profiles
+│   ├───Persistence // Data access repositories
+│   ├───AppDbContext.cs // EF Core DbContext
+│   └───UserEntity.cs // EF Core entity mapping
+│
+├───HexagonalSkeleton.MigrationDb // Database Migrations
+│   └───Migrations // EF Core database migrations
+│
+└───HexagonalSkeleton.Test // Test Layer - Unit and Integration tests
+    ├───Integration // End-to-end API tests
+    │   └───API
+    │       └───Controllers
+    └───Unit // Isolated unit tests
+        ├───API // API layer tests
+        ├───Application // Application layer tests
+        ├───Domain // Domain layer tests
+        └───CommonCore // Shared utilities tests
 ```
+
+### Architecture Patterns & Best Practices
+
+This skeleton implements modern .NET API best practices:
+
+#### **Clean Architecture & Hexagonal Pattern**
+
+-   **API Layer**: Only HTTP concerns, delegates to Application layer via MediatR
+-   **Application Layer**: Use cases, commands, queries (CQRS pattern)
+-   **Domain Layer**: Pure business logic, entities, value objects
+-   **Infrastructure Layer**: External dependencies, databases, external services
+
+#### **Exception-Based Error Handling**
+
+-   Custom exceptions map to appropriate HTTP status codes
+-   `MinimalExceptionHandler` handles application exceptions globally
+-   No more `IsValid`/`Errors` patterns - exceptions bubble up naturally
+
+#### **API Model Organization**
+
+-   **Models/Auth**: Authentication-related requests/responses
+-   **Models/Users**: User management requests/responses
+-   **Models/Common**: Shared base classes and utilities
+-   Consistent naming: `*Request` for inputs, `*Response` for outputs
+
+#### **Domain Organization**
+
+-   **Domain.Common**: Pure DDD concepts (AggregateRoot, DomainEvent)
+-   **Domain.Shared**: Technical utilities accessible from all layers
+-   Clear separation between domain logic and generic utilities
+
+#### **CQRS with MediatR**
+
+-   Commands for write operations
+-   Queries for read operations
+-   Handlers isolated and testable
+-   Clean separation of concerns
