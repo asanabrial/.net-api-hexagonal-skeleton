@@ -15,9 +15,7 @@ namespace HexagonalSkeleton.API.Mapping
         public ApiMappingProfile()
         {
             // Auth Models → Application Commands/Queries
-            CreateMap<LoginRequest, LoginCommand>();
-
-            // User Models → Application Commands
+            CreateMap<LoginRequest, LoginCommand>();            // User Models → Application Commands
             CreateMap<CreateUserRequest, RegisterUserCommand>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.FirstName))
                 .ForMember(dest => dest.Surname, opt => opt.MapFrom(src => src.LastName));

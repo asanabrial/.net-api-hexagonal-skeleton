@@ -3,12 +3,25 @@ using MediatR;
 
 namespace HexagonalSkeleton.Application.Command
 {
-    public class UpdateProfileUserCommand(int id, string aboutMe, string firstName, string lastName, DateTime birthdate) : IRequest<UpdateProfileUserCommandResult>
+    public class UpdateProfileUserCommand : IRequest<UpdateProfileUserCommandResult>
     {
-        public int Id { get; set; } = id;
-        public string FirstName { get; set; } = firstName;
-        public string LastName { get; set; } = lastName;
-        public DateTime Birthdate { get; set; } = birthdate;
-        public string AboutMe { get; set; } = aboutMe;
+        public int Id { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public DateTime Birthdate { get; set; }
+        public string AboutMe { get; set; } = string.Empty;
+
+        // Constructor for compatibility (optional)
+        public UpdateProfileUserCommand() { }
+
+        // Constructor with parameters for direct instantiation if needed
+        public UpdateProfileUserCommand(int id, string aboutMe, string firstName, string lastName, DateTime birthdate)
+        {
+            Id = id;
+            AboutMe = aboutMe;
+            FirstName = firstName;
+            LastName = lastName;
+            Birthdate = birthdate;
+        }
     }
 }

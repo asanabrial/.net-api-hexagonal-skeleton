@@ -3,11 +3,20 @@ using MediatR;
 
 namespace HexagonalSkeleton.Application.Command
 {
-    public class SoftDeleteUserCommand(int id) : IRequest<SoftDeleteUserCommandResult>
+    public class SoftDeleteUserCommand : IRequest<SoftDeleteUserCommandResult>
     {
         /// <summary>
         /// Gets or sets the user id.
         /// </summary>
-        public int Id { get; set; } = id;
+        public int Id { get; set; }
+
+        // Constructor for compatibility (optional)
+        public SoftDeleteUserCommand() { }
+
+        // Constructor with parameters for direct instantiation
+        public SoftDeleteUserCommand(int id)
+        {
+            Id = id;
+        }
     }
 }
