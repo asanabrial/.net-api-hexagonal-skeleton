@@ -1,10 +1,13 @@
+using AutoMapper;
 using HexagonalSkeleton.API.Models.Common;
+using HexagonalSkeleton.Application.Command;
 
 namespace HexagonalSkeleton.API.Models.Auth
-{
-    /// <summary>
+{    /// <summary>
     /// Response model for successful authentication
     /// </summary>
+    [AutoMap(typeof(LoginCommandResult), ReverseMap = true)]
+    [AutoMap(typeof(RegisterUserCommandResult), ReverseMap = true)]
     public class LoginResponse : BaseApiResponse
     {
         /// <summary>
@@ -26,9 +29,7 @@ namespace HexagonalSkeleton.API.Models.Auth
         /// User information
         /// </summary>
         public UserInfo User { get; set; } = new();
-    }
-
-    /// <summary>
+    }    /// <summary>
     /// Basic user information included in login response
     /// </summary>
     public class UserInfo
@@ -36,6 +37,13 @@ namespace HexagonalSkeleton.API.Models.Auth
         public int Id { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
+        public string FullName => $"{FirstName} {LastName}".Trim();
         public string Email { get; set; } = string.Empty;
+        public string? PhoneNumber { get; set; }
+        public DateTime? Birthdate { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
+        public string? AboutMe { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

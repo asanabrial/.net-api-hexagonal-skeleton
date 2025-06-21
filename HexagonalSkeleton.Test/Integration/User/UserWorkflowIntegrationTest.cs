@@ -1,7 +1,6 @@
 using Xunit;
 using Moq;
 using FluentValidation;
-using FluentAssertions;
 using MediatR;
 using HexagonalSkeleton.Application.Command;
 using HexagonalSkeleton.Application.Query;
@@ -68,53 +67,55 @@ public class UserWorkflowIntegrationTest
 
         mockUserWriteRepository
             .Setup(r => r.CreateAsync(It.IsAny<HexagonalSkeleton.Domain.User>(), cancellationToken))
-            .ReturnsAsync(userId);
-
-        mockAuthenticationService
+            .ReturnsAsync(userId);        mockAuthenticationService
             .Setup(a => a.GenerateJwtTokenAsync(userId, cancellationToken))
             .ReturnsAsync(jwtToken);
 
+        // Set up the user retrieval mock for the registration handler
+        var createdUser = TestHelper.CreateTestUser(
+            id: userId,
+            email: command.Email,
+            firstName: command.FirstName,
+            lastName: command.LastName,
+            phoneNumber: command.PhoneNumber);
+
+        mockUserReadRepository
+            .Setup(r => r.GetByIdAsync(userId, cancellationToken))
+            .ReturnsAsync(createdUser);
+
         // Act - Execute the registration command
-        var registrationResult = await registerHandler.Handle(command, cancellationToken);        // Assert - Verify registration was successful
+        var registrationResult = await registerHandler.Handle(command, cancellationToken);
+
+        // Assert - Verify registration was successful
         Assert.NotNull(registrationResult);
-        Assert.True(registrationResult.IsValid);
         Assert.NotNull(registrationResult.AccessToken);
+        Assert.Equal(command.Email, registrationResult.Email);
+        Assert.Equal($"{command.FirstName} {command.LastName}", registrationResult.FullName);
 
         // Verify the domain service was used correctly
         mockUserWriteRepository.Verify(r => r.CreateAsync(It.Is<HexagonalSkeleton.Domain.User>(u => 
             u.Email.Value == command.Email.ToLowerInvariant() &&
-            u.FullName.FirstName == command.Name &&
-            u.FullName.LastName == command.Surname &&
+            u.FullName.FirstName == command.FirstName &&
+            u.FullName.LastName == command.LastName &&
             u.PhoneNumber.Value == command.PhoneNumber), cancellationToken), Times.Once);
 
         // Now test retrieval of the created user
-        var createdUser = TestHelper.CreateTestUser(
-            id: userId,
-            email: command.Email,
-            firstName: command.Name,
-            lastName: command.Surname,
-            phoneNumber: command.PhoneNumber);
-
         getUserValidator
             .Setup(v => v.ValidateAsync(It.IsAny<GetUserQuery>(), cancellationToken))
             .ReturnsAsync(new FluentValidation.Results.ValidationResult());
 
-        mockUserReadRepository
-            .Setup(r => r.GetByIdAsync(userId, cancellationToken))
-            .ReturnsAsync(createdUser);        var getUserQuery = new GetUserQuery(userId);
+        var getUserQuery = new GetUserQuery(userId);
         var getUserResult = await getUserHandler.Handle(getUserQuery, cancellationToken);
 
         // Assert - Verify user retrieval was successful
-        getUserResult.Should().NotBeNull();
-        getUserResult.Id.Should().Be(userId);
-        getUserResult.Email.Should().Be(command.Email.ToLowerInvariant());
-        getUserResult.FirstName.Should().Be(command.Name);
-        getUserResult.LastName.Should().Be(command.Surname);
-
-        // Verify all repository interactions
+        Assert.NotNull(getUserResult);
+        Assert.Equal(userId, getUserResult.Id);
+        Assert.Equal(command.Email.ToLowerInvariant(), getUserResult.Email);
+        Assert.Equal(command.FirstName, getUserResult.FirstName);
+        Assert.Equal(command.LastName, getUserResult.LastName);        // Verify all repository interactions
         mockUserReadRepository.Verify(r => r.ExistsByEmailAsync(command.Email, cancellationToken), Times.Once);
         mockUserReadRepository.Verify(r => r.ExistsByPhoneNumberAsync(command.PhoneNumber, cancellationToken), Times.Once);
-        mockUserReadRepository.Verify(r => r.GetByIdAsync(userId, cancellationToken), Times.Once);
+        mockUserReadRepository.Verify(r => r.GetByIdAsync(userId, cancellationToken), Times.AtLeast(2)); // Called by both registration and retrieval
     }
 
     [Fact]

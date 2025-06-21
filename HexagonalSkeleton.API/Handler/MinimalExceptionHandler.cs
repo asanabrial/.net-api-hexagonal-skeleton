@@ -5,8 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace HexagonalSkeleton.API.Handler
-{
-    /// <summary>
+{    /// <summary>
     /// Minimal exception handler - only handles exceptions that ASP.NET Core doesn't map automatically
     /// Most standard exceptions (ArgumentException, KeyNotFoundException, etc.) are handled automatically
     /// </summary>
@@ -14,21 +13,35 @@ namespace HexagonalSkeleton.API.Handler
     {
         private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web)
         {
-            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
-        };
-
-        public async ValueTask<bool> TryHandleAsync(HttpContext context, Exception exception,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };        public async ValueTask<bool> TryHandleAsync(HttpContext context, Exception exception,
             CancellationToken cancellationToken)
-        {            // Only handle exceptions that need custom HTTP status codes
+        {
+            // Handle ValidationException specially to include detailed errors
+            if (exception is ValidationException validationEx)
+            {
+                logger.LogWarning("Handling validation exception with {ErrorCount} errors", validationEx.Errors.Count);
+
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                context.Response.ContentType = "application/problem+json";
+
+                var response = new
+                {
+                    type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+                    title = "Validation failed",
+                    status = StatusCodes.Status400BadRequest,
+                    instance = context.Request.Path.Value,
+                    errors = validationEx.Errors
+                };                var responseJson = JsonSerializer.Serialize(response, SerializerOptions);
+                await context.Response.WriteAsync(responseJson, cancellationToken);
+                return true;
+            }
+
+            // Only handle exceptions that need custom HTTP status codes
             // Let ASP.NET Core handle the rest automatically
             var problemDetails = exception switch
             {
-                ValidationException validationEx => new ValidationProblemDetails(validationEx.Errors)
-                {
-                    Status = StatusCodes.Status400BadRequest,
-                    Title = "Validation failed",
-                    Instance = context.Request.Path
-                },
                 
                 NotFoundException notFoundEx => new ProblemDetails
                 {

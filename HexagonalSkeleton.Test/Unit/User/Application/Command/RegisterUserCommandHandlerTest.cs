@@ -5,6 +5,7 @@ using MediatR;
 using HexagonalSkeleton.Application.Command;
 using HexagonalSkeleton.Application.Event;
 using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
 
@@ -64,20 +65,23 @@ public class RegisterUserCommandHandlerTest
 
         _mockAuthenticationService
             .Setup(a => a.HashPassword(command.Password, salt))
-            .Returns(hash);
-
-        _mockUserWriteRepository
+            .Returns(hash);        _mockUserWriteRepository
             .Setup(r => r.CreateAsync(It.IsAny<HexagonalSkeleton.Domain.User>(), cancellationToken))
             .ReturnsAsync(userId);
 
+        // Mock the GetByIdAsync to return the created user
+        var createdUser = TestHelper.CreateTestUser(userId);
+        _mockUserReadRepository
+            .Setup(r => r.GetByIdAsync(userId, cancellationToken))
+            .ReturnsAsync(createdUser);
+
         _mockAuthenticationService
             .Setup(a => a.GenerateJwtTokenAsync(userId, cancellationToken))
-            .ReturnsAsync(jwtToken);        // Act
+            .ReturnsAsync(jwtToken);// Act
         var result = await _handler.Handle(command, cancellationToken);
 
         // Assert
         Assert.NotNull(result);
-        Assert.True(result.IsValid);
         Assert.Equal(jwtToken, result.AccessToken);
 
         _mockUserWriteRepository.Verify(r => r.CreateAsync(
@@ -87,10 +91,8 @@ public class RegisterUserCommandHandlerTest
         _mockPublisher.Verify(p => p.Publish(
             It.IsAny<LoginEvent>(), 
             cancellationToken), Times.Once);
-    }
-
-    [Fact]
-    public async Task Handle_InvalidCommand_ShouldReturnValidationErrors()
+    }    [Fact]
+    public async Task Handle_InvalidCommand_ShouldThrowValidationException()
     {
         // Arrange
         var command = TestHelper.CreateRegisterUserCommand();
@@ -100,24 +102,17 @@ public class RegisterUserCommandHandlerTest
 
         _mockValidator
             .Setup(v => v.ValidateAsync(It.IsAny<RegisterUserCommand>(), cancellationToken))
-            .ReturnsAsync(validationResult);
-
-        // Act
-        var result = await _handler.Handle(command, cancellationToken);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.False(result.IsValid);
-        Assert.NotNull(result.Errors);
-        Assert.Contains("Email", result.Errors.Keys);
+            .ReturnsAsync(validationResult);        // Act & Assert
+        var exception = await Assert.ThrowsAsync<HexagonalSkeleton.Application.Exceptions.ValidationException>(() => 
+            _handler.Handle(command, cancellationToken));
+          Assert.True(exception.Errors.ContainsKey("Email"));
+        Assert.Contains("Email is required", exception.Errors["Email"]);
 
         _mockUserWriteRepository.Verify(r => r.CreateAsync(
             It.IsAny<HexagonalSkeleton.Domain.User>(), 
             It.IsAny<CancellationToken>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task Handle_EmailAlreadyExists_ShouldReturnError()
+    }    [Fact]
+    public async Task Handle_EmailAlreadyExists_ShouldThrowConflictException()
     {
         // Arrange
         var command = TestHelper.CreateRegisterUserCommand();
@@ -129,23 +124,17 @@ public class RegisterUserCommandHandlerTest
 
         _mockUserReadRepository
             .Setup(r => r.ExistsByEmailAsync(command.Email, cancellationToken))
-            .ReturnsAsync(true);
-
-        // Act
-        var result = await _handler.Handle(command, cancellationToken);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.False(result.IsValid);
-        Assert.Single(result.Errors);
+            .ReturnsAsync(true);        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ConflictException>(() => 
+            _handler.Handle(command, cancellationToken));
+        
+        Assert.Equal("Email or phone number already exists", exception.Message);
 
         _mockUserWriteRepository.Verify(r => r.CreateAsync(
             It.IsAny<HexagonalSkeleton.Domain.User>(), 
             It.IsAny<CancellationToken>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task Handle_PhoneNumberAlreadyExists_ShouldReturnError()
+    }    [Fact]
+    public async Task Handle_PhoneNumberAlreadyExists_ShouldThrowConflictException()
     {
         // Arrange
         var command = TestHelper.CreateRegisterUserCommand();
@@ -161,23 +150,17 @@ public class RegisterUserCommandHandlerTest
 
         _mockUserReadRepository
             .Setup(r => r.ExistsByPhoneNumberAsync(command.PhoneNumber, cancellationToken))
-            .ReturnsAsync(true);
-
-        // Act
-        var result = await _handler.Handle(command, cancellationToken);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.False(result.IsValid);
-        Assert.Single(result.Errors);
+            .ReturnsAsync(true);        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ConflictException>(() => 
+            _handler.Handle(command, cancellationToken));
+        
+        Assert.Equal("Email or phone number already exists", exception.Message);
 
         _mockUserWriteRepository.Verify(r => r.CreateAsync(
             It.IsAny<HexagonalSkeleton.Domain.User>(), 
             It.IsAny<CancellationToken>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task Handle_WeakPassword_ShouldReturnError()
+    }    [Fact]
+    public async Task Handle_WeakPassword_ShouldThrowValidationException()
     {
         // Arrange
         var command = TestHelper.CreateRegisterUserCommand(password: "weak");
@@ -195,13 +178,11 @@ public class RegisterUserCommandHandlerTest
             .Setup(r => r.ExistsByPhoneNumberAsync(command.PhoneNumber, cancellationToken))
             .ReturnsAsync(false);
 
-        // Act
-        var result = await _handler.Handle(command, cancellationToken);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.False(result.IsValid);
-        Assert.Single(result.Errors);
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<HexagonalSkeleton.Application.Exceptions.ValidationException>(() => 
+            _handler.Handle(command, cancellationToken));
+        
+        Assert.Contains("Password does not meet strength requirements", exception.Message);
 
         _mockUserWriteRepository.Verify(r => r.CreateAsync(
             It.IsAny<HexagonalSkeleton.Domain.User>(), 

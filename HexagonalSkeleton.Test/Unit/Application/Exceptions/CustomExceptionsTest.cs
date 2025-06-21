@@ -1,5 +1,4 @@
 using HexagonalSkeleton.Application.Exceptions;
-using FluentAssertions;
 using Xunit;
 
 namespace HexagonalSkeleton.Test.Unit.Application.Exceptions
@@ -16,12 +15,10 @@ namespace HexagonalSkeleton.Test.Unit.Application.Exceptions
             const int entityId = 123;
 
             // Act
-            var exception = new NotFoundException(entityName, entityId);
-
-            // Assert
-            exception.Message.Should().Contain("User");
-            exception.Message.Should().Contain("123");
-            exception.Message.ToLower().Should().Contain("not found");
+            var exception = new NotFoundException(entityName, entityId);            // Assert
+            Assert.Contains("User", exception.Message);
+            Assert.Contains("123", exception.Message);
+            Assert.Contains("not found", exception.Message.ToLower());
         }
 
         [Fact]
@@ -32,7 +29,7 @@ namespace HexagonalSkeleton.Test.Unit.Application.Exceptions
 
             // Act
             var exception = new NotFoundException(message);            // Assert
-            exception.Message.Should().Be(message);
+            Assert.Equal(message, exception.Message);
         }
 
         [Fact]
@@ -46,8 +43,8 @@ namespace HexagonalSkeleton.Test.Unit.Application.Exceptions
             var exception = new ValidationException(field, message);
 
             // Assert
-            exception.Errors.Should().ContainKey(field);
-            exception.Errors[field].Should().Contain(message);
+            Assert.True(exception.Errors.ContainsKey(field));
+            Assert.Contains(message, exception.Errors[field]);
         }
 
         [Fact]
@@ -64,8 +61,8 @@ namespace HexagonalSkeleton.Test.Unit.Application.Exceptions
             var exception = new ValidationException(errors);
 
             // Assert
-            exception.Errors.Should().HaveCount(2);
-            exception.Errors["email"].Should().HaveCount(2);            exception.Errors["password"].Should().ContainSingle();
+            Assert.Equal(2, exception.Errors.Count);
+            Assert.Equal(2, exception.Errors["email"].Length); Assert.Single(exception.Errors["password"]);
         }
 
         [Fact]
@@ -78,8 +75,8 @@ namespace HexagonalSkeleton.Test.Unit.Application.Exceptions
             var exception = new AuthenticationException(message);
 
             // Assert
-            exception.Message.Should().Be(message);
-            exception.Should().BeAssignableTo<System.Security.Authentication.InvalidCredentialException>();
+            Assert.Equal(message, exception.Message);
+            Assert.IsAssignableFrom<System.Security.Authentication.InvalidCredentialException>(exception);
         }
 
         [Fact]
@@ -92,7 +89,7 @@ namespace HexagonalSkeleton.Test.Unit.Application.Exceptions
             var exception = new AuthorizationException(message);
 
             // Assert
-            exception.Message.Should().Be(message);            exception.Should().BeAssignableTo<UnauthorizedAccessException>();
+            Assert.Equal(message, exception.Message);            Assert.IsAssignableFrom<UnauthorizedAccessException>(exception);
         }
 
         [Fact]
@@ -105,7 +102,7 @@ namespace HexagonalSkeleton.Test.Unit.Application.Exceptions
             var exception = new ConflictException(message);
 
             // Assert
-            exception.Message.Should().Be(message);
+            Assert.Equal(message, exception.Message);
         }
 
         [Fact]
@@ -118,8 +115,8 @@ namespace HexagonalSkeleton.Test.Unit.Application.Exceptions
             var exception = new BusinessRuleViolationException(message);
 
             // Assert
-            exception.Message.Should().Be(message);
-            exception.Should().BeAssignableTo<BusinessException>();
+            Assert.Equal(message, exception.Message);
+            Assert.IsAssignableFrom<BusinessException>(exception);
         }
 
         [Fact]
@@ -132,7 +129,7 @@ namespace HexagonalSkeleton.Test.Unit.Application.Exceptions
             var exception = new TooManyRequestsException(message);
 
             // Assert
-            exception.Message.Should().Be(message);
+            Assert.Equal(message, exception.Message);
         }
 
         [Theory]
@@ -144,7 +141,7 @@ namespace HexagonalSkeleton.Test.Unit.Application.Exceptions
             var act = () => new NotFoundException(message);
 
             // Assert
-            act.Should().NotThrow();
+            // Test passes if no exception is thrown
         }
 
         [Fact]
@@ -157,9 +154,9 @@ namespace HexagonalSkeleton.Test.Unit.Application.Exceptions
             var exception = new ValidationException(message);
 
             // Assert
-            exception.Message.Should().Be(message);
-            exception.Errors.Should().ContainKey("General");
-            exception.Errors["General"].Should().Contain(message);
+            Assert.Equal(message, exception.Message);
+            Assert.True(exception.Errors.ContainsKey("General"));
+            Assert.Contains(message, exception.Errors["General"]);
         }
 
         [Fact]
@@ -169,8 +166,8 @@ namespace HexagonalSkeleton.Test.Unit.Application.Exceptions
             var exception = new ValidationException((IDictionary<string, string[]>)null!);
 
             // Assert
-            exception.Errors.Should().NotBeNull();
-            exception.Errors.Should().BeEmpty();
+            Assert.NotNull(exception.Errors);
+            Assert.Empty(exception.Errors);
         }
     }
 }

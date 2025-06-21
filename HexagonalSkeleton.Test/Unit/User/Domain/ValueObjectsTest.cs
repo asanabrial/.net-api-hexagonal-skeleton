@@ -1,4 +1,3 @@
-using FluentAssertions;
 using HexagonalSkeleton.Domain.ValueObjects;
 using Xunit;
 
@@ -14,7 +13,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Domain
         {
             // Act & Assert
             var email = new Email(validEmail);
-            email.Value.Should().Be(validEmail);
+            Assert.Equal(validEmail, email.Value);
         }
 
         [Theory]
@@ -27,7 +26,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Domain
         {
             // Act & Assert
             var act = () => new Email(invalidEmail);
-            act.Should().Throw<ArgumentException>();
+            Assert.Throws<ArgumentException>(act);
         }
 
         [Fact]
@@ -38,11 +37,9 @@ namespace HexagonalSkeleton.Test.Unit.User.Domain
             var lastName = "Doe";
 
             // Act
-            var fullName = new FullName(firstName, lastName);
-
-            // Assert            fullName.FirstName.Should().Be(firstName);
-            fullName.LastName.Should().Be(lastName);
-            fullName.GetFullName().Should().Be($"{firstName} {lastName}");
+            var fullName = new FullName(firstName, lastName);            // Assert            Assert.Equal(firstName, fullName.FirstName);
+            Assert.Equal(lastName, fullName.LastName);
+            Assert.Equal($"{firstName} {lastName}", fullName.GetFullName());
         }
 
         [Theory]
@@ -54,7 +51,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Domain
         {
             // Act & Assert
             var act = () => new FullName(firstName, lastName);
-            act.Should().Throw<ArgumentException>();
+            Assert.Throws<ArgumentException>(act);
         }        [Theory]
         [InlineData("123456789", "123456789")]
         [InlineData("+1234567890", "+1234567890")]
@@ -63,7 +60,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Domain
         {
             // Act & Assert
             var phoneNumber = new PhoneNumber(inputPhone);
-            phoneNumber.Value.Should().Be(expectedPhone);
+            Assert.Equal(expectedPhone, phoneNumber.Value);
         }
 
         [Theory]
@@ -74,7 +71,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Domain
         {
             // Act & Assert
             var act = () => new PhoneNumber(invalidPhone);
-            act.Should().Throw<ArgumentException>();
+            Assert.Throws<ArgumentException>(act);
         }
 
         [Fact]
@@ -88,8 +85,8 @@ namespace HexagonalSkeleton.Test.Unit.User.Domain
             var location = new Location(latitude, longitude);
 
             // Assert
-            location.Latitude.Should().Be(latitude);
-            location.Longitude.Should().Be(longitude);
+            Assert.Equal(latitude, location.Latitude);
+            Assert.Equal(longitude, location.Longitude);
         }
 
         [Theory]
@@ -101,7 +98,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Domain
         {
             // Act & Assert
             var act = () => new Location(latitude, longitude);
-            act.Should().Throw<ArgumentException>();
+            Assert.Throws<ArgumentException>(act);
         }
 
         [Fact]
@@ -121,10 +118,10 @@ namespace HexagonalSkeleton.Test.Unit.User.Domain
             var location2 = new Location(40.7128, -74.0060);
 
             // Act & Assert
-            email1.Should().Be(email2);
-            fullName1.Should().Be(fullName2);
-            phoneNumber1.Should().Be(phoneNumber2);
-            location1.Should().Be(location2);
+            Assert.Equal(email2, email1);
+            Assert.Equal(fullName2, fullName1);
+            Assert.Equal(phoneNumber2, phoneNumber1);
+            Assert.Equal(location2, location1);
         }
 
         [Fact]
@@ -144,10 +141,10 @@ namespace HexagonalSkeleton.Test.Unit.User.Domain
             var location2 = new Location(34.0522, -118.2437);
 
             // Act & Assert
-            email1.Should().NotBe(email2);
-            fullName1.Should().NotBe(fullName2);
-            phoneNumber1.Should().NotBe(phoneNumber2);
-            location1.Should().NotBe(location2);
+            Assert.NotEqual(email2, email1);
+            Assert.NotEqual(fullName2, fullName1);
+            Assert.NotEqual(phoneNumber2, phoneNumber1);
+            Assert.NotEqual(location2, location1);
         }
     }
 }

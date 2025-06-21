@@ -1,10 +1,13 @@
 using System.ComponentModel.DataAnnotations;
+using AutoMapper;
+using HexagonalSkeleton.Application.Command;
 
 namespace HexagonalSkeleton.API.Models.Auth
 {
     /// <summary>
     /// Request model for user authentication
     /// </summary>
+    [AutoMap(typeof(LoginCommand))]
     public class LoginRequest
     {
         /// <summary>

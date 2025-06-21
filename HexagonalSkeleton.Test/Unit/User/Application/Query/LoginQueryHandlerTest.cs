@@ -1,4 +1,3 @@
-using FluentAssertions;
 using FluentValidation;
 using FluentValidation.Results;
 using HexagonalSkeleton.Application.Query;
@@ -10,7 +9,8 @@ using Xunit;
 using DomainUser = HexagonalSkeleton.Domain.User;
 
 namespace HexagonalSkeleton.Test.Unit.User.Application.Query
-{    public class LoginQueryHandlerTest
+{
+    public class LoginQueryHandlerTest
     {
         private readonly Mock<IValidator<LoginQuery>> _mockValidator;
         private readonly Mock<IUserReadRepository> _mockUserReadRepository;
@@ -26,7 +26,9 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Query
                 _mockValidator.Object,
                 _mockUserReadRepository.Object,
                 _mockAuthenticationService.Object);
-        }        [Fact]
+        }
+
+        [Fact]
         public async Task Handle_WithValidCredentials_ShouldReturnSuccessResultWithToken()
         {
             // Arrange
@@ -50,11 +52,13 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Query
             var result = await _handler.Handle(query, CancellationToken.None);
 
             // Assert
-            result.Should().NotBeNull();
-            result.AccessToken.Should().Be(expectedToken);
+            Assert.NotNull(result);
+            Assert.Equal(expectedToken, result.AccessToken);
 
             _mockAuthenticationService.Verify(x => x.ValidateCredentialsAsync(query.Email, query.Password, It.IsAny<CancellationToken>()), Times.Once);
-        }        [Fact]
+        }
+
+        [Fact]
         public async Task Handle_WithInvalidCredentials_ShouldThrowAuthenticationException()
         {
             // Arrange
@@ -70,10 +74,12 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Query
             var exception = await Assert.ThrowsAsync<AuthenticationException>(() =>
                 _handler.Handle(query, CancellationToken.None));
 
-            exception.Message.Should().Contain("Invalid email or password");
+            Assert.Contains("Invalid email or password", exception.Message);
 
             _mockAuthenticationService.Verify(x => x.GenerateJwtTokenAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
-        }        [Fact]
+        }
+
+        [Fact]
         public async Task Handle_WithInvalidQuery_ShouldThrowValidationException()
         {
             // Arrange
@@ -92,13 +98,15 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Query
             var exception = await Assert.ThrowsAsync<HexagonalSkeleton.Application.Exceptions.ValidationException>(() =>
                 _handler.Handle(query, CancellationToken.None));
 
-            exception.Errors.Should().ContainKey("Email");
-            exception.Errors.Should().ContainKey("Password");
-            exception.Errors["Email"].Should().Contain("Email is required");
-            exception.Errors["Password"].Should().Contain("Password is required");
+            Assert.True(exception.Errors.ContainsKey("Email"));
+            Assert.True(exception.Errors.ContainsKey("Password"));
+            Assert.Contains("Email is required", exception.Errors["Email"]);
+            Assert.Contains("Password is required", exception.Errors["Password"]);
 
             _mockAuthenticationService.Verify(x => x.ValidateCredentialsAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
-        }[Theory]
+        }
+
+        [Theory]
         [InlineData("test@example.com", "password123")]
         [InlineData("user@domain.org", "mySecretPass")]
         [InlineData("admin@company.co.uk", "AdminPass2023")]
@@ -116,15 +124,17 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Query
                 .ReturnsAsync(true);
 
             _mockUserReadRepository.Setup(x => x.GetByEmailAsync(email, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(user);            _mockAuthenticationService.Setup(x => x.GenerateJwtTokenAsync(user.Id, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(user);
+
+            _mockAuthenticationService.Setup(x => x.GenerateJwtTokenAsync(user.Id, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(expectedToken);
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
 
             // Assert
-            result.Should().NotBeNull();
-            result.AccessToken.Should().Be(expectedToken);
+            Assert.NotNull(result);
+            Assert.Equal(expectedToken, result.AccessToken);
         }
 
         [Fact]
@@ -143,8 +153,10 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Query
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _handler.Handle(query, CancellationToken.None));
 
-            exception.Message.Should().Be("Authentication service error");
-        }        [Fact]
+            Assert.Equal("Authentication service error", exception.Message);
+        }
+
+        [Fact]
         public async Task Handle_ShouldCallServicesInCorrectOrder()
         {
             // Arrange

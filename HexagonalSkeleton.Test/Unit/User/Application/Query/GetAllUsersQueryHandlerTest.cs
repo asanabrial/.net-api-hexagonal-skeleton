@@ -32,11 +32,8 @@ public class GetAllUsersQueryHandlerTest
         _mockUserReadRepository
             .Setup(r => r.GetAllAsync(cancellationToken))
             .ReturnsAsync(users);        // Act
-        var result = await _handler.Handle(query, cancellationToken);
-
-        // Assert
+        var result = await _handler.Handle(query, cancellationToken);        // Assert
         Assert.NotNull(result);
-        Assert.True(result.IsValid);
         Assert.NotNull(result.Users);
         Assert.Equal(2, result.Users.Count);
         
@@ -60,11 +57,8 @@ public class GetAllUsersQueryHandlerTest
             .ReturnsAsync(users);
 
         // Act
-        var result = await _handler.Handle(query, cancellationToken);
-
-        // Assert
+        var result = await _handler.Handle(query, cancellationToken);        // Assert
         Assert.NotNull(result);
-        Assert.True(result.IsValid);
         Assert.NotNull(result.Users);
         Assert.Empty(result.Users);
 

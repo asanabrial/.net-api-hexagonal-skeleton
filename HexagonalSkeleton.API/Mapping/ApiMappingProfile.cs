@@ -8,30 +8,33 @@ namespace HexagonalSkeleton.API.Mapping
 {
     /// <summary>
     /// AutoMapper profile for API layer mappings
-    /// Maps API Models to Application Commands/Queries and vice versa
+    /// Uses attribute-based mapping for automatic configuration
+    /// Only contains mappings that require special configuration
     /// </summary>
     public class ApiMappingProfile : Profile
     {
         public ApiMappingProfile()
         {
-            // Auth Models → Application Commands/Queries
-            CreateMap<LoginRequest, LoginCommand>();            // User Models → Application Commands
-            CreateMap<CreateUserRequest, RegisterUserCommand>()
-                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.FirstName))
-                .ForMember(dest => dest.Surname, opt => opt.MapFrom(src => src.LastName));
-            
-            CreateMap<UpdateUserRequest, UpdateUserCommand>();
-            CreateMap<UpdateProfileRequest, UpdateProfileUserCommand>();            // Application Results → API Responses
-            CreateMap<LoginCommandResult, LoginResponse>();
-            CreateMap<RegisterUserCommandResult, LoginResponse>();
-            CreateMap<GetUserQueryResult, UserResponse>();
-            CreateMap<UpdateUserCommandResult, UserResponse>();
-            CreateMap<UpdateProfileUserCommandResult, UserResponse>();
-            CreateMap<HardDeleteUserCommandResult, DeleteUserResponse>();
-            CreateMap<SoftDeleteUserCommandResult, DeleteUserResponse>();
+            // Solo mapeos que requieren configuración especial
             CreateMap<GetAllUsersQueryResult, UsersResponse>()
-                .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src.Users));
-            CreateMap<UserDto, UserResponse>();
+                .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src.Users));            // Mapeos especiales para Login/Register que requieren UserInfo  
+            CreateMap<LoginCommandResult, LoginResponse>()
+                .ForMember(dest => dest.User, opt => opt.Ignore());
+
+            CreateMap<RegisterUserCommandResult, LoginResponse>()
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src));
+                
+            // Mapeo del resultado de registro a UserInfo
+            CreateMap<RegisterUserCommandResult, UserInfo>();
+
+            // Mapeos especiales para Delete que requieren configuración de campos
+            CreateMap<HardDeleteUserCommandResult, DeleteUserResponse>()
+                .ForMember(dest => dest.UserId, opt => opt.Ignore())
+                .ForMember(dest => dest.DeletionType, opt => opt.MapFrom(src => "Hard"));
+
+            CreateMap<SoftDeleteUserCommandResult, DeleteUserResponse>()
+                .ForMember(dest => dest.UserId, opt => opt.Ignore())
+                .ForMember(dest => dest.DeletionType, opt => opt.MapFrom(src => "Soft"));
         }
     }
 }

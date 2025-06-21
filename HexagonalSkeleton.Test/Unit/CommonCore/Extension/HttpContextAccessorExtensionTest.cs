@@ -1,4 +1,3 @@
-using FluentAssertions;
 using HexagonalSkeleton.API.Extensions;
 using Microsoft.AspNetCore.Http;
 using Moq;
@@ -18,7 +17,7 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Extension
             var result = nullAccessor!.GetApiBaseUrl();
 
             // Assert
-            result.Should().BeNull();
+            Assert.Null(result);
         }
 
         [Fact]
@@ -32,7 +31,7 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Extension
             var result = mockAccessor.Object.GetApiBaseUrl();
 
             // Assert
-            result.Should().BeNull();
+            Assert.Null(result);
         }        [Fact]
         public void GetApiBaseUrl_WithStandardHttpsPort_ShouldIncludePort()
         {
@@ -52,7 +51,7 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Extension
             var result = mockAccessor.Object.GetApiBaseUrl();
 
             // Assert
-            result.Should().Be("https://api.example.com/api/v1");
+            Assert.Equal("https://api.example.com/api/v1", result);
         }
 
         [Fact]
@@ -74,7 +73,7 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Extension
             var result = mockAccessor.Object.GetApiBaseUrl();
 
             // Assert
-            result.Should().Be("https://api.example.com:443/api/v1");
+            Assert.Equal("https://api.example.com:443/api/v1", result);
         }
 
         [Fact]
@@ -96,7 +95,7 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Extension
             var result = mockAccessor.Object.GetApiBaseUrl();
 
             // Assert
-            result.Should().Be("http://localhost:5000");
+            Assert.Equal("http://localhost:5000", result);
         }
 
         [Fact]
@@ -118,7 +117,7 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Extension
             var result = mockAccessor.Object.GetApiBaseUrl();
 
             // Assert
-            result.Should().Be("https://api.example.com");
+            Assert.Equal("https://api.example.com", result);
         }
 
         [Fact]
@@ -140,7 +139,7 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Extension
             var result = mockAccessor.Object.GetApiBaseUrl();
 
             // Assert
-            result.Should().Be("http://localhost:8080/app");
+            Assert.Equal("http://localhost:8080/app", result);
         }
     }
 }

@@ -1,4 +1,3 @@
-using FluentAssertions;
 using HexagonalSkeleton.Infrastructure.Auth;
 using Xunit;
 
@@ -18,10 +17,10 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Auth
             var hash = PasswordHasher.ComputeHash(password, salt, pepper);
 
             // Assert
-            hash.Should().NotBeNullOrEmpty();
-            hash.Should().NotBe(password);
-            hash.Should().NotBe(salt);
-            hash.Should().NotBe(pepper);
+            Assert.NotNull(hash); Assert.NotEmpty(hash);
+            Assert.NotEqual(password, hash);
+            Assert.NotEqual(salt, hash);
+            Assert.NotEqual(pepper, hash);
         }
 
         [Fact]
@@ -37,7 +36,7 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Auth
             var hash2 = PasswordHasher.ComputeHash(password, salt, pepper);
 
             // Assert
-            hash1.Should().Be(hash2);
+            Assert.Equal(hash2, hash1);
         }
 
         [Fact]
@@ -54,7 +53,7 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Auth
             var hash2 = PasswordHasher.ComputeHash(password2, salt, pepper);
 
             // Assert
-            hash1.Should().NotBe(hash2);
+            Assert.NotEqual(hash2, hash1);
         }
 
         [Fact]
@@ -71,7 +70,7 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Auth
             var hash2 = PasswordHasher.ComputeHash(password, salt2, pepper);
 
             // Assert
-            hash1.Should().NotBe(hash2);
+            Assert.NotEqual(hash2, hash1);
         }
 
         [Fact]
@@ -88,15 +87,14 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Auth
             var hash2 = PasswordHasher.ComputeHash(password, salt, pepper2);
 
             // Assert
-            hash1.Should().NotBe(hash2);
+            Assert.NotEqual(hash2, hash1);
         }        [Theory]
         [InlineData("", "salt", "pepper")]
         [InlineData("password", "", "pepper")]
         public void ComputeHash_WithEmptyInputs_ShouldThrowArgumentException(string password, string salt, string pepper)
         {
             // Act & Assert
-            FluentActions.Invoking(() => PasswordHasher.ComputeHash(password, salt, pepper))
-                .Should().Throw<ArgumentException>();
+            Assert.Throws<ArgumentException>(() => PasswordHasher.ComputeHash(password, salt, pepper));
         }
 
         [Theory]
@@ -107,7 +105,7 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Auth
             var hash = PasswordHasher.ComputeHash(password, salt, pepper);
 
             // Assert
-            hash.Should().NotBeNullOrEmpty();
+            Assert.NotNull(hash); Assert.NotEmpty(hash);
         }
 
         [Fact]
@@ -119,11 +117,9 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Auth
             var pepper = "p3pp3r<>?";
 
             // Act
-            var hash = PasswordHasher.ComputeHash(password, salt, pepper);
-
-            // Assert
-            hash.Should().NotBeNullOrEmpty();
-            hash.Should().NotContain(password);
+            var hash = PasswordHasher.ComputeHash(password, salt, pepper);            // Assert
+            Assert.NotNull(hash); Assert.NotEmpty(hash);
+            Assert.DoesNotContain(password, hash);
         }
 
         [Fact]
@@ -138,7 +134,7 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Auth
             var hash = PasswordHasher.ComputeHash(password, salt, pepper);
 
             // Assert
-            hash.Should().NotBeNullOrEmpty();
+            Assert.NotNull(hash); Assert.NotEmpty(hash);
         }
 
         [Fact]
@@ -148,7 +144,7 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Auth
             var salt = PasswordHasher.GenerateSalt();
 
             // Assert
-            salt.Should().NotBeNullOrEmpty();
+            Assert.NotNull(salt); Assert.NotEmpty(salt);
         }
 
         [Fact]
@@ -160,9 +156,9 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Auth
             var salt3 = PasswordHasher.GenerateSalt();
 
             // Assert
-            salt1.Should().NotBe(salt2);
-            salt2.Should().NotBe(salt3);
-            salt1.Should().NotBe(salt3);
+            Assert.NotEqual(salt2, salt1);
+            Assert.NotEqual(salt3, salt2);
+            Assert.NotEqual(salt3, salt1);
         }
 
         [Fact]
@@ -171,11 +167,10 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Auth
             // Act
             var salt = PasswordHasher.GenerateSalt();
 
-            // Assert
-            salt.Should().NotBeNullOrEmpty();
+            // Assert            Assert.NotNull(salt); Assert.NotEmpty(salt);
             // Should be able to convert back from Base64 without throwing
-            var action = () => Convert.FromBase64String(salt);
-            action.Should().NotThrow();
+            var bytes = Record.Exception(() => Convert.FromBase64String(salt));
+            Assert.Null(bytes);
         }
 
         [Fact]
@@ -187,10 +182,10 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Auth
             var salt3 = PasswordHasher.GenerateSalt();
 
             // Assert
-            salt1.Length.Should().Be(salt2.Length);
-            salt2.Length.Should().Be(salt3.Length);
+            Assert.Equal(salt2.Length, salt1.Length);
+            Assert.Equal(salt3.Length, salt2.Length);
             // Base64 encoding of 16 bytes should be 24 characters (including padding)
-            salt1.Length.Should().Be(24);
+            Assert.Equal(24, salt1.Length);
         }
 
         [Fact]
@@ -204,11 +199,10 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Auth
             // Act
             var hash = PasswordHasher.ComputeHash(password, salt, pepper);
 
-            // Assert
-            hash.Should().NotBeNullOrEmpty();
+            // Assert            Assert.NotNull(hash); Assert.NotEmpty(hash);
             // Should be able to convert back from Base64 without throwing
-            var action = () => Convert.FromBase64String(hash!);
-            action.Should().NotThrow();
+            var exception = Record.Exception(() => Convert.FromBase64String(hash!));
+            Assert.Null(exception);
         }
     }
 }

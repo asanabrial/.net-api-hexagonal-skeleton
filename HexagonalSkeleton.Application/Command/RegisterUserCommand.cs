@@ -9,8 +9,8 @@ namespace HexagonalSkeleton.Application.Command
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
         public string PasswordConfirmation { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public string Surname { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
         public DateTime Birthdate { get; set; }
         public string PhoneNumber { get; set; } = string.Empty;
         public double Latitude { get; set; }
@@ -36,8 +36,8 @@ namespace HexagonalSkeleton.Application.Command
             Email = email;
             Password = password;
             PasswordConfirmation = passwordConfirmation;
-            Name = name;
-            Surname = surname;
+            FirstName = name;
+            LastName = surname;
             Birthdate = birthdate;
             PhoneNumber = phoneNumber;
             Latitude = latitude;

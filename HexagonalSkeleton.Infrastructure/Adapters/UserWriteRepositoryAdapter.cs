@@ -22,18 +22,20 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
             _dbContext = dbContext;
             _mapper = mapper;
             _mediator = mediator;
-        }        public async Task<int> CreateAsync(User user, CancellationToken cancellationToken = default)
+        }
+
+        public async Task<int> CreateAsync(User user, CancellationToken cancellationToken = default)
         {
             var entity = _mapper.Map<UserEntity>(user);
             _dbContext.Users.Add(entity);
-            
+
             await _dbContext.SaveChangesAsync(cancellationToken);
-            
+
             // The ID is handled by the mapping profile, so no need to set it manually
-            
+
             // Publish domain events after successful save
             await PublishDomainEventsAsync(user, cancellationToken);
-            
+
             return entity.Id;
         }
 

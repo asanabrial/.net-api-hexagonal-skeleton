@@ -1,10 +1,14 @@
+using AutoMapper;
 using HexagonalSkeleton.API.Models.Common;
+using HexagonalSkeleton.Application.Command;
 
 namespace HexagonalSkeleton.API.Models.Users
 {
     /// <summary>
     /// Response model for successful user deletion
     /// </summary>
+    [AutoMap(typeof(SoftDeleteUserCommandResult), ReverseMap = true)]
+    [AutoMap(typeof(HardDeleteUserCommandResult), ReverseMap = true)]
     public class DeleteUserResponse : BaseApiResponse
     {
         /// <summary>

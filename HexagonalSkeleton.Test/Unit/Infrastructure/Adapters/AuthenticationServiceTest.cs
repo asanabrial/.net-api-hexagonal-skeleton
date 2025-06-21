@@ -1,4 +1,3 @@
-using FluentAssertions;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain.ValueObjects;
 using HexagonalSkeleton.Infrastructure.Adapters;
@@ -34,7 +33,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var exception = Assert.Throws<ArgumentNullException>(() => 
                 new AuthenticationService(null!, _mockUserReadRepository.Object));
             
-            exception.ParamName.Should().Be("appSettings");
+            Assert.Equal("appSettings", exception.ParamName);
         }
 
         [Fact]
@@ -44,7 +43,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var exception = Assert.Throws<ArgumentNullException>(() => 
                 new AuthenticationService(_mockAppSettings.Object, null!));
             
-            exception.ParamName.Should().Be("userReadRepository");
+            Assert.Equal("userReadRepository", exception.ParamName);
         }
 
         [Fact]
@@ -60,8 +59,8 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var token = await _authenticationService.GenerateJwtTokenAsync(userId);
 
             // Assert
-            token.Should().NotBeNullOrEmpty();
-            token.Should().Contain(".");
+            Assert.NotNull(token); Assert.NotEmpty(token);
+            Assert.Contains(".", token);
         }
 
         [Theory]
@@ -73,8 +72,8 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var exception = await Assert.ThrowsAsync<ArgumentException>(() => 
                 _authenticationService.GenerateJwtTokenAsync(userId));
             
-            exception.ParamName.Should().Be("userId");
-            exception.Message.Should().Contain("User ID must be greater than zero");
+            Assert.Equal("userId", exception.ParamName);
+            Assert.Contains("User ID must be greater than zero", exception.Message);
         }        [Fact]
         public async Task GenerateJwtTokenAsync_WithNonExistentUser_ShouldThrowArgumentException()
         {
@@ -87,8 +86,8 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var exception = await Assert.ThrowsAsync<ArgumentException>(() => 
                 _authenticationService.GenerateJwtTokenAsync(userId));
             
-            exception.ParamName.Should().Be("userId");
-            exception.Message.Should().Contain("User not found");
+            Assert.Equal("userId", exception.ParamName);
+            Assert.Contains("User not found", exception.Message);
         }
 
         [Fact]
@@ -106,7 +105,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => 
                 _authenticationService.GenerateJwtTokenAsync(userId));
             
-            exception.Message.Should().Contain("Cannot generate token for deleted user");
+            Assert.Contains("Cannot generate token for deleted user", exception.Message);
         }
 
         [Fact]
@@ -131,7 +130,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var result = await _authenticationService.ValidateCredentialsAsync(email, password);
 
             // Assert
-            result.Should().BeTrue();
+            Assert.True(result);
         }        [Fact]
         public async Task ValidateCredentialsAsync_WithInvalidPassword_ShouldReturnFalse()
         {
@@ -154,7 +153,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var result = await _authenticationService.ValidateCredentialsAsync(email, password);
 
             // Assert
-            result.Should().BeFalse();
+            Assert.False(result);
         }
 
         [Fact]
@@ -169,7 +168,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var result = await _authenticationService.ValidateCredentialsAsync(email, password);
 
             // Assert
-            result.Should().BeFalse();
+            Assert.False(result);
         }
 
         [Fact]
@@ -189,7 +188,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var result = await _authenticationService.ValidateCredentialsAsync(email, password);
 
             // Assert
-            result.Should().BeFalse();
+            Assert.False(result);
         }        [Theory]
         [InlineData("")]
         [InlineData("   ")]
@@ -199,8 +198,8 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var exception = await Assert.ThrowsAsync<ArgumentException>(() => 
                 _authenticationService.ValidateCredentialsAsync(email, "password"));
             
-            exception.ParamName.Should().Be("email");
-            exception.Message.Should().Contain("Email cannot be null or empty");
+            Assert.Equal("email", exception.ParamName);
+            Assert.Contains("Email cannot be null or empty", exception.Message);
         }
 
         [Fact]
@@ -210,8 +209,8 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var exception = await Assert.ThrowsAsync<ArgumentException>(() => 
                 _authenticationService.ValidateCredentialsAsync(null!, "password"));
             
-            exception.ParamName.Should().Be("email");
-            exception.Message.Should().Contain("Email cannot be null or empty");
+            Assert.Equal("email", exception.ParamName);
+            Assert.Contains("Email cannot be null or empty", exception.Message);
         }        [Theory]
         [InlineData("")]
         [InlineData("   ")]
@@ -221,8 +220,8 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var exception = await Assert.ThrowsAsync<ArgumentException>(() => 
                 _authenticationService.ValidateCredentialsAsync("test@example.com", password));
             
-            exception.ParamName.Should().Be("password");
-            exception.Message.Should().Contain("Password cannot be null or empty");
+            Assert.Equal("password", exception.ParamName);
+            Assert.Contains("Password cannot be null or empty", exception.Message);
         }
 
         [Fact]
@@ -232,8 +231,8 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var exception = await Assert.ThrowsAsync<ArgumentException>(() => 
                 _authenticationService.ValidateCredentialsAsync("test@example.com", null!));
             
-            exception.ParamName.Should().Be("password");
-            exception.Message.Should().Contain("Password cannot be null or empty");
+            Assert.Equal("password", exception.ParamName);
+            Assert.Contains("Password cannot be null or empty", exception.Message);
         }
 
         [Fact]
@@ -247,8 +246,8 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var hashedPassword = _authenticationService.HashPassword(password, salt);
 
             // Assert
-            hashedPassword.Should().NotBeNullOrEmpty();
-            hashedPassword.Should().NotBe(password);
+            Assert.NotNull(hashedPassword); Assert.NotEmpty(hashedPassword);
+            Assert.NotEqual(password, hashedPassword);
         }        [Theory]
         [InlineData("")]
         [InlineData("   ")]
@@ -258,8 +257,8 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var exception = Assert.Throws<ArgumentException>(() => 
                 _authenticationService.HashPassword(password, "salt"));
             
-            exception.ParamName.Should().Be("password");
-            exception.Message.Should().Contain("Password cannot be null or empty");
+            Assert.Equal("password", exception.ParamName);
+            Assert.Contains("Password cannot be null or empty", exception.Message);
         }
 
         [Fact]
@@ -269,8 +268,8 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var exception = Assert.Throws<ArgumentException>(() => 
                 _authenticationService.HashPassword(null!, "salt"));
             
-            exception.ParamName.Should().Be("password");
-            exception.Message.Should().Contain("Password cannot be null or empty");
+            Assert.Equal("password", exception.ParamName);
+            Assert.Contains("Password cannot be null or empty", exception.Message);
         }        [Theory]
         [InlineData("")]
         [InlineData("   ")]
@@ -280,8 +279,8 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var exception = Assert.Throws<ArgumentException>(() => 
                 _authenticationService.HashPassword("password", salt));
             
-            exception.ParamName.Should().Be("salt");
-            exception.Message.Should().Contain("Salt cannot be null or empty");
+            Assert.Equal("salt", exception.ParamName);
+            Assert.Contains("Salt cannot be null or empty", exception.Message);
         }
 
         [Fact]
@@ -291,8 +290,8 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var exception = Assert.Throws<ArgumentException>(() => 
                 _authenticationService.HashPassword("password", null!));
             
-            exception.ParamName.Should().Be("salt");
-            exception.Message.Should().Contain("Salt cannot be null or empty");
+            Assert.Equal("salt", exception.ParamName);
+            Assert.Contains("Salt cannot be null or empty", exception.Message);
         }        [Fact]
         public void HashPassword_WithNullPepper_ShouldThrowInvalidOperationException()
         {
@@ -304,7 +303,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var exception = Assert.Throws<InvalidOperationException>(() => 
                 _authenticationService.HashPassword("password", "salt"));
             
-            exception.Message.Should().Contain("Pepper configuration is required for security");
+            Assert.Contains("Pepper configuration is required for security", exception.Message);
         }
 
         [Fact]
@@ -314,7 +313,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var salt = _authenticationService.GenerateSalt();
 
             // Assert
-            salt.Should().NotBeNullOrEmpty();
+            Assert.NotNull(salt); Assert.NotEmpty(salt);
         }
 
         [Fact]
@@ -325,7 +324,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var salt2 = _authenticationService.GenerateSalt();
 
             // Assert
-            salt1.Should().NotBe(salt2);
+            Assert.NotEqual(salt2, salt1);
         }
 
         [Fact]
@@ -340,7 +339,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var hash2 = _authenticationService.HashPassword(password, salt);
 
             // Assert
-            hash1.Should().Be(hash2);
+            Assert.Equal(hash2, hash1);
         }        private static DomainUser CreateTestUser(int id)
         {
             return DomainUser.Reconstitute(

@@ -1,8 +1,8 @@
-using FluentAssertions;
 using FluentValidation;
 using FluentValidation.Results;
 using HexagonalSkeleton.Application.Command;
 using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Test.Unit.User.Domain;
 using Moq;
@@ -49,21 +49,17 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
                 .ReturnsAsync(user);
 
             _mockUserWriteRepository.Setup(x => x.UpdateAsync(user, It.IsAny<CancellationToken>()))
-                .Returns(Task.CompletedTask);
-
-            // Act
+                .Returns(Task.CompletedTask);            // Act
             var result = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            result.Should().NotBeNull();
-            result.IsValid.Should().BeTrue();
-            result.Errors.Should().BeEmpty();
+            Assert.NotNull(result);
 
             // Verify the user profile was updated
-            user.FullName.FirstName.Should().Be("Jane");
-            user.FullName.LastName.Should().Be("Smith");
-            user.Birthdate.Should().Be(new DateTime(1985, 5, 15));
-            user.AboutMe.Should().Be("Updated about me");
+            Assert.Equal("Jane", user.FullName.FirstName);
+            Assert.Equal("Smith", user.FullName.LastName);
+            Assert.Equal(new DateTime(1985, 5, 15), user.Birthdate);
+            Assert.Equal("Updated about me", user.AboutMe);
 
             _mockUserWriteRepository.Verify(x => x.UpdateAsync(user, It.IsAny<CancellationToken>()), Times.Once);
         }
@@ -88,24 +84,18 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
             var validationResult = new ValidationResult(validationErrors);
 
             _mockValidator.Setup(x => x.ValidateAsync(command, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(validationResult);
+                .ReturnsAsync(validationResult);            // Act & Assert
+            var exception = await Assert.ThrowsAsync<HexagonalSkeleton.Application.Exceptions.ValidationException>(() =>
+                _handler.Handle(command, CancellationToken.None));
 
-            // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
-
-            // Assert
-            result.Should().NotBeNull();
-            result.IsValid.Should().BeFalse();
-            result.Errors.Should().ContainKey("Id");
-            result.Errors.Should().ContainKey("FirstName");
-            result.Errors.Should().ContainKey("LastName");
+            Assert.True(exception.Errors.ContainsKey("Id"));
+            Assert.True(exception.Errors.ContainsKey("FirstName"));
+            Assert.True(exception.Errors.ContainsKey("LastName"));
 
             _mockUserReadRepository.Verify(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
             _mockUserWriteRepository.Verify(x => x.UpdateAsync(It.IsAny<DomainUser>(), It.IsAny<CancellationToken>()), Times.Never);
-        }
-
-        [Fact]
-        public async Task Handle_WithNonExistentUser_ShouldReturnUserNotFoundError()
+        }        [Fact]
+        public async Task Handle_WithNonExistentUser_ShouldThrowNotFoundException()
         {
             // Arrange
             var command = new UpdateProfileUserCommand(
@@ -121,14 +111,12 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
             _mockUserReadRepository.Setup(x => x.GetByIdAsync(command.Id, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((DomainUser?)null);
 
-            // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
+                _handler.Handle(command, CancellationToken.None));
 
-            // Assert
-            result.Should().NotBeNull();
-            result.IsValid.Should().BeFalse();
-            result.Errors.Should().ContainKey("User");
-            result.Errors["User"].Should().Contain("User not found");
+            Assert.Contains("User", exception.Message);
+            Assert.Contains("999", exception.Message);
 
             _mockUserWriteRepository.Verify(x => x.UpdateAsync(It.IsAny<DomainUser>(), It.IsAny<CancellationToken>()), Times.Never);
         }
@@ -159,13 +147,10 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
                 .Returns(Task.CompletedTask);
 
             // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
-
-            // Assert
-            result.Should().NotBeNull();
-            result.IsValid.Should().BeTrue();
-            user.FullName.FirstName.Should().Be(firstName);
-            user.FullName.LastName.Should().Be(lastName);
+            var result = await _handler.Handle(command, CancellationToken.None);            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(firstName, user.FullName.FirstName);
+            Assert.Equal(lastName, user.FullName.LastName);
         }
 
         [Fact]
@@ -194,7 +179,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _handler.Handle(command, CancellationToken.None));
 
-            exception.Message.Should().Be("Database connection error");
+            Assert.Equal("Database connection error", exception.Message);
         }
 
         [Fact]
@@ -221,12 +206,12 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
             await _handler.Handle(command, CancellationToken.None);
 
             // Assert
-            user.FullName.FirstName.Should().Be("Jane");
-            user.FullName.LastName.Should().Be("Smith");
-            user.Birthdate.Should().Be(new DateTime(1985, 5, 15));
-            user.AboutMe.Should().Be("Updated about me");
-            user.UpdatedAt.Should().NotBe(initialUpdatedAt);
-            user.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+            Assert.Equal("Jane", user.FullName.FirstName);
+            Assert.Equal("Smith", user.FullName.LastName);
+            Assert.Equal(new DateTime(1985, 5, 15), user.Birthdate);
+            Assert.Equal("Updated about me", user.AboutMe);            Assert.NotEqual(initialUpdatedAt, user.UpdatedAt);
+            Assert.True(user.UpdatedAt.HasValue);
+            Assert.True(DateTime.UtcNow.Subtract(user.UpdatedAt.Value) < TimeSpan.FromSeconds(1));
         }
     }
 }

@@ -65,7 +65,7 @@ public class RegisterUserCommandValidatorTest
 
         // Act & Assert
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.Name);
+        result.ShouldHaveValidationErrorFor(x => x.FirstName);
     }
 
     [Fact]
@@ -76,7 +76,7 @@ public class RegisterUserCommandValidatorTest
 
         // Act & Assert
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.Name);
+        result.ShouldHaveValidationErrorFor(x => x.FirstName);
     }
 
     [Fact]
@@ -87,7 +87,7 @@ public class RegisterUserCommandValidatorTest
 
         // Act & Assert
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.Surname);
+        result.ShouldHaveValidationErrorFor(x => x.LastName);
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public class RegisterUserCommandValidatorTest
 
         // Act & Assert
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.Surname);
+        result.ShouldHaveValidationErrorFor(x => x.LastName);
     }
 
     [Fact]

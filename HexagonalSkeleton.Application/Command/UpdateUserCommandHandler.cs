@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
 using MediatR;
 
@@ -9,17 +10,16 @@ namespace HexagonalSkeleton.Application.Command
         IValidator<UpdateUserCommand> validator,
         IUserReadRepository userReadRepository,
         IUserWriteRepository userWriteRepository)        : IRequestHandler<UpdateUserCommand, UpdateUserCommandResult>
-    {
-        public async Task<UpdateUserCommandResult> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
+    {        public async Task<UpdateUserCommandResult> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
         {
             var result = await validator.ValidateAsync(request, cancellationToken);
             if (!result.IsValid)
-                return new UpdateUserCommandResult(result.ToDictionary());
+                throw new Exceptions.ValidationException(result.ToDictionary());
 
             // Get the existing user
             var user = await userReadRepository.GetByIdAsync(request.Id, cancellationToken);
             if (user == null)
-                return new UpdateUserCommandResult("User not found", true);
+                throw new NotFoundException("User", request.Id);
 
             // Update user properties using domain methods
             user.UpdateProfile(

@@ -1,4 +1,3 @@
-using FluentAssertions;
 using FluentValidation;
 using FluentValidation.Results;
 using HexagonalSkeleton.Application.Command;
@@ -44,10 +43,9 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
                 .Returns(Task.CompletedTask);
 
             // Act
-            var act = async () => await _handler.Handle(command, CancellationToken.None);
-
-            // Assert
-            await act.Should().NotThrowAsync();
+            var act = async () => await _handler.Handle(command, CancellationToken.None);            // Assert
+            var exception = await Record.ExceptionAsync(act);
+            Assert.Null(exception);
             _mockUserWriteRepository.Verify(x => x.DeleteAsync(command.Id, It.IsAny<CancellationToken>()), Times.Once);
         }        [Fact]
         public async Task Handle_WithInvalidCommand_ShouldThrowValidationException()
@@ -63,10 +61,8 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
             _mockValidator.Setup(x => x.ValidateAsync(command, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(validationResult);            // Act & Assert
             var exception = await Assert.ThrowsAsync<HexagonalSkeleton.Application.Exceptions.ValidationException>(() =>
-                _handler.Handle(command, CancellationToken.None));
-
-            exception.Errors.Should().ContainKey("Id");
-            exception.Errors["Id"].Should().Contain("Id must be greater than 0");
+                _handler.Handle(command, CancellationToken.None));            Assert.True(exception.Errors.ContainsKey("Id"));
+            Assert.Contains("Id must be greater than 0", exception.Errors["Id"]);
 
             _mockUserReadRepository.Verify(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
             _mockUserWriteRepository.Verify(x => x.DeleteAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -84,8 +80,8 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
             var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
                 _handler.Handle(command, CancellationToken.None));
 
-            exception.Message.Should().Contain("User");
-            exception.Message.Should().Contain("999");
+            Assert.Contains("User", exception.Message);
+            Assert.Contains("999", exception.Message);
 
             _mockUserWriteRepository.Verify(x => x.DeleteAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
         }
@@ -139,10 +135,9 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
                 .Returns(Task.CompletedTask);
 
             // Act
-            var act = async () => await _handler.Handle(command, CancellationToken.None);
-
-            // Assert
-            await act.Should().NotThrowAsync();
+            var act = async () => await _handler.Handle(command, CancellationToken.None);            // Assert
+            var exception = await Record.ExceptionAsync(act);
+            Assert.Null(exception);
             _mockUserWriteRepository.Verify(x => x.DeleteAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
         }
 
@@ -166,7 +161,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _handler.Handle(command, CancellationToken.None));
 
-            exception.Message.Should().Be("Database connection error");
+            Assert.Equal("Database connection error", exception.Message);
         }
     }
 }

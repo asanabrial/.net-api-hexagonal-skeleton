@@ -1,6 +1,7 @@
 using FluentValidation;
 using HexagonalSkeleton.Application.Event;
 using HexagonalSkeleton.Application.Exceptions;
+using HexagonalSkeleton.Application.Extensions;
 using HexagonalSkeleton.Domain.Ports;
 using MediatR;
 

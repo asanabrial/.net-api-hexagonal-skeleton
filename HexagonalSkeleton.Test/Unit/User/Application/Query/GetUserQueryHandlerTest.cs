@@ -1,7 +1,6 @@
 using Xunit;
 using Moq;
 using FluentValidation;
-using FluentAssertions;
 using HexagonalSkeleton.Application.Query;
 using HexagonalSkeleton.Application.Dto;
 using HexagonalSkeleton.Application.Exceptions;
@@ -45,11 +44,11 @@ public class GetUserQueryHandlerTest
         var result = await _handler.Handle(query, cancellationToken);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Id.Should().Be(user.Id);
-        result.FirstName.Should().Be(user.FullName.FirstName);
-        result.LastName.Should().Be(user.FullName.LastName);
-        result.Email.Should().Be(user.Email.Value);
+        Assert.NotNull(result);
+        Assert.Equal(user.Id, result.Id);
+        Assert.Equal(user.FullName.FirstName, result.FirstName);
+        Assert.Equal(user.FullName.LastName, result.LastName);
+        Assert.Equal(user.Email.Value, result.Email);
 
         _mockUserReadRepository.Verify(r => r.GetByIdAsync(userId, cancellationToken), Times.Once);
     }
@@ -65,11 +64,9 @@ public class GetUserQueryHandlerTest
 
         _mockValidator
             .Setup(v => v.ValidateAsync(It.IsAny<GetUserQuery>(), cancellationToken))
-            .ReturnsAsync(validationErrors);
-
-        // Act
+            .ReturnsAsync(validationErrors);        // Act
         var act = async () => await _handler.Handle(query, cancellationToken);        // Assert
-        await act.Should().ThrowAsync<HexagonalSkeleton.Application.Exceptions.ValidationException>();
+        await Assert.ThrowsAsync<HexagonalSkeleton.Application.Exceptions.ValidationException>(act);
         _mockUserReadRepository.Verify(r => r.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
@@ -87,12 +84,10 @@ public class GetUserQueryHandlerTest
 
         _mockUserReadRepository
             .Setup(r => r.GetByIdAsync(userId, cancellationToken))
-            .ReturnsAsync((HexagonalSkeleton.Domain.User?)null);
-
-        // Act
+            .ReturnsAsync((HexagonalSkeleton.Domain.User?)null);        // Act
         var act = async () => await _handler.Handle(query, cancellationToken);        // Assert
-        await act.Should().ThrowAsync<NotFoundException>()
-            .WithMessage("User with identifier '999' was not found");
+        var exception = await Assert.ThrowsAsync<NotFoundException>(act);
+        Assert.Equal("User with identifier '999' was not found", exception.Message);
 
         _mockUserReadRepository.Verify(r => r.GetByIdAsync(userId, cancellationToken), Times.Once);
     }

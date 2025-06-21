@@ -1,5 +1,6 @@
 using HexagonalSkeleton.Domain.ValueObjects;
 using HexagonalSkeleton.Domain.Ports;
+using HexagonalSkeleton.Domain.Exceptions;
 
 namespace HexagonalSkeleton.Domain.Services
 {
@@ -129,21 +130,24 @@ namespace HexagonalSkeleton.Domain.Services
                    user.Birthdate.HasValue &&
                    !string.IsNullOrEmpty(user.FullName.FirstName) &&
                    !string.IsNullOrEmpty(user.FullName.LastName);
+        }        /// <summary>
+        /// Validates that user data meets uniqueness business rules
+        /// Throws domain exception if business rule is violated
+        /// </summary>
+        public static void ValidateUserUniqueness(bool emailExists, bool phoneExists, string email, string phoneNumber)
+        {
+            if (emailExists || phoneExists)
+                throw new UserDataNotUniqueException(email, phoneNumber);
         }
 
         /// <summary>
-        /// Check if user registration data is unique across the system
+        /// Validates password strength according to business rules
+        /// Throws domain exception if business rule is violated
         /// </summary>
-        public static async Task<bool> IsUserRegistrationDataUniqueAsync(
-            string email, 
-            string phoneNumber, 
-            IUserReadRepository readRepository, 
-            CancellationToken cancellationToken = default)
+        public static void ValidatePasswordStrength(string password)
         {
-            var emailExists = await readRepository.ExistsByEmailAsync(email, cancellationToken);
-            var phoneExists = await readRepository.ExistsByPhoneNumberAsync(phoneNumber, cancellationToken);
-            
-            return !emailExists && !phoneExists;
+            if (!IsPasswordStrong(password))
+                throw new WeakPasswordException();
         }
 
         /// <summary>

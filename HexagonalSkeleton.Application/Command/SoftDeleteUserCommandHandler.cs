@@ -1,5 +1,7 @@
 ﻿using FluentValidation;
 using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Exceptions;
+using HexagonalSkeleton.Application.Extensions;
 using HexagonalSkeleton.Domain.Ports;
 using MediatR;
 
@@ -16,18 +18,14 @@ namespace HexagonalSkeleton.Application.Command
         : IRequestHandler<SoftDeleteUserCommand, SoftDeleteUserCommandResult>
     {
         public async Task<SoftDeleteUserCommandResult> Handle(SoftDeleteUserCommand request, CancellationToken cancellationToken)
-        {
-            var result = await validator.ValidateAsync(request, cancellationToken);
+        {            var result = await validator.ValidateAsync(request, cancellationToken);
             if (!result.IsValid)
-                return new SoftDeleteUserCommandResult(result.ToDictionary());
+                throw new Exceptions.ValidationException(result.ToDictionary());
 
             // Get the user aggregate to apply business rules
             var user = await userReadRepository.GetByIdAsync(request.Id, cancellationToken);
             if (user == null)
-                return new SoftDeleteUserCommandResult(new Dictionary<string, string[]> 
-                { 
-                    { "User", new[] { "User not found" } } 
-                });
+                throw new NotFoundException("User", request.Id);
 
             // Use the aggregate's business method for soft deletion
             user.Delete();

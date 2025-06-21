@@ -32,7 +32,7 @@ namespace HexagonalSkeleton.Application.Command
                 .Equal(r => r.Password)
                 .WithMessage("Password confirmation must match password");
 
-            RuleFor(r => r.Name)
+            RuleFor(r => r.FirstName)
                 .NotEmpty()
                 .WithMessage("First name is required")
                 .MaximumLength(50)
@@ -40,7 +40,7 @@ namespace HexagonalSkeleton.Application.Command
                 .Matches(@"^[a-zA-Z\s]+$")
                 .WithMessage("First name can only contain letters and spaces");
 
-            RuleFor(r => r.Surname)
+            RuleFor(r => r.LastName)
                 .NotEmpty()
                 .WithMessage("Last name is required")
                 .MaximumLength(50)

@@ -1,25 +1,22 @@
-﻿using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Dto;
 using HexagonalSkeleton.Domain;
 
 namespace HexagonalSkeleton.Application.Query
 {
-    public class GetAllUsersQueryResult : BaseResponseDto
+    /// <summary>
+    /// Result for GetAllUsersQuery operation.
+    /// Contains list of users. Errors are handled via exceptions.
+    /// </summary>
+    public class GetAllUsersQueryResult
     {
-        public GetAllUsersQueryResult(IEnumerable<User> users) : base()
+        public GetAllUsersQueryResult(IEnumerable<User> users)
         {
             Users = users.Select(u => new UserDto(u)).ToList();
         }
 
-        public GetAllUsersQueryResult(IDictionary<string, string[]> errors) : base(errors)
-        {
-            Users = new List<UserDto>();
-        }
-
-        public GetAllUsersQueryResult(string errorMessage, bool isError) : base(errorMessage)
-        {
-            Users = new List<UserDto>();
-        }
-
+        /// <summary>
+        /// List of users
+        /// </summary>
         public IList<UserDto> Users { get; set; }
     }
 

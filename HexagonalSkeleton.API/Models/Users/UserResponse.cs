@@ -1,10 +1,16 @@
+using AutoMapper;
 using HexagonalSkeleton.API.Models.Common;
+using HexagonalSkeleton.Application.Command;
+using HexagonalSkeleton.Application.Query;
 
 namespace HexagonalSkeleton.API.Models.Users
 {
     /// <summary>
     /// Response model for user operations
     /// </summary>
+    [AutoMap(typeof(GetUserQueryResult), ReverseMap = true)]
+    [AutoMap(typeof(UpdateUserCommandResult), ReverseMap = true)]
+    [AutoMap(typeof(UpdateProfileUserCommandResult), ReverseMap = true)]
     public class UserResponse : BaseApiResponse
     {
         /// <summary>

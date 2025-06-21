@@ -32,7 +32,8 @@ var serverVersion = ServerVersion.AutoDetect(connectionStr);
 
 builder.Services.AddDbContextPool<AppDbContext>(
     dbContextOptions =>
-        dbContextOptions.UseMySql(connectionStr, serverVersion)
+        dbContextOptions.UseMySql(connectionStr, serverVersion, options =>
+            options.MigrationsAssembly("HexagonalSkeleton.MigrationDb"))
         // The following three options help with debugging, but should
         // be changed or removed for production.
         .LogTo(Console.WriteLine, LogLevel.Information)

@@ -2,7 +2,6 @@ using HexagonalSkeleton.API.Handler;
 using HexagonalSkeleton.Application.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using FluentAssertions;
 using Moq;
 using System.Text.Json;
 using Xunit;
@@ -39,9 +38,9 @@ namespace HexagonalSkeleton.Test.Unit.API.Handler
 
             // Act
             var result = await _handler.TryHandleAsync(_httpContext, exception, CancellationToken.None);            // Assert
-            result.Should().BeTrue();
-            _httpContext.Response.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
-            _httpContext.Response.ContentType.Should().Be("application/problem+json");
+            Assert.True(result);
+            Assert.Equal(StatusCodes.Status400BadRequest, _httpContext.Response.StatusCode);
+            Assert.Equal("application/problem+json", _httpContext.Response.ContentType);
         }
 
         [Fact]
@@ -52,9 +51,9 @@ namespace HexagonalSkeleton.Test.Unit.API.Handler
 
             // Act
             var result = await _handler.TryHandleAsync(_httpContext, exception, CancellationToken.None);            // Assert
-            result.Should().BeTrue();
-            _httpContext.Response.StatusCode.Should().Be(StatusCodes.Status404NotFound);
-            _httpContext.Response.ContentType.Should().Be("application/problem+json");
+            Assert.True(result);
+            Assert.Equal(StatusCodes.Status404NotFound, _httpContext.Response.StatusCode);
+            Assert.Equal("application/problem+json", _httpContext.Response.ContentType);
         }
 
         [Fact]
@@ -65,9 +64,9 @@ namespace HexagonalSkeleton.Test.Unit.API.Handler
 
             // Act
             var result = await _handler.TryHandleAsync(_httpContext, exception, CancellationToken.None);            // Assert
-            result.Should().BeTrue();
-            _httpContext.Response.StatusCode.Should().Be(StatusCodes.Status401Unauthorized);
-            _httpContext.Response.ContentType.Should().Be("application/problem+json");
+            Assert.True(result);
+            Assert.Equal(StatusCodes.Status401Unauthorized, _httpContext.Response.StatusCode);
+            Assert.Equal("application/problem+json", _httpContext.Response.ContentType);
         }
 
         [Fact]
@@ -78,9 +77,9 @@ namespace HexagonalSkeleton.Test.Unit.API.Handler
 
             // Act
             var result = await _handler.TryHandleAsync(_httpContext, exception, CancellationToken.None);            // Assert
-            result.Should().BeTrue();
-            _httpContext.Response.StatusCode.Should().Be(StatusCodes.Status403Forbidden);
-            _httpContext.Response.ContentType.Should().Be("application/problem+json");
+            Assert.True(result);
+            Assert.Equal(StatusCodes.Status403Forbidden, _httpContext.Response.StatusCode);
+            Assert.Equal("application/problem+json", _httpContext.Response.ContentType);
         }
 
         [Fact]
@@ -91,9 +90,9 @@ namespace HexagonalSkeleton.Test.Unit.API.Handler
 
             // Act
             var result = await _handler.TryHandleAsync(_httpContext, exception, CancellationToken.None);            // Assert
-            result.Should().BeTrue();
-            _httpContext.Response.StatusCode.Should().Be(StatusCodes.Status409Conflict);
-            _httpContext.Response.ContentType.Should().Be("application/problem+json");
+            Assert.True(result);
+            Assert.Equal(StatusCodes.Status409Conflict, _httpContext.Response.StatusCode);
+            Assert.Equal("application/problem+json", _httpContext.Response.ContentType);
         }
 
         [Fact]
@@ -104,9 +103,9 @@ namespace HexagonalSkeleton.Test.Unit.API.Handler
 
             // Act
             var result = await _handler.TryHandleAsync(_httpContext, exception, CancellationToken.None);            // Assert
-            result.Should().BeTrue();
-            _httpContext.Response.StatusCode.Should().Be(StatusCodes.Status422UnprocessableEntity);
-            _httpContext.Response.ContentType.Should().Be("application/problem+json");
+            Assert.True(result);
+            Assert.Equal(StatusCodes.Status422UnprocessableEntity, _httpContext.Response.StatusCode);
+            Assert.Equal("application/problem+json", _httpContext.Response.ContentType);
         }
 
         [Fact]
@@ -117,9 +116,9 @@ namespace HexagonalSkeleton.Test.Unit.API.Handler
 
             // Act
             var result = await _handler.TryHandleAsync(_httpContext, exception, CancellationToken.None);            // Assert
-            result.Should().BeTrue();
-            _httpContext.Response.StatusCode.Should().Be(StatusCodes.Status429TooManyRequests);
-            _httpContext.Response.ContentType.Should().Be("application/problem+json");
+            Assert.True(result);
+            Assert.Equal(StatusCodes.Status429TooManyRequests, _httpContext.Response.StatusCode);
+            Assert.Equal("application/problem+json", _httpContext.Response.ContentType);
         }
 
         [Fact]
@@ -130,7 +129,7 @@ namespace HexagonalSkeleton.Test.Unit.API.Handler
 
             // Act
             var result = await _handler.TryHandleAsync(_httpContext, exception, CancellationToken.None);            // Assert
-            result.Should().BeFalse(); // Should let ASP.NET Core handle it
+            Assert.False(result); // Should let ASP.NET Core handle it
         }
 
         [Fact]
@@ -142,13 +141,12 @@ namespace HexagonalSkeleton.Test.Unit.API.Handler
 
             // Act
             await _handler.TryHandleAsync(_httpContext, exception, CancellationToken.None);            // Assert
-            _httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
-            var responseText = await new StreamReader(_httpContext.Response.Body).ReadToEndAsync();
+            _httpContext.Response.Body.Seek(0, SeekOrigin.Begin);            var responseText = await new StreamReader(_httpContext.Response.Body).ReadToEndAsync();
             var problemDetails = JsonSerializer.Deserialize<JsonElement>(responseText);
             
-            problemDetails.GetProperty("title").GetString().Should().Be("Validation failed");
-            problemDetails.GetProperty("status").GetInt32().Should().Be(400);
-            problemDetails.GetProperty("instance").GetString().Should().Be("/api/test");
+            Assert.Equal("Validation failed", problemDetails.GetProperty("title").GetString());
+            Assert.Equal(400, problemDetails.GetProperty("status").GetInt32());
+            Assert.Equal("/api/test", problemDetails.GetProperty("instance").GetString());
         }
     }
 }

@@ -1,4 +1,3 @@
-using FluentAssertions;
 using HexagonalSkeleton.Domain.Shared.Extensions;
 using Xunit;
 
@@ -16,7 +15,7 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Extension
             var result = nullList.HasElements();
 
             // Assert
-            result.Should().BeFalse();
+            Assert.False(result);
         }
 
         [Fact]
@@ -29,7 +28,7 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Extension
             var result = emptyList.HasElements();
 
             // Assert
-            result.Should().BeFalse();
+            Assert.False(result);
         }
 
         [Fact]
@@ -42,7 +41,7 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Extension
             var result = listWithOneElement.HasElements();
 
             // Assert
-            result.Should().BeTrue();
+            Assert.True(result);
         }
 
         [Fact]
@@ -55,7 +54,7 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Extension
             var result = listWithMultipleElements.HasElements();
 
             // Assert
-            result.Should().BeTrue();
+            Assert.True(result);
         }
 
         [Fact]
@@ -64,12 +63,10 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Extension
             // Arrange
             var intList = new List<int> { 1, 2, 3 };
             var boolList = new List<bool> { true };
-            var emptyIntList = new List<int>();
-
-            // Act & Assert
-            intList.HasElements().Should().BeTrue();
-            boolList.HasElements().Should().BeTrue();
-            emptyIntList.HasElements().Should().BeFalse();
+            var emptyIntList = new List<int>();            // Act & Assert
+            Assert.True(intList.HasElements());
+            Assert.True(boolList.HasElements());
+            Assert.False(emptyIntList.HasElements());
         }
     }
 }

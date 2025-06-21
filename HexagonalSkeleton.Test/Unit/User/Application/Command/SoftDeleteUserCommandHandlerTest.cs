@@ -1,8 +1,8 @@
-using FluentAssertions;
 using FluentValidation;
 using FluentValidation.Results;
 using HexagonalSkeleton.Application.Command;
 using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Test.Unit.User.Domain;
 using Moq;
@@ -46,22 +46,16 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
                 .Returns(Task.CompletedTask);
 
             // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
-
-            // Assert
-            result.Should().NotBeNull();
-            result.IsValid.Should().BeTrue();
-            result.Errors.Should().BeEmpty();
+            var result = await _handler.Handle(command, CancellationToken.None);            // Assert
+            Assert.NotNull(result);
 
             // Verify the user was soft deleted
-            user.IsDeleted.Should().BeTrue();
-            user.DeletedAt.Should().NotBeNull();
+            Assert.True(user.IsDeleted);
+            Assert.NotNull(user.DeletedAt);
 
             _mockUserWriteRepository.Verify(x => x.UpdateAsync(user, It.IsAny<CancellationToken>()), Times.Once);
-        }
-
-        [Fact]
-        public async Task Handle_WithInvalidCommand_ShouldReturnValidationErrors()
+        }        [Fact]
+        public async Task Handle_WithInvalidCommand_ShouldThrowValidationException()
         {
             // Arrange
             var command = new SoftDeleteUserCommand(0);
@@ -74,21 +68,15 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
             _mockValidator.Setup(x => x.ValidateAsync(command, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(validationResult);
 
-            // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
-
-            // Assert
-            result.Should().NotBeNull();
-            result.IsValid.Should().BeFalse();
-            result.Errors.Should().ContainKey("Id");
-            result.Errors["Id"].Should().Contain("Id must be greater than 0");
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<HexagonalSkeleton.Application.Exceptions.ValidationException>(() =>
+                _handler.Handle(command, CancellationToken.None));            Assert.True(exception.Errors.ContainsKey("Id"));
+            Assert.Contains("Id must be greater than 0", exception.Errors["Id"]);
 
             _mockUserReadRepository.Verify(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
             _mockUserWriteRepository.Verify(x => x.UpdateAsync(It.IsAny<DomainUser>(), It.IsAny<CancellationToken>()), Times.Never);
-        }
-
-        [Fact]
-        public async Task Handle_WithNonExistentUser_ShouldReturnUserNotFoundError()
+        }        [Fact]
+        public async Task Handle_WithNonExistentUser_ShouldThrowNotFoundException()
         {
             // Arrange
             var command = new SoftDeleteUserCommand(999);
@@ -99,14 +87,12 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
             _mockUserReadRepository.Setup(x => x.GetByIdAsync(command.Id, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((DomainUser?)null);
 
-            // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<NotFoundException>(() =>
+                _handler.Handle(command, CancellationToken.None));
 
-            // Assert
-            result.Should().NotBeNull();
-            result.IsValid.Should().BeFalse();
-            result.Errors.Should().ContainKey("User");
-            result.Errors["User"].Should().Contain("User not found");
+            Assert.Contains("User", exception.Message);
+            Assert.Contains("999", exception.Message);
 
             _mockUserWriteRepository.Verify(x => x.UpdateAsync(It.IsAny<DomainUser>(), It.IsAny<CancellationToken>()), Times.Never);
         }
@@ -162,12 +148,9 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
                 .Returns(Task.CompletedTask);
 
             // Act
-            var result = await _handler.Handle(command, CancellationToken.None);
-
-            // Assert
-            result.Should().NotBeNull();
-            result.IsValid.Should().BeTrue();
-            user.IsDeleted.Should().BeTrue();
+            var result = await _handler.Handle(command, CancellationToken.None);            // Assert
+            Assert.NotNull(result);
+            Assert.True(user.IsDeleted);
             _mockUserWriteRepository.Verify(x => x.UpdateAsync(user, It.IsAny<CancellationToken>()), Times.Once);
         }
 
@@ -191,7 +174,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _handler.Handle(command, CancellationToken.None));
 
-            exception.Message.Should().Be("Database connection error");
+            Assert.Equal("Database connection error", exception.Message);
         }
 
         [Fact]
@@ -211,12 +194,13 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
             // Act
             await _handler.Handle(command, CancellationToken.None);
 
-            // Assert
-            user.IsDeleted.Should().BeTrue();
-            user.DeletedAt.Should().NotBe(initialDeletedAt);
-            user.DeletedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
-            user.UpdatedAt.Should().NotBeNull();
-            user.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+            // Assert            Assert.True(user.IsDeleted);
+            Assert.NotEqual(initialDeletedAt, user.DeletedAt);
+            Assert.True(user.DeletedAt.HasValue);
+            Assert.True(DateTime.UtcNow.Subtract(user.DeletedAt.Value) < TimeSpan.FromSeconds(1));
+            Assert.NotNull(user.UpdatedAt);
+            Assert.True(user.UpdatedAt.HasValue);
+            Assert.True(DateTime.UtcNow.Subtract(user.UpdatedAt.Value) < TimeSpan.FromSeconds(1));
         }
     }
 }

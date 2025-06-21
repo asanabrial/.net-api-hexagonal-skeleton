@@ -1,10 +1,13 @@
 using System.ComponentModel.DataAnnotations;
+using AutoMapper;
+using HexagonalSkeleton.Application.Command;
 
 namespace HexagonalSkeleton.API.Models.Users
 {
     /// <summary>
     /// Request model for creating a new user
     /// </summary>
+    [AutoMap(typeof(RegisterUserCommand), ReverseMap = true)]
     public class CreateUserRequest
     {
         /// <summary>
