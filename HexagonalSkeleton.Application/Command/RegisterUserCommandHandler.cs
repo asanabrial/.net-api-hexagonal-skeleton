@@ -21,66 +21,54 @@ namespace HexagonalSkeleton.Application.Command
         {
             var result = await validator.ValidateAsync(request, cancellationToken);
             if (!result.IsValid)
-                throw new Exceptions.ValidationException(result.ToDictionary());            try
+                throw new Exceptions.ValidationException(result.ToDictionary());            // 1. Validate password strength (domain business rule)
+            UserDomainService.ValidatePasswordStrength(request.Password);
+
+            // 2. Check uniqueness (domain business rule)
+            var emailExists = await userReadRepository.ExistsByEmailAsync(request.Email, cancellationToken);
+            var phoneExists = await userReadRepository.ExistsByPhoneNumberAsync(request.PhoneNumber, cancellationToken);
+            UserDomainService.ValidateUserUniqueness(emailExists, phoneExists, request.Email, request.PhoneNumber);
+
+            // 3. Create user (domain logic)
+            var passwordSalt = authenticationService.GenerateSalt();
+            var passwordHash = authenticationService.HashPassword(request.Password, passwordSalt);
+
+            var user = UserDomainService.CreateUser(
+                request.Email,
+                passwordSalt,
+                passwordHash,
+                request.FirstName,
+                request.LastName,
+                request.Birthdate,
+                request.PhoneNumber,
+                request.Latitude,
+                request.Longitude,
+                request.AboutMe);
+
+            // 4. Persist and complete workflow
+            var userId = await userWriteRepository.CreateAsync(user, cancellationToken);
+            
+            // Get the complete user data with generated values (ID, timestamps, etc.)
+            var createdUser = await userReadRepository.GetByIdAsync(userId, cancellationToken);
+            if (createdUser == null)
+                throw new InvalidOperationException("Failed to retrieve created user");
+            
+            var jwtToken = await authenticationService.GenerateJwtTokenAsync(userId, cancellationToken);
+            await publisher.Publish(new LoginEvent(userId), cancellationToken);
+            
+            return new RegisterUserCommandResult(jwtToken)
             {
-                // 1. Validate password strength (domain business rule)
-                UserDomainService.ValidatePasswordStrength(request.Password);
-
-                // 2. Check uniqueness (domain business rule)
-                var emailExists = await userReadRepository.ExistsByEmailAsync(request.Email, cancellationToken);
-                var phoneExists = await userReadRepository.ExistsByPhoneNumberAsync(request.PhoneNumber, cancellationToken);
-                UserDomainService.ValidateUserUniqueness(emailExists, phoneExists, request.Email, request.PhoneNumber);
-
-                // 3. Create user (domain logic)
-                var passwordSalt = authenticationService.GenerateSalt();
-                var passwordHash = authenticationService.HashPassword(request.Password, passwordSalt);
-
-                var user = UserDomainService.CreateUser(
-                    request.Email,
-                    passwordSalt,
-                    passwordHash,
-                    request.FirstName,
-                    request.LastName,
-                    request.Birthdate,
-                    request.PhoneNumber,
-                    request.Latitude,
-                    request.Longitude,
-                    request.AboutMe);
-
-                // 4. Persist and complete workflow
-                var userId = await userWriteRepository.CreateAsync(user, cancellationToken);
-                
-                // Get the complete user data with generated values (ID, timestamps, etc.)
-                var createdUser = await userReadRepository.GetByIdAsync(userId, cancellationToken);
-                if (createdUser == null)
-                    throw new InvalidOperationException("Failed to retrieve created user");
-                
-                var jwtToken = await authenticationService.GenerateJwtTokenAsync(userId, cancellationToken);
-                await publisher.Publish(new LoginEvent(userId), cancellationToken);
-                
-                return new RegisterUserCommandResult(jwtToken)
-                {
-                    Id = createdUser.Id,
-                    FirstName = createdUser.FullName.FirstName,
-                    LastName = createdUser.FullName.LastName,
-                    Email = createdUser.Email.Value,
-                    PhoneNumber = createdUser.PhoneNumber?.Value,
-                    Birthdate = createdUser.Birthdate,
-                    Latitude = createdUser.Location?.Latitude,
-                    Longitude = createdUser.Location?.Longitude,
-                    AboutMe = createdUser.AboutMe,
-                    CreatedAt = createdUser.CreatedAt
-                };
-            }            catch (UserDataNotUniqueException)
-            {
-                // Transform domain exception to application exception
-                throw new ConflictException("Email or phone number already exists");
-            }
-            catch (WeakPasswordException)
-            {
-                // Transform domain exception to application exception
-                throw new Exceptions.ValidationException("password", "Password does not meet strength requirements");
-            }
+                Id = createdUser.Id,
+                FirstName = createdUser.FullName.FirstName,
+                LastName = createdUser.FullName.LastName,
+                Email = createdUser.Email.Value,
+                PhoneNumber = createdUser.PhoneNumber?.Value,
+                Birthdate = createdUser.Birthdate,
+                Latitude = createdUser.Location?.Latitude,
+                Longitude = createdUser.Location?.Longitude,
+                AboutMe = createdUser.AboutMe,
+                CreatedAt = createdUser.CreatedAt
+            };
         }
     }
 }
