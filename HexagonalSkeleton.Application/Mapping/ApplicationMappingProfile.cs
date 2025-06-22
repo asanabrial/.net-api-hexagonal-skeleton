@@ -63,16 +63,30 @@ namespace HexagonalSkeleton.Application.Mapping
 
             CreateMap<User, UpdateProfileUserCommandResult>()
                 .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
-                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName));
-
-            // Query results (full user data)
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName));            // Query results (full user data)
             CreateMap<User, GetUserQueryResult>()
                 .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
-                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName));
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email.Value))
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber != null ? src.PhoneNumber.Value : null))
+                .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Latitude : (double?)null))
+                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Longitude : (double?)null))
+                .ForMember(dest => dest.AboutMe, opt => opt.MapFrom(src => src.AboutMe))
+                .ForMember(dest => dest.ProfileImageName, opt => opt.MapFrom(src => src.ProfileImageName))
+                .ForMember(dest => dest.LastLogin, opt => opt.MapFrom(src => src.LastLogin))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
 
             CreateMap<User, UserDto>()
                 .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
-                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName));
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email.Value))
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber != null ? src.PhoneNumber.Value : null))
+                .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Latitude : (double?)null))
+                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Longitude : (double?)null))
+                .ForMember(dest => dest.AboutMe, opt => opt.MapFrom(src => src.AboutMe))
+                .ForMember(dest => dest.ProfileImageName, opt => opt.MapFrom(src => src.ProfileImageName))
+                .ForMember(dest => dest.LastLogin, opt => opt.MapFrom(src => src.LastLogin))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
         }        /// <summary>
         /// Configures collection mappings
         /// </summary>

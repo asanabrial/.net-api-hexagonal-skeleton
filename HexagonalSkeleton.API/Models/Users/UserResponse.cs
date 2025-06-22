@@ -9,6 +9,7 @@ namespace HexagonalSkeleton.API.Models.Users
     /// Response model for user operations
     /// </summary>
     [AutoMap(typeof(GetUserQueryResult), ReverseMap = true)]
+    [AutoMap(typeof(UserDto), ReverseMap = true)]
     [AutoMap(typeof(UpdateUserCommandResult), ReverseMap = true)]
     [AutoMap(typeof(UpdateProfileUserCommandResult), ReverseMap = true)]
     public class UserResponse : BaseApiResponse
@@ -41,12 +42,30 @@ namespace HexagonalSkeleton.API.Models.Users
         /// <summary>
         /// User's phone number
         /// </summary>
-        public string? PhoneNumber { get; set; }
-
-        /// <summary>
+        public string? PhoneNumber { get; set; }        /// <summary>
         /// User's birth date
         /// </summary>
         public DateTime? Birthdate { get; set; }
+
+        /// <summary>
+        /// User's latitude coordinate
+        /// </summary>
+        public double? Latitude { get; set; }
+
+        /// <summary>
+        /// User's longitude coordinate
+        /// </summary>
+        public double? Longitude { get; set; }
+
+        /// <summary>
+        /// User's about me description
+        /// </summary>
+        public string? AboutMe { get; set; }
+
+        /// <summary>
+        /// User's profile image file name
+        /// </summary>
+        public string? ProfileImageName { get; set; }
 
         /// <summary>
         /// Last login timestamp
