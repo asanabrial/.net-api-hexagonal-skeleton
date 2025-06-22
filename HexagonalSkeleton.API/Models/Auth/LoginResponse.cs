@@ -28,11 +28,14 @@ namespace HexagonalSkeleton.API.Models.Auth
         /// <summary>
         /// User information
         /// </summary>
-        public UserInfo User { get; set; } = new();
-    }    /// <summary>
+        public UserInfoResponse User { get; set; } = new();
+    }
+
+    /// <summary>
     /// Basic user information included in login response
     /// </summary>
-    public class UserInfo
+    [AutoMap(typeof(RegisterUserCommandResult), ReverseMap = true)]
+    public class UserInfoResponse
     {
         public int Id { get; set; }
         public string FirstName { get; set; } = string.Empty;

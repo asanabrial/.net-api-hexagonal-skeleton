@@ -17,22 +17,21 @@ namespace HexagonalSkeleton.API.Mapping
         {
             // Solo mapeos que requieren configuración especial
             CreateMap<GetAllUsersQueryResult, UsersResponse>()
-                .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src.Users));            // Mapeos especiales para Login/Register que requieren UserInfo  
+                .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src.Users));            // Mapeos especiales para Login/Register con estructura anidada
             CreateMap<LoginCommandResult, LoginResponse>()
-                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src))
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User))
                 .ForMember(dest => dest.TokenType, opt => opt.MapFrom(src => "Bearer"))
                 .ForMember(dest => dest.ExpiresIn, opt => opt.MapFrom(src => 0))
                 .ForMember(dest => dest.Success, opt => opt.MapFrom(src => true));            
             
             CreateMap<RegisterUserCommandResult, LoginResponse>()
-                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src))
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User))
                 .ForMember(dest => dest.TokenType, opt => opt.MapFrom(src => "Bearer"))
                 .ForMember(dest => dest.ExpiresIn, opt => opt.MapFrom(src => 0))
                 .ForMember(dest => dest.Success, opt => opt.MapFrom(src => true));
                 
-            // Mapeo del resultado de login y registro a UserInfo
-            CreateMap<LoginCommandResult, UserInfo>();
-            CreateMap<RegisterUserCommandResult, UserInfo>();
+            // Mapeo de UserInfoResult a UserInfoResponse de la API
+            CreateMap<UserInfoResult, HexagonalSkeleton.API.Models.Auth.UserInfoResponse>();
 
             // Mapeos especiales para Delete que requieren configuración de campos
             CreateMap<HardDeleteUserCommandResult, DeleteUserResponse>()

@@ -36,33 +36,13 @@ namespace HexagonalSkeleton.API.Controllers
         /// </summary>
         /// <param name="request">User registration data</param>
         /// <returns>Created user information</returns>
-        [HttpPost]        [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status201Created)]        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Register(CreateUserRequest request)
+        [HttpPost]        [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status201Created)]        [ProducesResponseType(StatusCodes.Status400BadRequest)]        public async Task<IActionResult> Register(CreateUserRequest request)
         {
             var command = mapper.Map<RegisterUserCommand>(request);
             var result = await mediator.Send(command);
             
-            // Manual mapping ensures all properties are correctly mapped
-            var response = new LoginResponse
-            {
-                AccessToken = result.AccessToken,
-                TokenType = "Bearer",
-                ExpiresIn = 0,
-                User = new UserInfo
-                {
-                    Id = result.Id,
-                    FirstName = result.FirstName,
-                    LastName = result.LastName,
-                    Email = result.Email,
-                    PhoneNumber = result.PhoneNumber,
-                    Birthdate = result.Birthdate,
-                    Latitude = result.Latitude,
-                    Longitude = result.Longitude,
-                    AboutMe = result.AboutMe,
-                    CreatedAt = result.CreatedAt
-                },
-                Success = true
-            };
+            // Use AutoMapper for the entire response now that we have nested structure
+            var response = mapper.Map<LoginResponse>(result);
             
             return Created("", response);
         }/// <summary>

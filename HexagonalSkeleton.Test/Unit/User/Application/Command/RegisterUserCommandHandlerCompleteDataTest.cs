@@ -94,54 +94,54 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
                 .Setup(r => r.GetByIdAsync(userId, cancellationToken))
                 .ReturnsAsync(createdUser);            _mockAuthenticationService
                 .Setup(a => a.GenerateJwtTokenAsync(userId, cancellationToken))
-                .ReturnsAsync(jwtToken);
-
-            // Setup AutoMapper mock to return a properly mapped result
+                .ReturnsAsync(jwtToken);            // Setup AutoMapper mock to return a properly mapped result with nested structure
             _mockMapper
                 .Setup(m => m.Map<RegisterUserCommandResult>(It.IsAny<HexagonalSkeleton.Domain.User>()))
                 .Returns((HexagonalSkeleton.Domain.User user) => new RegisterUserCommandResult(string.Empty)
                 {
-                    Id = user.Id,
-                    FirstName = user.FullName.FirstName,
-                    LastName = user.FullName.LastName,
-                    Email = user.Email.Value,
-                    PhoneNumber = user.PhoneNumber?.Value,
-                    Birthdate = user.Birthdate,
-                    Latitude = user.Location?.Latitude,
-                    Longitude = user.Location?.Longitude,
-                    AboutMe = user.AboutMe,
-                    CreatedAt = user.CreatedAt
+                    User = new UserInfoResult
+                    {
+                        Id = user.Id,
+                        FirstName = user.FullName.FirstName,
+                        LastName = user.FullName.LastName,
+                        Email = user.Email.Value,
+                        PhoneNumber = user.PhoneNumber?.Value,
+                        Birthdate = user.Birthdate,
+                        Latitude = user.Location?.Latitude,
+                        Longitude = user.Location?.Longitude,
+                        AboutMe = user.AboutMe,
+                        CreatedAt = user.CreatedAt
+                    }
                 });
 
             // Act
-            var result = await _handler.Handle(command, cancellationToken);
-
-            // Assert - Verify ALL user data is returned
+            var result = await _handler.Handle(command, cancellationToken);            // Assert - Verify ALL user data is returned
             Assert.NotNull(result);
             Assert.Equal(jwtToken, result.AccessToken);
+            Assert.NotNull(result.User);
             
             // Verify user identification
-            Assert.Equal(userId, result.Id);
+            Assert.Equal(userId, result.User.Id);
             
             // Verify names
-            Assert.Equal("John", result.FirstName);
-            Assert.Equal("Doe", result.LastName);
-            Assert.Equal("John Doe", result.FullName);
+            Assert.Equal("John", result.User.FirstName);
+            Assert.Equal("Doe", result.User.LastName);
+            Assert.Equal("John Doe", result.User.FullName);
             
             // Verify contact information
-            Assert.Equal("complete.test@example.com", result.Email);
-            Assert.Equal("+1234567890", result.PhoneNumber);
+            Assert.Equal("complete.test@example.com", result.User.Email);
+            Assert.Equal("+1234567890", result.User.PhoneNumber);
             
             // Verify personal information
-            Assert.Equal(command.Birthdate, result.Birthdate);
-            Assert.Equal("Test user", result.AboutMe);
+            Assert.Equal(command.Birthdate, result.User.Birthdate);
+            Assert.Equal("Test user", result.User.AboutMe);
             
             // Verify location
-            Assert.Equal(40.7128, result.Latitude);
-            Assert.Equal(-74.0060, result.Longitude);
+            Assert.Equal(40.7128, result.User.Latitude);
+            Assert.Equal(-74.0060, result.User.Longitude);
             
             // Verify timestamps
-            Assert.True(result.CreatedAt > DateTime.MinValue);
+            Assert.True(result.User.CreatedAt > DateTime.MinValue);
             
             // Verify repository calls were made correctly
             _mockUserWriteRepository.Verify(r => r.CreateAsync(

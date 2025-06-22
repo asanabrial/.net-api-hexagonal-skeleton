@@ -70,23 +70,24 @@ public class UserWorkflowIntegrationTest
             .Setup(r => r.CreateAsync(It.IsAny<HexagonalSkeleton.Domain.User>(), cancellationToken))
             .ReturnsAsync(userId);        mockAuthenticationService
             .Setup(a => a.GenerateJwtTokenAsync(userId, cancellationToken))
-            .ReturnsAsync(jwtToken);
-
-        // Setup AutoMapper mock to return a properly mapped result
+            .ReturnsAsync(jwtToken);        // Setup AutoMapper mock to return a properly mapped result with nested structure
         mockMapper
             .Setup(m => m.Map<RegisterUserCommandResult>(It.IsAny<HexagonalSkeleton.Domain.User>()))
             .Returns((HexagonalSkeleton.Domain.User user) => new RegisterUserCommandResult(string.Empty)
             {
-                Id = user.Id,
-                FirstName = user.FullName.FirstName,
-                LastName = user.FullName.LastName,
-                Email = user.Email.Value,
-                PhoneNumber = user.PhoneNumber?.Value,
-                Birthdate = user.Birthdate,
-                Latitude = user.Location?.Latitude,
-                Longitude = user.Location?.Longitude,
-                AboutMe = user.AboutMe,
-                CreatedAt = user.CreatedAt
+                User = new UserInfoResult
+                {
+                    Id = user.Id,
+                    FirstName = user.FullName.FirstName,
+                    LastName = user.FullName.LastName,
+                    Email = user.Email.Value,
+                    PhoneNumber = user.PhoneNumber?.Value,
+                    Birthdate = user.Birthdate,
+                    Latitude = user.Location?.Latitude,
+                    Longitude = user.Location?.Longitude,
+                    AboutMe = user.AboutMe,
+                    CreatedAt = user.CreatedAt
+                }
             });
 
         // Set up the user retrieval mock for the registration handler
@@ -102,13 +103,12 @@ public class UserWorkflowIntegrationTest
             .ReturnsAsync(createdUser);
 
         // Act - Execute the registration command
-        var registrationResult = await registerHandler.Handle(command, cancellationToken);
-
-        // Assert - Verify registration was successful
+        var registrationResult = await registerHandler.Handle(command, cancellationToken);        // Assert - Verify registration was successful
         Assert.NotNull(registrationResult);
         Assert.NotNull(registrationResult.AccessToken);
-        Assert.Equal(command.Email, registrationResult.Email);
-        Assert.Equal($"{command.FirstName} {command.LastName}", registrationResult.FullName);
+        Assert.NotNull(registrationResult.User);
+        Assert.Equal(command.Email, registrationResult.User.Email);
+        Assert.Equal($"{command.FirstName} {command.LastName}", registrationResult.User.FullName);
 
         // Verify the domain service was used correctly
         mockUserWriteRepository.Verify(r => r.CreateAsync(It.Is<HexagonalSkeleton.Domain.User>(u => 

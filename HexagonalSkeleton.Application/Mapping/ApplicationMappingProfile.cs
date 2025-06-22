@@ -33,27 +33,28 @@ namespace HexagonalSkeleton.Application.Mapping
 
             // PhoneNumber Value Object mappings
             CreateMap<PhoneNumber, string>().ConvertUsing(vo => vo != null ? vo.Value : string.Empty);
-        }
-
-        /// <summary>
+        }        /// <summary>
         /// Configures User aggregate mappings to various result DTOs
         /// </summary>
         private void ConfigureUserMappings()
         {
-            // Authentication result mappings (with AccessToken and full user data)
-            CreateMap<User, LoginCommandResult>()
-                .ForMember(dest => dest.AccessToken, opt => opt.Ignore()) // Will be set manually after mapping
+            // User to UserInfoResult mapping (for nested structures)
+            CreateMap<User, UserInfoResult>()
                 .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
                 .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email.Value))
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber != null ? src.PhoneNumber.Value : null))
                 .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Latitude : (double?)null))
                 .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Longitude : (double?)null));
 
+            // Authentication result mappings (with AccessToken and nested user data)
+            CreateMap<User, LoginCommandResult>()
+                .ForMember(dest => dest.AccessToken, opt => opt.Ignore()) // Will be set manually after mapping
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src));
+
             CreateMap<User, RegisterUserCommandResult>()
                 .ForMember(dest => dest.AccessToken, opt => opt.Ignore()) // Will be set manually after mapping
-                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
-                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName))
-                .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Latitude : (double?)null))
-                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Longitude : (double?)null));
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src));
 
             // Update command results (limited properties)
             CreateMap<User, UpdateUserCommandResult>()
