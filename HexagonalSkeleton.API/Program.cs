@@ -1,6 +1,7 @@
 using FluentValidation;
 using HexagonalSkeleton.API.Config;
 using HexagonalSkeleton.API.Handler;
+using HexagonalSkeleton.API.Handler.ExceptionMapping;
 using HexagonalSkeleton.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -22,8 +23,15 @@ builder.Host.UseSerilog(configureLogger: (context, configuration) => configurati
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddExceptionHandler<MinimalExceptionHandler>();
+// Exception handling services - Using modular architecture
+builder.Services.AddExceptionHandler<ExceptionHandler>();
 builder.Services.AddProblemDetails();
+
+// Exception mapping services - Using Singleton lifetime
+builder.Services.AddSingleton<ExceptionMappingService>();
+builder.Services.AddSingleton<IExceptionMapper, DomainExceptionMapper>();
+builder.Services.AddSingleton<IExceptionMapper, ApplicationExceptionMapper>();
+builder.Services.AddSingleton<IExceptionMapper, ValidationExceptionMapper>();
 
 builder.Services.AddOptions();
 

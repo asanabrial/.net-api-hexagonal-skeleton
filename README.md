@@ -157,7 +157,7 @@ This skeleton implements modern .NET API best practices:
 #### **Exception-Based Error Handling**
 
 -   Custom exceptions map to appropriate HTTP status codes
--   `MinimalExceptionHandler` handles application exceptions globally
+-   `ExceptionHandler` handles application exceptions globally using a modular mapper system
 -   No more `IsValid`/`Errors` patterns - exceptions bubble up naturally
 
 #### **API Model Organization**
