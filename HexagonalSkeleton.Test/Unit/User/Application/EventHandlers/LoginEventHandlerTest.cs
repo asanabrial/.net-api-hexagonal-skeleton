@@ -5,7 +5,7 @@ using HexagonalSkeleton.Application.Event;
 using HexagonalSkeleton.Application.EventHandlers;
 using HexagonalSkeleton.Domain.Ports;
 
-namespace HexagonalSkeleton.Test.Unit.User.Application.Event;
+namespace HexagonalSkeleton.Test.Unit.User.Application.EventHandlers;
 
 public class LoginEventHandlerTest
 {
@@ -30,20 +30,28 @@ public class LoginEventHandlerTest
 
         _mockUserWriteRepository
             .Setup(r => r.SetLastLoginAsync(userId, cancellationToken))
-            .Returns(Task.CompletedTask);
-
-        // Act
+            .Returns(Task.CompletedTask);        // Act
         await _handler.Handle(loginEvent, cancellationToken);
 
         // Assert
         _mockUserWriteRepository.Verify(r => r.SetLastLoginAsync(userId, cancellationToken), Times.Once);
         
-        // Verify logging occurred
+        // Verify processing started log message
         _mockLogger.Verify(
             x => x.Log(
                 LogLevel.Information,
                 It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"User logged in. UserId: {userId}")),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"Processing login event for user {userId}")),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+            
+        // Verify success log message
+        _mockLogger.Verify(
+            x => x.Log(
+                LogLevel.Information,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"Login event processed successfully for user {userId}")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);

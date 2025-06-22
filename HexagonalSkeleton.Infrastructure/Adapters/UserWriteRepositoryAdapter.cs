@@ -1,6 +1,7 @@
 using AutoMapper;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
+using HexagonalSkeleton.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using MediatR;
 
@@ -22,19 +23,13 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
             _dbContext = dbContext;
             _mapper = mapper;
             _mediator = mediator;
-        }
-
-        public async Task<int> CreateAsync(User user, CancellationToken cancellationToken = default)
+        }        public async Task<int> CreateAsync(User user, CancellationToken cancellationToken = default)
         {
             var entity = _mapper.Map<UserEntity>(user);
             _dbContext.Users.Add(entity);
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
-            // The ID is handled by the mapping profile, so no need to set it manually
-
-            // Publish domain events after successful save
-            await PublishDomainEventsAsync(user, cancellationToken);
+            // Save changes and publish domain events atomically
+            await SaveChangesAndPublishEventsAsync(new[] { user }, cancellationToken);
 
             return entity.Id;
         }
@@ -44,11 +39,9 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
             var entity = _mapper.Map<UserEntity>(user);
             _dbContext.Users.Update(entity);
             
-            await _dbContext.SaveChangesAsync(cancellationToken);
-            
-            // Publish domain events after successful save
-            await PublishDomainEventsAsync(user, cancellationToken);
-        }        public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
+            // Save changes and publish domain events atomically
+            await SaveChangesAndPublishEventsAsync(new[] { user }, cancellationToken);
+        }public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
         {
             var entity = await _dbContext.Users.FindAsync(id);
             if (entity != null)
@@ -56,16 +49,24 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
                 _dbContext.Users.Remove(entity);
                 await _dbContext.SaveChangesAsync(cancellationToken);
             }
-        }
-
-        public async Task SetLastLoginAsync(int userId, CancellationToken cancellationToken = default)
+        }        public async Task SetLastLoginAsync(int userId, CancellationToken cancellationToken = default)
         {
             var entity = await _dbContext.Users.FindAsync(userId);
             if (entity != null)
             {
-                entity.LastLogin = DateTime.UtcNow;
-                entity.UpdatedAt = DateTime.UtcNow;
-                await _dbContext.SaveChangesAsync(cancellationToken);
+                // Map to domain aggregate to trigger domain events
+                var user = _mapper.Map<User>(entity);
+                if (user != null)
+                {
+                    // Record login in domain - this will raise UserLoggedInEvent
+                    user.RecordLogin();
+                    
+                    // Map back to entity
+                    _mapper.Map(user, entity);
+                    
+                    // Save changes and publish domain events atomically
+                    await SaveChangesAndPublishEventsAsync(new[] { user }, cancellationToken);
+                }
             }
         }
 
@@ -78,9 +79,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
         public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             await _dbContext.SaveChangesAsync(cancellationToken);
-        }
-
-        /// <summary>
+        }        /// <summary>
         /// Publish domain events from the aggregate
         /// </summary>
         private async Task PublishDomainEventsAsync(User user, CancellationToken cancellationToken)
@@ -93,6 +92,21 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
             }
             
             user.ClearDomainEvents();
+        }
+
+        /// <summary>
+        /// Save changes and publish domain events from all aggregates atomically
+        /// </summary>
+        private async Task SaveChangesAndPublishEventsAsync(IEnumerable<User> aggregates, CancellationToken cancellationToken)
+        {
+            // Save changes to database first
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            // Publish domain events after successful save
+            foreach (var aggregate in aggregates)
+            {
+                await PublishDomainEventsAsync(aggregate, cancellationToken);
+            }
         }
     }
 }
