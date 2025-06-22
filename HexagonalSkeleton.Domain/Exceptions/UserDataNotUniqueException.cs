@@ -1,15 +1,6 @@
 namespace HexagonalSkeleton.Domain.Exceptions
 {
     /// <summary>
-    /// Base exception for all domain-related business rule violations
-    /// </summary>
-    public abstract class DomainException : Exception
-    {
-        protected DomainException(string message) : base(message) { }
-        protected DomainException(string message, Exception innerException) : base(message, innerException) { }
-    }
-
-    /// <summary>
     /// Exception thrown when attempting to create a user with data that already exists
     /// </summary>
     public class UserDataNotUniqueException : DomainException
@@ -29,17 +20,6 @@ namespace HexagonalSkeleton.Domain.Exceptions
             if (!string.IsNullOrEmpty(phoneNumber))
                 return $"User with email '{email}' or phone number '{phoneNumber}' already exists";
             return $"User with email '{email}' already exists";
-        }
-    }
-
-    /// <summary>
-    /// Exception thrown when password doesn't meet business requirements
-    /// </summary>
-    public class WeakPasswordException : DomainException
-    {
-        public WeakPasswordException() 
-            : base("Password does not meet strength requirements")
-        {
         }
     }
 }
