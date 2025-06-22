@@ -20,29 +20,31 @@ namespace HexagonalSkeleton.Test.Integration
             {
                 builder.ConfigureServices(services =>
                 {
-                    // Remove the existing DbContext registration
-                    var dbContextDescriptor = services.SingleOrDefault(
-                        d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-                    if (dbContextDescriptor != null)
-                        services.Remove(dbContextDescriptor);
+                    // Remove all DbContext related registrations
+                    var descriptors = services.Where(d => 
+                        d.ServiceType == typeof(DbContextOptions<AppDbContext>) ||
+                        d.ServiceType == typeof(AppDbContext) ||
+                        d.ServiceType.IsGenericType && 
+                        d.ServiceType.GetGenericTypeDefinition() == typeof(DbContextOptions<>) ||
+                        d.ImplementationType?.FullName?.Contains("DbContext") == true ||
+                        d.ServiceType.FullName?.Contains("DbContext") == true)
+                        .ToList();
+                    
+                    foreach (var descriptor in descriptors)
+                    {
+                        services.Remove(descriptor);
+                    }
 
-                    var dbContextServiceDescriptor = services.SingleOrDefault(
-                        d => d.ServiceType == typeof(AppDbContext));
-                    if (dbContextServiceDescriptor != null)
-                        services.Remove(dbContextServiceDescriptor);
-
-                    // Add in-memory database for testing
+                    // Add in-memory database for testing with scoped lifetime
                     services.AddDbContext<AppDbContext>(options =>
                     {
                         options.UseInMemoryDatabase("TestDb" + Guid.NewGuid());
-                    });
+                    }, ServiceLifetime.Scoped);
                 });
             });
             
             _client = _factory.CreateClient();
-        }
-
-        [Fact]
+        }        [Fact]
         public async Task RegisterUser_ShouldReturnAllUserData()
         {            // Arrange
             var request = new CreateUserRequest
@@ -72,6 +74,10 @@ namespace HexagonalSkeleton.Test.Integration
             response.EnsureSuccessStatusCode();
             
             var responseContent = await response.Content.ReadAsStringAsync();
+            
+            // Debug: Print the actual response to understand the structure
+            System.Console.WriteLine($"Response content: {responseContent}");
+            
             var loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent, new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -85,7 +91,7 @@ namespace HexagonalSkeleton.Test.Integration
 
             // Verify all user data is returned
             Assert.NotNull(loginResponse.User);
-            Assert.True(loginResponse.User.Id > 0);
+            Assert.True(loginResponse.User.Id > 0, $"Expected User.Id > 0, but got {loginResponse.User.Id}");
             Assert.Equal("John", loginResponse.User.FirstName);
             Assert.Equal("Doe", loginResponse.User.LastName);
             Assert.Equal("John Doe", loginResponse.User.FullName);

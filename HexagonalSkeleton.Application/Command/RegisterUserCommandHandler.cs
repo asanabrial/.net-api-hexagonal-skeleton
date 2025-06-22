@@ -46,9 +46,7 @@ namespace HexagonalSkeleton.Application.Command
                 request.AboutMe);
 
             // 4. Persist and complete workflow
-            var userId = await userWriteRepository.CreateAsync(user, cancellationToken);
-            
-            // Get the complete user data with generated values (ID, timestamps, etc.)
+            var userId = await userWriteRepository.CreateAsync(user, cancellationToken);            // Get the complete user data with generated values (ID, timestamps, etc.)
             var createdUser = await userReadRepository.GetByIdAsync(userId, cancellationToken);
             if (createdUser == null)
                 throw new InvalidOperationException("Failed to retrieve created user");

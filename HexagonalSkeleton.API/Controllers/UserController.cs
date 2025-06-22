@@ -36,14 +36,35 @@ namespace HexagonalSkeleton.API.Controllers
         /// </summary>
         /// <param name="request">User registration data</param>
         /// <returns>Created user information</returns>
-        [HttpPost]
-        [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [HttpPost]        [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status201Created)]        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register(CreateUserRequest request)
         {
             var command = mapper.Map<RegisterUserCommand>(request);
             var result = await mediator.Send(command);
-            return Created("", mapper.Map<LoginResponse>(result));
+            
+            // Manual mapping ensures all properties are correctly mapped
+            var response = new LoginResponse
+            {
+                AccessToken = result.AccessToken,
+                TokenType = "Bearer",
+                ExpiresIn = 0,
+                User = new UserInfo
+                {
+                    Id = result.Id,
+                    FirstName = result.FirstName,
+                    LastName = result.LastName,
+                    Email = result.Email,
+                    PhoneNumber = result.PhoneNumber,
+                    Birthdate = result.Birthdate,
+                    Latitude = result.Latitude,
+                    Longitude = result.Longitude,
+                    AboutMe = result.AboutMe,
+                    CreatedAt = result.CreatedAt
+                },
+                Success = true
+            };
+            
+            return Created("", response);
         }/// <summary>
         /// Update user information (full update)
         /// </summary>

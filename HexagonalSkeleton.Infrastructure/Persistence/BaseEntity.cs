@@ -1,4 +1,6 @@
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HexagonalSkeleton.Infrastructure.Persistence
 {
@@ -16,13 +18,13 @@ namespace HexagonalSkeleton.Infrastructure.Persistence
 
         [DefaultValue(false)]
         bool IsDeleted { get; set; }
-    }
-
-    /// <summary>
+    }    /// <summary>
     /// Base implementation for database entities.
     /// </summary>
     public abstract class BaseEntity : IBaseEntity
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
