@@ -4,18 +4,21 @@ using HexagonalSkeleton.Application.Query;
 using HexagonalSkeleton.Application.Dto;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
+using AutoMapper;
 
 namespace HexagonalSkeleton.Test.Unit.User.Application.Query;
 
 public class GetAllUsersQueryHandlerTest
 {
     private readonly Mock<IUserReadRepository> _mockUserReadRepository;
+    private readonly Mock<IMapper> _mockMapper;
     private readonly GetAllUsersQueryHandler _handler;
 
     public GetAllUsersQueryHandlerTest()
     {
         _mockUserReadRepository = new Mock<IUserReadRepository>();
-        _handler = new GetAllUsersQueryHandler(_mockUserReadRepository.Object);
+        _mockMapper = new Mock<IMapper>();
+        _handler = new GetAllUsersQueryHandler(_mockUserReadRepository.Object, _mockMapper.Object);
     }
 
     [Fact]
@@ -27,11 +30,37 @@ public class GetAllUsersQueryHandlerTest
         {
             TestHelper.CreateTestUser(),
             TestHelper.CreateTestUser(id: 2, email: "user2@example.com", phoneNumber: "+1234567891")
+        };        _mockUserReadRepository
+            .Setup(r => r.GetAllAsync(cancellationToken))
+            .ReturnsAsync(users);
+
+        var expectedUserDtos = new List<UserDto>
+        {
+            new UserDto
+            {
+                Id = users[0].Id,
+                FirstName = users[0].FullName.FirstName,
+                LastName = users[0].FullName.LastName,
+                Birthdate = users[0].Birthdate,
+                Email = users[0].Email.Value,
+                LastLogin = users[0].LastLogin
+            },
+            new UserDto
+            {
+                Id = users[1].Id,
+                FirstName = users[1].FullName.FirstName,
+                LastName = users[1].FullName.LastName,
+                Birthdate = users[1].Birthdate,
+                Email = users[1].Email.Value,
+                LastLogin = users[1].LastLogin
+            }
         };
 
-        _mockUserReadRepository
-            .Setup(r => r.GetAllAsync(cancellationToken))
-            .ReturnsAsync(users);        // Act
+        _mockMapper
+            .Setup(m => m.Map<IList<UserDto>>(It.IsAny<IEnumerable<HexagonalSkeleton.Domain.User>>()))
+            .Returns(expectedUserDtos);
+
+        // Act
         var result = await _handler.Handle(query, cancellationToken);        // Assert
         Assert.NotNull(result);
         Assert.NotNull(result.Users);
@@ -55,6 +84,10 @@ public class GetAllUsersQueryHandlerTest
         var users = new List<HexagonalSkeleton.Domain.User>();        _mockUserReadRepository
             .Setup(r => r.GetAllAsync(cancellationToken))
             .ReturnsAsync(users);
+
+        _mockMapper
+            .Setup(m => m.Map<IList<UserDto>>(It.IsAny<IEnumerable<HexagonalSkeleton.Domain.User>>()))
+            .Returns(new List<UserDto>());
 
         // Act
         var result = await _handler.Handle(query, cancellationToken);        // Assert

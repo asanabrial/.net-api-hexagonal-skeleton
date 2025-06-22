@@ -4,12 +4,13 @@ using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Application.Extensions;
 using HexagonalSkeleton.Domain.Ports;
 using MediatR;
+using AutoMapper;
 
 namespace HexagonalSkeleton.Application.Query
-{
-    public class GetUserQueryHandler(
+{    public class GetUserQueryHandler(
         IValidator<GetUserQuery> validator,
-        IUserReadRepository userReadRepository)
+        IUserReadRepository userReadRepository,
+        IMapper mapper)
         : IRequestHandler<GetUserQuery, GetUserQueryResult>
     {        public async Task<GetUserQueryResult> Handle(GetUserQuery request, CancellationToken cancellationToken)
         {
@@ -19,12 +20,10 @@ namespace HexagonalSkeleton.Application.Query
 
             var user = await userReadRepository.GetByIdAsync(
                 id: request.Id,
-                cancellationToken: cancellationToken);
-
-            if (user == null)
+                cancellationToken: cancellationToken);            if (user == null)
                 throw new NotFoundException("User", request.Id);
 
-            return new GetUserQueryResult(user);
+            return mapper.Map<GetUserQueryResult>(user);
         }
     }
 }

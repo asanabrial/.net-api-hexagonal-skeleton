@@ -1,5 +1,6 @@
 using HexagonalSkeleton.API.Mapping;
 using HexagonalSkeleton.Infrastructure.Mapping;
+using HexagonalSkeleton.Application.Mapping;
 
 namespace HexagonalSkeleton.API.Config
 {
@@ -11,18 +12,16 @@ namespace HexagonalSkeleton.API.Config
         /// Registers AutoMapper with all profiles and attribute-based mappings
         /// </summary>
         public static IServiceCollection AddAutoMapperProfiles(this IServiceCollection services)
-        {
-            services.AddAutoMapper(config =>
+        {            services.AddAutoMapper(config =>
             {
                 // Configuración para mapeo automático más permisivo
                 config.AllowNullDestinationValues = true;
                 config.AllowNullCollections = true;
 
-            }, 
-            // Escanear múltiples assemblies para encontrar perfiles y atributos [AutoMap]
+            },            // Escanear múltiples assemblies para encontrar perfiles y atributos [AutoMap]
             typeof(ApiMappingProfile).Assembly,                    // API assembly
             typeof(InfrastructureMappingProfile).Assembly,         // Infrastructure assembly
-            typeof(HexagonalSkeleton.Application.Command.LoginCommand).Assembly  // Application assembly
+            typeof(ApplicationMappingProfile).Assembly             // Application assembly (for [AutoMap] attributes)
             );
             
             return services;

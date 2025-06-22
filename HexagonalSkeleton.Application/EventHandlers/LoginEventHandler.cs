@@ -1,4 +1,4 @@
-﻿using HexagonalSkeleton.Application.Event;
+﻿using HexagonalSkeleton.Application.Events;
 using HexagonalSkeleton.Domain.Ports;
 using MediatR;
 using Microsoft.Extensions.Logging;

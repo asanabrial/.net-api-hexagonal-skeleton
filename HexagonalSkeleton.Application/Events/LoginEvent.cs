@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace HexagonalSkeleton.Application.Event
+namespace HexagonalSkeleton.Application.Events
 {
     /// <summary>
     /// Application event for immediate notification when user needs login processing

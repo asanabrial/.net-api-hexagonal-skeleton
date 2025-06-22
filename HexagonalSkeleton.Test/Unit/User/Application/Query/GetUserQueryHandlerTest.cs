@@ -6,6 +6,7 @@ using HexagonalSkeleton.Application.Dto;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
+using AutoMapper;
 
 namespace HexagonalSkeleton.Test.Unit.User.Application.Query;
 
@@ -13,17 +14,20 @@ public class GetUserQueryHandlerTest
 {
     private readonly Mock<IValidator<GetUserQuery>> _mockValidator;
     private readonly Mock<IUserReadRepository> _mockUserReadRepository;
+    private readonly Mock<IMapper> _mockMapper;
     private readonly GetUserQueryHandler _handler;
 
     public GetUserQueryHandlerTest()
     {
         _mockValidator = new Mock<IValidator<GetUserQuery>>();
         _mockUserReadRepository = new Mock<IUserReadRepository>();
+        _mockMapper = new Mock<IMapper>();
 
         _handler = new GetUserQueryHandler(
             _mockValidator.Object,
-            _mockUserReadRepository.Object);
-    }    [Fact]
+            _mockUserReadRepository.Object,
+            _mockMapper.Object);
+    }[Fact]
     public async Task Handle_ValidQuery_ShouldReturnUser()
     {
         // Arrange
@@ -34,11 +38,23 @@ public class GetUserQueryHandlerTest
 
         _mockValidator
             .Setup(v => v.ValidateAsync(It.IsAny<GetUserQuery>(), cancellationToken))
-            .ReturnsAsync(new FluentValidation.Results.ValidationResult());
-
-        _mockUserReadRepository
+            .ReturnsAsync(new FluentValidation.Results.ValidationResult());        _mockUserReadRepository
             .Setup(r => r.GetByIdAsync(userId, cancellationToken))
             .ReturnsAsync(user);
+
+        var expectedResult = new GetUserQueryResult
+        {
+            Id = user.Id,
+            FirstName = user.FullName.FirstName,
+            LastName = user.FullName.LastName,
+            Birthdate = user.Birthdate,
+            Email = user.Email.Value,
+            LastLogin = user.LastLogin
+        };
+
+        _mockMapper
+            .Setup(m => m.Map<GetUserQueryResult>(It.IsAny<HexagonalSkeleton.Domain.User>()))
+            .Returns(expectedResult);
 
         // Act
         var result = await _handler.Handle(query, cancellationToken);

@@ -3,35 +3,36 @@ using Moq;
 using FluentValidation;
 using MediatR;
 using HexagonalSkeleton.Application.Command;
-using HexagonalSkeleton.Application.Event;
+using HexagonalSkeleton.Application.Events;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
+using AutoMapper;
 
 namespace HexagonalSkeleton.Test.Unit.User.Application.Command
-{
-    public class RegisterUserCommandHandlerCompleteDataTest
+{    public class RegisterUserCommandHandlerCompleteDataTest
     {
         private readonly Mock<IValidator<RegisterUserCommand>> _mockValidator;
         private readonly Mock<IPublisher> _mockPublisher;
         private readonly Mock<IUserWriteRepository> _mockUserWriteRepository;
         private readonly Mock<IUserReadRepository> _mockUserReadRepository;
         private readonly Mock<IAuthenticationService> _mockAuthenticationService;
-        private readonly RegisterUserCommandHandler _handler;
-
-        public RegisterUserCommandHandlerCompleteDataTest()
+        private readonly Mock<IMapper> _mockMapper;
+        private readonly RegisterUserCommandHandler _handler;        public RegisterUserCommandHandlerCompleteDataTest()
         {
             _mockValidator = new Mock<IValidator<RegisterUserCommand>>();
             _mockPublisher = new Mock<IPublisher>();
             _mockUserWriteRepository = new Mock<IUserWriteRepository>();
             _mockUserReadRepository = new Mock<IUserReadRepository>();
             _mockAuthenticationService = new Mock<IAuthenticationService>();
+            _mockMapper = new Mock<IMapper>();
 
             _handler = new RegisterUserCommandHandler(
                 _mockValidator.Object,
                 _mockPublisher.Object,
                 _mockUserWriteRepository.Object,
                 _mockUserReadRepository.Object,
-                _mockAuthenticationService.Object);
+                _mockAuthenticationService.Object,
+                _mockMapper.Object);
         }
 
         [Fact]
@@ -91,11 +92,26 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
 
             _mockUserReadRepository
                 .Setup(r => r.GetByIdAsync(userId, cancellationToken))
-                .ReturnsAsync(createdUser);
-
-            _mockAuthenticationService
+                .ReturnsAsync(createdUser);            _mockAuthenticationService
                 .Setup(a => a.GenerateJwtTokenAsync(userId, cancellationToken))
                 .ReturnsAsync(jwtToken);
+
+            // Setup AutoMapper mock to return a properly mapped result
+            _mockMapper
+                .Setup(m => m.Map<RegisterUserCommandResult>(It.IsAny<HexagonalSkeleton.Domain.User>()))
+                .Returns((HexagonalSkeleton.Domain.User user) => new RegisterUserCommandResult(string.Empty)
+                {
+                    Id = user.Id,
+                    FirstName = user.FullName.FirstName,
+                    LastName = user.FullName.LastName,
+                    Email = user.Email.Value,
+                    PhoneNumber = user.PhoneNumber?.Value,
+                    Birthdate = user.Birthdate,
+                    Latitude = user.Location?.Latitude,
+                    Longitude = user.Location?.Longitude,
+                    AboutMe = user.AboutMe,
+                    CreatedAt = user.CreatedAt
+                });
 
             // Act
             var result = await _handler.Handle(command, cancellationToken);

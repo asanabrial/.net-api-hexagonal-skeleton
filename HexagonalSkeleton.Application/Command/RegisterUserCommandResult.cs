@@ -6,6 +6,11 @@
     /// </summary>
     public class RegisterUserCommandResult
     {
+        public RegisterUserCommandResult() 
+        { 
+            AccessToken = string.Empty;
+        }
+
         public RegisterUserCommandResult(string accessToken)
         {
             AccessToken = accessToken;
@@ -59,9 +64,7 @@
         /// <summary>
         /// User's location longitude
         /// </summary>
-        public double? Longitude { get; set; }
-
-        /// <summary>
+        public double? Longitude { get; set; }        /// <summary>
         /// User's about me description
         /// </summary>
         public string? AboutMe { get; set; }

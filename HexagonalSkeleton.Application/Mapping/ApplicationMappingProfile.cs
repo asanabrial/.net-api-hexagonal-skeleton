@@ -1,0 +1,85 @@
+using AutoMapper;
+using HexagonalSkeleton.Application.Command;
+using HexagonalSkeleton.Application.Query;
+using HexagonalSkeleton.Domain;
+using HexagonalSkeleton.Domain.ValueObjects;
+
+namespace HexagonalSkeleton.Application.Mapping
+{
+    /// <summary>
+    /// AutoMapper profile for Application layer mappings
+    /// Handles generic mappings for Value Objects and domain aggregates to result DTOs
+    /// Uses generic methods to reduce code duplication and improve maintainability
+    /// </summary>
+    public class ApplicationMappingProfile : Profile
+    {
+        public ApplicationMappingProfile()
+        {
+            ConfigureValueObjectMappings();
+            ConfigureUserMappings();
+            ConfigureCollectionMappings();
+        }
+
+        /// <summary>
+        /// Configures mappings for Value Objects used across the application
+        /// </summary>
+        private void ConfigureValueObjectMappings()
+        {
+            // FullName Value Object mappings
+            CreateMap<FullName, string>().ConvertUsing(vo => vo != null ? $"{vo.FirstName} {vo.LastName}".Trim() : string.Empty);
+
+            // Email Value Object mappings
+            CreateMap<Email, string>().ConvertUsing(vo => vo != null ? vo.Value : string.Empty);
+
+            // PhoneNumber Value Object mappings
+            CreateMap<PhoneNumber, string>().ConvertUsing(vo => vo != null ? vo.Value : string.Empty);
+        }
+
+        /// <summary>
+        /// Configures User aggregate mappings to various result DTOs
+        /// </summary>
+        private void ConfigureUserMappings()
+        {
+            // Authentication result mappings (with AccessToken and full user data)
+            CreateMap<User, LoginCommandResult>()
+                .ForMember(dest => dest.AccessToken, opt => opt.Ignore()) // Will be set manually after mapping
+                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName))
+                .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Latitude : (double?)null))
+                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Longitude : (double?)null));
+
+            CreateMap<User, RegisterUserCommandResult>()
+                .ForMember(dest => dest.AccessToken, opt => opt.Ignore()) // Will be set manually after mapping
+                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName))
+                .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Latitude : (double?)null))
+                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Longitude : (double?)null));
+
+            // Update command results (limited properties)
+            CreateMap<User, UpdateUserCommandResult>()
+                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName));
+
+            CreateMap<User, UpdateProfileUserCommandResult>()
+                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName));
+
+            // Query results (full user data)
+            CreateMap<User, GetUserQueryResult>()
+                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName));
+
+            CreateMap<User, UserDto>()
+                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName));
+        }
+
+        /// <summary>
+        /// Configures collection mappings
+        /// </summary>
+        private void ConfigureCollectionMappings()
+        {
+            CreateMap<IEnumerable<User>, IList<UserDto>>();
+        }
+    }
+}

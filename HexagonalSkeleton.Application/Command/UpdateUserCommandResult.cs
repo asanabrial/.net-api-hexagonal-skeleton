@@ -9,14 +9,9 @@ namespace HexagonalSkeleton.Application.Command
     /// </summary>
     public class UpdateUserCommandResult
     {
-        public UpdateUserCommandResult(User userEntity)
+        public UpdateUserCommandResult()
         {
-            Id = userEntity.Id;
-            FirstName = userEntity.FullName.FirstName;
-            LastName = userEntity.FullName.LastName;
-            Birthdate = userEntity.Birthdate;
-            Email = userEntity.Email.Value;
-            LastLogin = userEntity.LastLogin;        }
+        }
 
         public int Id { get; set; }
         public string? FirstName { get; set; }

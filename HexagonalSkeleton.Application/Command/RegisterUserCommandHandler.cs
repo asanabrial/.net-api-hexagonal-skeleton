@@ -1,27 +1,24 @@
 ﻿using FluentValidation;
-using HexagonalSkeleton.Application.Dto;
-using HexagonalSkeleton.Application.Event;
-using HexagonalSkeleton.Application.Exceptions;
-using HexagonalSkeleton.Application.Extensions;
+using HexagonalSkeleton.Application.Events;
 using HexagonalSkeleton.Domain.Ports;
-using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.Services;
-using HexagonalSkeleton.Domain.Exceptions;
 using MediatR;
+using AutoMapper;
 
 namespace HexagonalSkeleton.Application.Command
-{
-    public class RegisterUserCommandHandler(
+{    public class RegisterUserCommandHandler(
         IValidator<RegisterUserCommand> validator,
         IPublisher publisher,
         IUserWriteRepository userWriteRepository,
         IUserReadRepository userReadRepository,
-        IAuthenticationService authenticationService)        : IRequestHandler<RegisterUserCommand, RegisterUserCommandResult>
+        IAuthenticationService authenticationService,
+        IMapper mapper)
+        : IRequestHandler<RegisterUserCommand, RegisterUserCommandResult>
     {        public async Task<RegisterUserCommandResult> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
-            var result = await validator.ValidateAsync(request, cancellationToken);
-            if (!result.IsValid)
-                throw new Exceptions.ValidationException(result.ToDictionary());            // 1. Validate password strength (domain business rule)
+            var validationResult = await validator.ValidateAsync(request, cancellationToken);
+            if (!validationResult.IsValid)
+                throw new Exceptions.ValidationException(validationResult.ToDictionary());// 1. Validate password strength (domain business rule)
             UserDomainService.ValidatePasswordStrength(request.Password);
 
             // 2. Check uniqueness (domain business rule)
@@ -50,23 +47,13 @@ namespace HexagonalSkeleton.Application.Command
             var createdUser = await userReadRepository.GetByIdAsync(userId, cancellationToken);
             if (createdUser == null)
                 throw new InvalidOperationException("Failed to retrieve created user");
-            
-            var jwtToken = await authenticationService.GenerateJwtTokenAsync(userId, cancellationToken);
+              var jwtToken = await authenticationService.GenerateJwtTokenAsync(userId, cancellationToken);
             await publisher.Publish(new LoginEvent(userId), cancellationToken);
+              // Map user data to result using AutoMapper
+            var commandResult = mapper.Map<RegisterUserCommandResult>(createdUser);
+            commandResult.AccessToken = jwtToken; // Set the access token manually as it's not part of the user domain
             
-            return new RegisterUserCommandResult(jwtToken)
-            {
-                Id = createdUser.Id,
-                FirstName = createdUser.FullName.FirstName,
-                LastName = createdUser.FullName.LastName,
-                Email = createdUser.Email.Value,
-                PhoneNumber = createdUser.PhoneNumber?.Value,
-                Birthdate = createdUser.Birthdate,
-                Latitude = createdUser.Location?.Latitude,
-                Longitude = createdUser.Location?.Longitude,
-                AboutMe = createdUser.AboutMe,
-                CreatedAt = createdUser.CreatedAt
-            };
+            return commandResult;
         }
     }
 }

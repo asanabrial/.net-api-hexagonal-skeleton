@@ -6,6 +6,7 @@ using HexagonalSkeleton.Application.Command;
 using HexagonalSkeleton.Application.Query;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain.Services;
+using AutoMapper;
 
 namespace HexagonalSkeleton.Test.Integration.User;
 
@@ -16,25 +17,25 @@ public class UserWorkflowIntegrationTest
 {
     [Fact]
     public async Task UserRegistrationAndRetrieval_EndToEndFlow_ShouldWorkCorrectly()
-    {
-        // Arrange - Set up all the dependencies
+    {        // Arrange - Set up all the dependencies
         var mockValidator = new Mock<IValidator<RegisterUserCommand>>();
         var mockPublisher = new Mock<IPublisher>();
         var mockUserWriteRepository = new Mock<IUserWriteRepository>();
         var mockUserReadRepository = new Mock<IUserReadRepository>();
         var mockAuthenticationService = new Mock<IAuthenticationService>();
+        var mockMapper = new Mock<IMapper>();
 
         var registerHandler = new RegisterUserCommandHandler(
             mockValidator.Object,
             mockPublisher.Object,
             mockUserWriteRepository.Object,
             mockUserReadRepository.Object,
-            mockAuthenticationService.Object);
-
-        var getUserValidator = new Mock<IValidator<GetUserQuery>>();
+            mockAuthenticationService.Object,
+            mockMapper.Object);        var getUserValidator = new Mock<IValidator<GetUserQuery>>();
         var getUserHandler = new GetUserQueryHandler(
             getUserValidator.Object,
-            mockUserReadRepository.Object);
+            mockUserReadRepository.Object,
+            mockMapper.Object);
 
         // Test data
         var command = TestHelper.CreateRegisterUserCommand();
@@ -71,6 +72,23 @@ public class UserWorkflowIntegrationTest
             .Setup(a => a.GenerateJwtTokenAsync(userId, cancellationToken))
             .ReturnsAsync(jwtToken);
 
+        // Setup AutoMapper mock to return a properly mapped result
+        mockMapper
+            .Setup(m => m.Map<RegisterUserCommandResult>(It.IsAny<HexagonalSkeleton.Domain.User>()))
+            .Returns((HexagonalSkeleton.Domain.User user) => new RegisterUserCommandResult(string.Empty)
+            {
+                Id = user.Id,
+                FirstName = user.FullName.FirstName,
+                LastName = user.FullName.LastName,
+                Email = user.Email.Value,
+                PhoneNumber = user.PhoneNumber?.Value,
+                Birthdate = user.Birthdate,
+                Latitude = user.Location?.Latitude,
+                Longitude = user.Location?.Longitude,
+                AboutMe = user.AboutMe,
+                CreatedAt = user.CreatedAt
+            });
+
         // Set up the user retrieval mock for the registration handler
         var createdUser = TestHelper.CreateTestUser(
             id: userId,
@@ -97,12 +115,23 @@ public class UserWorkflowIntegrationTest
             u.Email.Value == command.Email.ToLowerInvariant() &&
             u.FullName.FirstName == command.FirstName &&
             u.FullName.LastName == command.LastName &&
-            u.PhoneNumber.Value == command.PhoneNumber), cancellationToken), Times.Once);
-
-        // Now test retrieval of the created user
+            u.PhoneNumber.Value == command.PhoneNumber), cancellationToken), Times.Once);        // Now test retrieval of the created user
         getUserValidator
             .Setup(v => v.ValidateAsync(It.IsAny<GetUserQuery>(), cancellationToken))
             .ReturnsAsync(new FluentValidation.Results.ValidationResult());
+
+        // Setup AutoMapper mock for GetUser operation
+        mockMapper
+            .Setup(m => m.Map<GetUserQueryResult>(It.IsAny<HexagonalSkeleton.Domain.User>()))
+            .Returns((HexagonalSkeleton.Domain.User user) => new GetUserQueryResult
+            {
+                Id = user.Id,
+                FirstName = user.FullName.FirstName,
+                LastName = user.FullName.LastName,
+                Birthdate = user.Birthdate,
+                Email = user.Email.Value,
+                LastLogin = user.LastLogin
+            });
 
         var getUserQuery = new GetUserQuery(userId);
         var getUserResult = await getUserHandler.Handle(getUserQuery, cancellationToken);

@@ -1,7 +1,7 @@
 using Xunit;
 using Moq;
 using Microsoft.Extensions.Logging;
-using HexagonalSkeleton.Application.Event;
+using HexagonalSkeleton.Application.Events;
 using HexagonalSkeleton.Application.EventHandlers;
 using HexagonalSkeleton.Domain.Ports;
 

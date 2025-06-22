@@ -7,15 +7,16 @@ using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Test.Unit.User.Domain;
 using Moq;
 using Xunit;
+using AutoMapper;
 using DomainUser = HexagonalSkeleton.Domain.User;
 
 namespace HexagonalSkeleton.Test.Unit.User.Application.Command
-{
-    public class UpdateProfileUserCommandHandlerTest
+{    public class UpdateProfileUserCommandHandlerTest
     {
         private readonly Mock<IValidator<UpdateProfileUserCommand>> _mockValidator;
         private readonly Mock<IUserReadRepository> _mockUserReadRepository;
         private readonly Mock<IUserWriteRepository> _mockUserWriteRepository;
+        private readonly Mock<IMapper> _mockMapper;
         private readonly UpdateProfileUserCommandHandler _handler;
 
         public UpdateProfileUserCommandHandlerTest()
@@ -23,10 +24,12 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
             _mockValidator = new Mock<IValidator<UpdateProfileUserCommand>>();
             _mockUserReadRepository = new Mock<IUserReadRepository>();
             _mockUserWriteRepository = new Mock<IUserWriteRepository>();
+            _mockMapper = new Mock<IMapper>();
             _handler = new UpdateProfileUserCommandHandler(
                 _mockValidator.Object,
                 _mockUserReadRepository.Object,
-                _mockUserWriteRepository.Object);
+                _mockUserWriteRepository.Object,
+                _mockMapper.Object);
         }
 
         [Fact]
@@ -46,10 +49,23 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
                 .ReturnsAsync(new ValidationResult());
 
             _mockUserReadRepository.Setup(x => x.GetByIdAsync(command.Id, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(user);
+                .ReturnsAsync(user);            _mockUserWriteRepository.Setup(x => x.UpdateAsync(user, It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
-            _mockUserWriteRepository.Setup(x => x.UpdateAsync(user, It.IsAny<CancellationToken>()))
-                .Returns(Task.CompletedTask);            // Act
+            var expectedResult = new UpdateProfileUserCommandResult
+            {
+                Id = user.Id,
+                FirstName = "Jane",
+                LastName = "Smith",
+                Birthdate = new DateTime(1985, 5, 15),
+                Email = user.Email.Value,
+                LastLogin = user.LastLogin
+            };
+
+            _mockMapper.Setup(x => x.Map<UpdateProfileUserCommandResult>(It.IsAny<DomainUser>()))
+                .Returns(expectedResult);
+
+            // Act
             var result = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
@@ -141,10 +157,21 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
                 .ReturnsAsync(new ValidationResult());
 
             _mockUserReadRepository.Setup(x => x.GetByIdAsync(command.Id, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(user);
-
-            _mockUserWriteRepository.Setup(x => x.UpdateAsync(user, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(user);            _mockUserWriteRepository.Setup(x => x.UpdateAsync(user, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
+
+            var expectedResult = new UpdateProfileUserCommandResult
+            {
+                Id = user.Id,
+                FirstName = firstName,
+                LastName = lastName,
+                Birthdate = new DateTime(1990, 1, 1),
+                Email = user.Email.Value,
+                LastLogin = user.LastLogin
+            };
+
+            _mockMapper.Setup(x => x.Map<UpdateProfileUserCommandResult>(It.IsAny<DomainUser>()))
+                .Returns(expectedResult);
 
             // Act
             var result = await _handler.Handle(command, CancellationToken.None);            // Assert

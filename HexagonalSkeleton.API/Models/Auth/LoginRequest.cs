@@ -7,7 +7,7 @@ namespace HexagonalSkeleton.API.Models.Auth
     /// <summary>
     /// Request model for user authentication
     /// </summary>
-    [AutoMap(typeof(LoginCommand))]
+    [AutoMap(typeof(LoginCommand), ReverseMap = true)]
     public class LoginRequest
     {
         /// <summary>

@@ -19,13 +19,19 @@ namespace HexagonalSkeleton.API.Mapping
             CreateMap<GetAllUsersQueryResult, UsersResponse>()
                 .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src.Users));            // Mapeos especiales para Login/Register que requieren UserInfo  
             CreateMap<LoginCommandResult, LoginResponse>()
-                .ForMember(dest => dest.User, opt => opt.Ignore());            CreateMap<RegisterUserCommandResult, LoginResponse>()
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src))
+                .ForMember(dest => dest.TokenType, opt => opt.MapFrom(src => "Bearer"))
+                .ForMember(dest => dest.ExpiresIn, opt => opt.MapFrom(src => 0))
+                .ForMember(dest => dest.Success, opt => opt.MapFrom(src => true));            
+            
+            CreateMap<RegisterUserCommandResult, LoginResponse>()
                 .ForMember(dest => dest.User, opt => opt.MapFrom(src => src))
                 .ForMember(dest => dest.TokenType, opt => opt.MapFrom(src => "Bearer"))
                 .ForMember(dest => dest.ExpiresIn, opt => opt.MapFrom(src => 0))
                 .ForMember(dest => dest.Success, opt => opt.MapFrom(src => true));
                 
-            // Mapeo del resultado de registro a UserInfo
+            // Mapeo del resultado de login y registro a UserInfo
+            CreateMap<LoginCommandResult, UserInfo>();
             CreateMap<RegisterUserCommandResult, UserInfo>();
 
             // Mapeos especiales para Delete que requieren configuración de campos

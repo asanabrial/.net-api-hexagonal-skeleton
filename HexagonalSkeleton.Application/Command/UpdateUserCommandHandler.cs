@@ -3,13 +3,15 @@ using HexagonalSkeleton.Application.Dto;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
 using MediatR;
+using AutoMapper;
 
 namespace HexagonalSkeleton.Application.Command
-{
-    public class UpdateUserCommandHandler(
+{    public class UpdateUserCommandHandler(
         IValidator<UpdateUserCommand> validator,
         IUserReadRepository userReadRepository,
-        IUserWriteRepository userWriteRepository)        : IRequestHandler<UpdateUserCommand, UpdateUserCommandResult>
+        IUserWriteRepository userWriteRepository,
+        IMapper mapper)
+        : IRequestHandler<UpdateUserCommand, UpdateUserCommandResult>
     {        public async Task<UpdateUserCommandResult> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
         {
             var result = await validator.ValidateAsync(request, cancellationToken);
@@ -30,7 +32,9 @@ namespace HexagonalSkeleton.Application.Command
 
             user.UpdatePhoneNumber(request.PhoneNumber);
             user.UpdateLocation(request.Latitude, request.Longitude);            await userWriteRepository.UpdateAsync(user, cancellationToken);
-            return new UpdateUserCommandResult(user);
+            
+            // Map user data to result using AutoMapper
+            return mapper.Map<UpdateUserCommandResult>(user);
         }
     }
 }
