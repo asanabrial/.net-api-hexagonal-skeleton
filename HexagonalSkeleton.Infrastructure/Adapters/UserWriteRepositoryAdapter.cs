@@ -1,8 +1,6 @@
 using AutoMapper;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
-using HexagonalSkeleton.Infrastructure.Extensions;
-using Microsoft.EntityFrameworkCore;
 using MediatR;
 
 namespace HexagonalSkeleton.Infrastructure.Adapters
@@ -23,13 +21,15 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
             _dbContext = dbContext;
             _mapper = mapper;
             _mediator = mediator;
-        }        public async Task<int> CreateAsync(User user, CancellationToken cancellationToken = default)
+        }
+
+        public async Task<int> CreateAsync(User user, CancellationToken cancellationToken = default)
         {
             var entity = _mapper.Map<UserEntity>(user);
             _dbContext.Users.Add(entity);
 
             // Save changes and publish domain events atomically
-            await SaveChangesAndPublishEventsAsync(new[] { user }, cancellationToken);
+            await SaveChangesAndPublishEventsAsync([user], cancellationToken);
 
             return entity.Id;
         }
@@ -40,8 +40,10 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
             _dbContext.Users.Update(entity);
             
             // Save changes and publish domain events atomically
-            await SaveChangesAndPublishEventsAsync(new[] { user }, cancellationToken);
-        }public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
+            await SaveChangesAndPublishEventsAsync([user], cancellationToken);
+        }
+
+        public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
         {
             var entity = await _dbContext.Users.FindAsync(id);
             if (entity != null)
@@ -49,7 +51,9 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
                 _dbContext.Users.Remove(entity);
                 await _dbContext.SaveChangesAsync(cancellationToken);
             }
-        }        public async Task SetLastLoginAsync(int userId, CancellationToken cancellationToken = default)
+        }
+
+        public async Task SetLastLoginAsync(int userId, CancellationToken cancellationToken = default)
         {
             var entity = await _dbContext.Users.FindAsync(userId);
             if (entity != null)
@@ -60,12 +64,12 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
                 {
                     // Record login in domain - this will raise UserLoggedInEvent
                     user.RecordLogin();
-                    
+
                     // Map back to entity
                     _mapper.Map(user, entity);
-                    
+
                     // Save changes and publish domain events atomically
-                    await SaveChangesAndPublishEventsAsync(new[] { user }, cancellationToken);
+                    await SaveChangesAndPublishEventsAsync([user], cancellationToken);
                 }
             }
         }
@@ -79,18 +83,20 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
         public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             await _dbContext.SaveChangesAsync(cancellationToken);
-        }        /// <summary>
+        }
+
+        /// <summary>
         /// Publish domain events from the aggregate
         /// </summary>
         private async Task PublishDomainEventsAsync(User user, CancellationToken cancellationToken)
         {
             var domainEvents = user.DomainEvents.ToList();
-            
+
             foreach (var domainEvent in domainEvents)
             {
                 await _mediator.Publish(domainEvent, cancellationToken);
             }
-            
+
             user.ClearDomainEvents();
         }
 
