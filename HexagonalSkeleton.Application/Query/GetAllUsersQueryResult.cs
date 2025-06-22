@@ -7,11 +7,10 @@ namespace HexagonalSkeleton.Application.Query
     /// Contains list of users. Errors are handled via exceptions.
     /// </summary>
     public class GetAllUsersQueryResult
-    {
-        /// <summary>
+    {        /// <summary>
         /// List of users
         /// </summary>
-        public IList<UserDto> Users { get; set; } = new List<UserDto>();
+        public List<UserDto> Users { get; set; } = new List<UserDto>();
     }    public class UserDto
     {
         public int Id { get; set; }

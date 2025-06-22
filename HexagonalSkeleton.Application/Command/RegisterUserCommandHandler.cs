@@ -46,12 +46,14 @@ namespace HexagonalSkeleton.Application.Command
             var userId = await userWriteRepository.CreateAsync(user, cancellationToken);            // Get the complete user data with generated values (ID, timestamps, etc.)
             var createdUser = await userReadRepository.GetByIdAsync(userId, cancellationToken);
             if (createdUser == null)
-                throw new InvalidOperationException("Failed to retrieve created user");
-              var jwtToken = await authenticationService.GenerateJwtTokenAsync(userId, cancellationToken);
+                throw new InvalidOperationException("Failed to retrieve created user");            // Generate JWT token with expiration info
+            var tokenInfo = await authenticationService.GenerateJwtTokenAsync(userId, cancellationToken);
             await publisher.Publish(new LoginEvent(userId), cancellationToken);
-              // Map user data to result using AutoMapper
+              
+            // Map user data to result using AutoMapper
             var commandResult = mapper.Map<RegisterUserCommandResult>(createdUser);
-            commandResult.AccessToken = jwtToken; // Set the access token manually as it's not part of the user domain
+            commandResult.AccessToken = tokenInfo.Token; // Set the access token from TokenInfo
+            commandResult.ExpiresIn = tokenInfo.ExpiresIn; // Set the expiration time in seconds
             
             return commandResult;
         }

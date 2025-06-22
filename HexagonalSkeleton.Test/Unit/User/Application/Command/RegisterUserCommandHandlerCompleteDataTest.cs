@@ -6,6 +6,7 @@ using HexagonalSkeleton.Application.Command;
 using HexagonalSkeleton.Application.Events;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
+using HexagonalSkeleton.Domain.ValueObjects;
 using AutoMapper;
 
 namespace HexagonalSkeleton.Test.Unit.User.Application.Command
@@ -90,11 +91,12 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
                 birthdate: command.Birthdate
             );
 
-            _mockUserReadRepository
-                .Setup(r => r.GetByIdAsync(userId, cancellationToken))
-                .ReturnsAsync(createdUser);            _mockAuthenticationService
+            _mockUserReadRepository                .Setup(r => r.GetByIdAsync(userId, cancellationToken))
+                .ReturnsAsync(createdUser);            
+                
+            _mockAuthenticationService
                 .Setup(a => a.GenerateJwtTokenAsync(userId, cancellationToken))
-                .ReturnsAsync(jwtToken);            // Setup AutoMapper mock to return a properly mapped result with nested structure
+                .ReturnsAsync(new TokenInfo(jwtToken, DateTime.UtcNow.AddDays(7)));// Setup AutoMapper mock to return a properly mapped result with nested structure
             _mockMapper
                 .Setup(m => m.Map<RegisterUserCommandResult>(It.IsAny<HexagonalSkeleton.Domain.User>()))
                 .Returns((HexagonalSkeleton.Domain.User user) => new RegisterUserCommandResult(string.Empty)

@@ -6,6 +6,7 @@ using HexagonalSkeleton.Application.Command;
 using HexagonalSkeleton.Application.Query;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain.Services;
+using HexagonalSkeleton.Domain.ValueObjects;
 using AutoMapper;
 
 namespace HexagonalSkeleton.Test.Integration.User;
@@ -64,13 +65,13 @@ public class UserWorkflowIntegrationTest
 
         mockAuthenticationService
             .Setup(a => a.HashPassword(command.Password, salt))
-            .Returns(hash);
-
-        mockUserWriteRepository
+            .Returns(hash);        mockUserWriteRepository
             .Setup(r => r.CreateAsync(It.IsAny<HexagonalSkeleton.Domain.User>(), cancellationToken))
-            .ReturnsAsync(userId);        mockAuthenticationService
+            .ReturnsAsync(userId);        
+            
+        mockAuthenticationService
             .Setup(a => a.GenerateJwtTokenAsync(userId, cancellationToken))
-            .ReturnsAsync(jwtToken);        // Setup AutoMapper mock to return a properly mapped result with nested structure
+            .ReturnsAsync(new TokenInfo(jwtToken, DateTime.UtcNow.AddDays(7)));// Setup AutoMapper mock to return a properly mapped result with nested structure
         mockMapper
             .Setup(m => m.Map<RegisterUserCommandResult>(It.IsAny<HexagonalSkeleton.Domain.User>()))
             .Returns((HexagonalSkeleton.Domain.User user) => new RegisterUserCommandResult(string.Empty)

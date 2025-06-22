@@ -30,12 +30,10 @@ namespace HexagonalSkeleton.Application.Query
 
             var user = await userReadRepository.GetByEmailAsync(request.Email, cancellationToken);
             if (user == null)
-                throw new NotFoundException("User", request.Email);
+                throw new NotFoundException("User", request.Email);            // Pure query - just generate token without side effects
+            var tokenInfo = await authenticationService.GenerateJwtTokenAsync(user.Id, cancellationToken);
 
-            // Pure query - just generate token without side effects
-            var accessToken = await authenticationService.GenerateJwtTokenAsync(user.Id, cancellationToken);
-
-            return new LoginQueryResult(accessToken);
+            return new LoginQueryResult(tokenInfo.Token);
         }
     }
 }

@@ -3,6 +3,7 @@ using FluentValidation.Results;
 using HexagonalSkeleton.Application.Query;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
+using HexagonalSkeleton.Domain.ValueObjects;
 using HexagonalSkeleton.Test.Unit.User.Domain;
 using Moq;
 using Xunit;
@@ -40,13 +41,11 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Query
                 .ReturnsAsync(new ValidationResult());
 
             _mockAuthenticationService.Setup(x => x.ValidateCredentialsAsync(query.Email, query.Password, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(true);
-
-            _mockUserReadRepository.Setup(x => x.GetByEmailAsync(query.Email, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);            _mockUserReadRepository.Setup(x => x.GetByEmailAsync(query.Email, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);
 
             _mockAuthenticationService.Setup(x => x.GenerateJwtTokenAsync(user.Id, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(expectedToken);
+                .ReturnsAsync(new TokenInfo(expectedToken, DateTime.UtcNow.AddDays(7)));
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
@@ -121,13 +120,11 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Query
                 .ReturnsAsync(new ValidationResult());
 
             _mockAuthenticationService.Setup(x => x.ValidateCredentialsAsync(email, password, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(true);
-
-            _mockUserReadRepository.Setup(x => x.GetByEmailAsync(email, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);            _mockUserReadRepository.Setup(x => x.GetByEmailAsync(email, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);
 
             _mockAuthenticationService.Setup(x => x.GenerateJwtTokenAsync(user.Id, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(expectedToken);
+                .ReturnsAsync(new TokenInfo(expectedToken, DateTime.UtcNow.AddDays(7)));
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
@@ -168,13 +165,11 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Query
                 .ReturnsAsync(new ValidationResult());
 
             _mockAuthenticationService.Setup(x => x.ValidateCredentialsAsync(query.Email, query.Password, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(true);
-
-            _mockUserReadRepository.Setup(x => x.GetByEmailAsync(query.Email, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);            _mockUserReadRepository.Setup(x => x.GetByEmailAsync(query.Email, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);
 
             _mockAuthenticationService.Setup(x => x.GenerateJwtTokenAsync(user.Id, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(expectedToken);
+                .ReturnsAsync(new TokenInfo(expectedToken, DateTime.UtcNow.AddDays(7)));
 
             // Act
             await _handler.Handle(query, CancellationToken.None);
@@ -192,10 +187,9 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Query
             _mockUserReadRepository.InSequence(sequence)
                 .Setup(x => x.GetByEmailAsync(query.Email, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);
-            
-            _mockAuthenticationService.InSequence(sequence)
+              _mockAuthenticationService.InSequence(sequence)
                 .Setup(x => x.GenerateJwtTokenAsync(user.Id, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(expectedToken);
+                .ReturnsAsync(new TokenInfo(expectedToken, DateTime.UtcNow.AddDays(7)));
         }
     }
 }

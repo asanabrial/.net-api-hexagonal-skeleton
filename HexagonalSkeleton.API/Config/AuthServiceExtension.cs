@@ -27,22 +27,26 @@ namespace HexagonalSkeleton.API.Config
                 o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 o.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(o =>
-            {
-                // Set the parameters for token validation.
+            {                // Set the parameters for token validation.
                 o.TokenValidationParameters = new TokenValidationParameters
                 {
                     // Set the valid issuer and audience from configuration.
-                    ValidIssuer = issuer,                    ValidAudience = audience,
+                    ValidIssuer = issuer,
+                    ValidAudience = audience,
 
                     // Set the symmetric security key for signing the token.
-                    IssuerSigningKey = new SymmetricSecurityKey
-                        (Encoding.UTF8.GetBytes(secret)),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
 
                     // Set validation rules: issuer, audience, lifetime, and issuer signing key should be validated.
                     ValidateIssuer = true,
                     ValidateAudience = true,
-                    ValidateLifetime = false,
+                    ValidateLifetime = true, // Enable lifetime validation
                     ValidateIssuerSigningKey = true,
+                    
+                    // Add these for better token validation
+                    ClockSkew = TimeSpan.Zero, // Remove default 5 minute clock skew
+                    RequireExpirationTime = true,
+                    RequireSignedTokens = true
                 };
             });
 

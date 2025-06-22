@@ -46,8 +46,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             Assert.Equal("userReadRepository", exception.ParamName);
         }
 
-        [Fact]
-        public async Task GenerateJwtTokenAsync_WithValidUserId_ShouldReturnToken()
+        [Fact]        public async Task GenerateJwtTokenAsync_WithValidUserId_ShouldReturnToken()
         {
             // Arrange
             var userId = 1;
@@ -56,11 +55,15 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
                 .ReturnsAsync(user);
 
             // Act
-            var token = await _authenticationService.GenerateJwtTokenAsync(userId);
+            var tokenInfo = await _authenticationService.GenerateJwtTokenAsync(userId);
 
             // Assert
-            Assert.NotNull(token); Assert.NotEmpty(token);
-            Assert.Contains(".", token);
+            Assert.NotNull(tokenInfo);
+            Assert.NotNull(tokenInfo.Token);
+            Assert.NotEmpty(tokenInfo.Token);
+            Assert.Contains(".", tokenInfo.Token);
+            Assert.True(tokenInfo.ExpiresIn > 0);
+            Assert.True(tokenInfo.ExpiresAt > DateTime.UtcNow);
         }
 
         [Theory]

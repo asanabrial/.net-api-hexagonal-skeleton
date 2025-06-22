@@ -12,7 +12,7 @@ namespace HexagonalSkeleton.Application.Query
         {
             var users = await userReadRepository.GetAllAsync(cancellationToken: cancellationToken);
             
-            var userDtos = mapper.Map<IList<UserDto>>(users);
+            var userDtos = mapper.Map<List<UserDto>>(users);
             return new GetAllUsersQueryResult { Users = userDtos };
         }
     }

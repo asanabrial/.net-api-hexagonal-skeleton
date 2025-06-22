@@ -73,14 +73,12 @@ namespace HexagonalSkeleton.Application.Mapping
             CreateMap<User, UserDto>()
                 .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
                 .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName));
-        }
-
-        /// <summary>
+        }        /// <summary>
         /// Configures collection mappings
         /// </summary>
         private void ConfigureCollectionMappings()
         {
-            CreateMap<IEnumerable<User>, IList<UserDto>>();
+            CreateMap<IEnumerable<User>, List<UserDto>>();
         }
     }
 }

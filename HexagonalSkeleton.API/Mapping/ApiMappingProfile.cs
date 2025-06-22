@@ -21,13 +21,13 @@ namespace HexagonalSkeleton.API.Mapping
             CreateMap<LoginCommandResult, LoginResponse>()
                 .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User))
                 .ForMember(dest => dest.TokenType, opt => opt.MapFrom(src => "Bearer"))
-                .ForMember(dest => dest.ExpiresIn, opt => opt.MapFrom(src => 0))
+                .ForMember(dest => dest.ExpiresIn, opt => opt.MapFrom(src => src.ExpiresIn)) // Use real expiration time
                 .ForMember(dest => dest.Success, opt => opt.MapFrom(src => true));            
             
             CreateMap<RegisterUserCommandResult, LoginResponse>()
                 .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User))
                 .ForMember(dest => dest.TokenType, opt => opt.MapFrom(src => "Bearer"))
-                .ForMember(dest => dest.ExpiresIn, opt => opt.MapFrom(src => 0))
+                .ForMember(dest => dest.ExpiresIn, opt => opt.MapFrom(src => src.ExpiresIn)) // Use real expiration time
                 .ForMember(dest => dest.Success, opt => opt.MapFrom(src => true));
                 
             // Mapeo de UserInfoResult a UserInfoResponse de la API
