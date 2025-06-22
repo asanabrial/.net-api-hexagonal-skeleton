@@ -4,35 +4,53 @@ using HexagonalSkeleton.Application.Query;
 using HexagonalSkeleton.Application.Dto;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
+using HexagonalSkeleton.Domain.ValueObjects;
+using HexagonalSkeleton.Domain.Specifications;
 using AutoMapper;
+using FluentValidation;
+using FluentValidation.Results;
 
 namespace HexagonalSkeleton.Test.Unit.User.Application.Query;
 
 public class GetAllUsersQueryHandlerTest
 {
+    private readonly Mock<IValidator<GetAllUsersQuery>> _mockValidator;
     private readonly Mock<IUserReadRepository> _mockUserReadRepository;
     private readonly Mock<IMapper> _mockMapper;
     private readonly GetAllUsersQueryHandler _handler;
 
     public GetAllUsersQueryHandlerTest()
     {
+        _mockValidator = new Mock<IValidator<GetAllUsersQuery>>();
         _mockUserReadRepository = new Mock<IUserReadRepository>();
         _mockMapper = new Mock<IMapper>();
-        _handler = new GetAllUsersQueryHandler(_mockUserReadRepository.Object, _mockMapper.Object);
+        _handler = new GetAllUsersQueryHandler(_mockValidator.Object, _mockUserReadRepository.Object, _mockMapper.Object);
+
+        // Setup validator to return valid by default
+        _mockValidator
+            .Setup(v => v.ValidateAsync(It.IsAny<GetAllUsersQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult());
     }
 
     [Fact]
-    public async Task Handle_ValidQuery_ShouldReturnAllUsers()
+    public async Task Handle_ValidQuery_ShouldReturnPaginatedUsers()
     {
         // Arrange
-        var query = new GetAllUsersQuery();
-        var cancellationToken = CancellationToken.None;        var users = new List<HexagonalSkeleton.Domain.User>
+        var query = new GetAllUsersQuery(pageNumber: 1, pageSize: 10);
+        var cancellationToken = CancellationToken.None;
+
+        var users = new List<HexagonalSkeleton.Domain.User>
         {
             TestHelper.CreateTestUser(),
             TestHelper.CreateTestUser(id: 2, email: "user2@example.com", phoneNumber: "+1234567891")
-        };        _mockUserReadRepository
-            .Setup(r => r.GetAllAsync(cancellationToken))
-            .ReturnsAsync(users);
+        };
+
+        var pagination = PaginationParams.Create(1, 10);
+        var pagedResult = new PagedResult<HexagonalSkeleton.Domain.User>(users, 2, pagination);
+
+        _mockUserReadRepository
+            .Setup(r => r.GetPagedAsync(It.Is<PaginationParams>(p => p.PageNumber == 1 && p.PageSize == 10), null, cancellationToken))
+            .ReturnsAsync(pagedResult);
 
         var expectedUserDtos = new List<UserDto>
         {
@@ -57,14 +75,22 @@ public class GetAllUsersQueryHandlerTest
         };
 
         _mockMapper
-            .Setup(m => m.Map<IList<UserDto>>(It.IsAny<IEnumerable<HexagonalSkeleton.Domain.User>>()))
+            .Setup(m => m.Map<List<UserDto>>(It.IsAny<IReadOnlyList<HexagonalSkeleton.Domain.User>>()))
             .Returns(expectedUserDtos);
 
         // Act
-        var result = await _handler.Handle(query, cancellationToken);        // Assert
+        var result = await _handler.Handle(query, cancellationToken);
+
+        // Assert
         Assert.NotNull(result);
         Assert.NotNull(result.Users);
         Assert.Equal(2, result.Users.Count);
+        Assert.Equal(2, result.TotalCount);
+        Assert.Equal(1, result.PageNumber);
+        Assert.Equal(10, result.PageSize);
+        Assert.Equal(1, result.TotalPages);
+        Assert.False(result.HasNextPage);
+        Assert.False(result.HasPreviousPage);
         
         var firstUser = result.Users[0];
         Assert.Equal(users[0].Id, firstUser.Id);
@@ -72,7 +98,54 @@ public class GetAllUsersQueryHandlerTest
         Assert.Equal(users[0].FullName.LastName, firstUser.LastName);
         Assert.Equal(users[0].Email.Value, firstUser.Email);
 
-        _mockUserReadRepository.Verify(r => r.GetAllAsync(cancellationToken), Times.Once);
+        _mockUserReadRepository.Verify(r => r.GetPagedAsync(It.Is<PaginationParams>(p => p.PageNumber == 1 && p.PageSize == 10), null, cancellationToken), Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_WithSearchTerm_ShouldReturnFilteredUsers()
+    {
+        // Arrange
+        var query = new GetAllUsersQuery(pageNumber: 1, pageSize: 10, searchTerm: "john");
+        var cancellationToken = CancellationToken.None;
+        var users = new List<HexagonalSkeleton.Domain.User>
+        {
+            TestHelper.CreateTestUser()
+        };
+
+        var pagination = PaginationParams.Create(1, 10);
+        var pagedResult = new PagedResult<HexagonalSkeleton.Domain.User>(users, 1, pagination);
+
+        _mockUserReadRepository
+            .Setup(r => r.GetPagedAsync(It.Is<PaginationParams>(p => p.PageNumber == 1 && p.PageSize == 10), It.IsAny<Specification<HexagonalSkeleton.Domain.User>>(), cancellationToken))
+            .ReturnsAsync(pagedResult);
+
+        var expectedUserDtos = new List<UserDto>
+        {
+            new UserDto
+            {
+                Id = users[0].Id,
+                FirstName = users[0].FullName.FirstName,
+                LastName = users[0].FullName.LastName,
+                Birthdate = users[0].Birthdate,
+                Email = users[0].Email.Value,
+                LastLogin = users[0].LastLogin
+            }
+        };
+
+        _mockMapper
+            .Setup(m => m.Map<List<UserDto>>(It.IsAny<IReadOnlyList<HexagonalSkeleton.Domain.User>>()))
+            .Returns(expectedUserDtos);
+
+        // Act
+        var result = await _handler.Handle(query, cancellationToken);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotNull(result.Users);
+        Assert.Single(result.Users);
+        Assert.Equal(1, result.TotalCount);
+
+        _mockUserReadRepository.Verify(r => r.GetPagedAsync(It.Is<PaginationParams>(p => p.PageNumber == 1 && p.PageSize == 10), It.IsAny<Specification<HexagonalSkeleton.Domain.User>>(), cancellationToken), Times.Once);
     }
 
     [Fact]
@@ -81,20 +154,29 @@ public class GetAllUsersQueryHandlerTest
         // Arrange
         var query = new GetAllUsersQuery();
         var cancellationToken = CancellationToken.None;
-        var users = new List<HexagonalSkeleton.Domain.User>();        _mockUserReadRepository
-            .Setup(r => r.GetAllAsync(cancellationToken))
-            .ReturnsAsync(users);
+
+        var pagination = PaginationParams.Create(1, 10);
+        var pagedResult = PagedResult<HexagonalSkeleton.Domain.User>.Empty(pagination);
+
+        _mockUserReadRepository
+            .Setup(r => r.GetPagedAsync(It.Is<PaginationParams>(p => p.PageNumber == 1 && p.PageSize == 10), null, cancellationToken))
+            .ReturnsAsync(pagedResult);
 
         _mockMapper
-            .Setup(m => m.Map<IList<UserDto>>(It.IsAny<IEnumerable<HexagonalSkeleton.Domain.User>>()))
+            .Setup(m => m.Map<List<UserDto>>(It.IsAny<IReadOnlyList<HexagonalSkeleton.Domain.User>>()))
             .Returns(new List<UserDto>());
 
         // Act
-        var result = await _handler.Handle(query, cancellationToken);        // Assert
+        var result = await _handler.Handle(query, cancellationToken);
+
+        // Assert
         Assert.NotNull(result);
         Assert.NotNull(result.Users);
         Assert.Empty(result.Users);
+        Assert.Equal(0, result.TotalCount);
+        Assert.Equal(1, result.PageNumber);
+        Assert.Equal(10, result.PageSize);
 
-        _mockUserReadRepository.Verify(r => r.GetAllAsync(cancellationToken), Times.Once);
+        _mockUserReadRepository.Verify(r => r.GetPagedAsync(It.Is<PaginationParams>(p => p.PageNumber == 1 && p.PageSize == 10), null, cancellationToken), Times.Once);
     }
 }

@@ -2,6 +2,7 @@ using AutoMapper;
 using HexagonalSkeleton.API.Models.Common;
 using HexagonalSkeleton.Application.Command;
 using HexagonalSkeleton.Application.Query;
+using HexagonalSkeleton.Application.Dto;
 
 namespace HexagonalSkeleton.API.Models.Users
 {

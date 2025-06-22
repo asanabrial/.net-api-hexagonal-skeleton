@@ -1,30 +1,52 @@
 using HexagonalSkeleton.Application.Dto;
-using HexagonalSkeleton.Domain;
+using HexagonalSkeleton.Application.Common.Pagination;
+using HexagonalSkeleton.Domain.ValueObjects;
 
 namespace HexagonalSkeleton.Application.Query
-{    /// <summary>
-    /// Result for GetAllUsersQuery operation.
-    /// Contains list of users. Errors are handled via exceptions.
+{
+    /// <summary>
+    /// Result for GetAllUsersQuery operation with pagination support.
+    /// Uses composition for better flexibility and maintainability
     /// </summary>
     public class GetAllUsersQueryResult
-    {        /// <summary>
-        /// List of users
-        /// </summary>
-        public List<UserDto> Users { get; set; } = new List<UserDto>();
-    }    public class UserDto
     {
-        public int Id { get; set; }
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-        public string FullName => $"{FirstName} {LastName}".Trim();
-        public string Email { get; set; } = string.Empty;
-        public string? PhoneNumber { get; set; }
-        public DateTime? Birthdate { get; set; }
-        public double? Latitude { get; set; }
-        public double? Longitude { get; set; }
-        public string? AboutMe { get; set; }
-        public string? ProfileImageName { get; set; }
-        public DateTime LastLogin { get; set; }
-        public DateTime CreatedAt { get; set; }
+        /// <summary>
+        /// List of users for current page
+        /// </summary>
+        public IReadOnlyList<UserDto> Users { get; }
+
+        /// <summary>
+        /// Pagination metadata
+        /// </summary>
+        public PaginationMetadata Metadata { get; }
+
+        /// <summary>
+        /// Constructor with pagination data
+        /// </summary>
+        public GetAllUsersQueryResult(IEnumerable<UserDto> users, PaginationMetadata metadata)
+        {
+            Users = users?.ToList().AsReadOnly() ?? throw new ArgumentNullException(nameof(users));
+            Metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
+        }
+
+        /// <summary>
+        /// Convenience properties for backward compatibility
+        /// </summary>
+        public int TotalCount => Metadata.TotalCount;
+        public int PageNumber => Metadata.PageNumber;
+        public int PageSize => Metadata.PageSize;
+        public int TotalPages => Metadata.TotalPages;
+        public bool HasNextPage => Metadata.HasNextPage;
+        public bool HasPreviousPage => Metadata.HasPreviousPage;
+
+        /// <summary>
+        /// Factory method to create result from domain PagedResult
+        /// </summary>
+        public static GetAllUsersQueryResult FromDomain<TDomain>(
+            PagedResult<TDomain> domainResult, 
+            IEnumerable<UserDto> userDtos)
+        {
+            var metadata = PaginationMetadata.FromDomain(domainResult);
+            return new GetAllUsersQueryResult(userDtos, metadata);        }
     }
 }

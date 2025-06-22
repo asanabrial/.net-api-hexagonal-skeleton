@@ -1,6 +1,7 @@
 using AutoMapper;
 using HexagonalSkeleton.Application.Command;
 using HexagonalSkeleton.Application.Query;
+using HexagonalSkeleton.Application.Dto;
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.ValueObjects;
 

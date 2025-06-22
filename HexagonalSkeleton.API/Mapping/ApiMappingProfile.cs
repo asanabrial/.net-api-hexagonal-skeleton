@@ -14,10 +14,12 @@ namespace HexagonalSkeleton.API.Mapping
     public class ApiMappingProfile : Profile
     {
         public ApiMappingProfile()
-        {
-            // Solo mapeos que requieren configuración especial
+        {            // Solo mapeos que requieren configuración especial
             CreateMap<GetAllUsersQueryResult, UsersResponse>()
-                .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src.Users));            // Mapeos especiales para Login/Register con estructura anidada
+                .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src.Users))
+                .ForMember(dest => dest.TotalCount, opt => opt.MapFrom(src => src.TotalCount))
+                .ForMember(dest => dest.PageNumber, opt => opt.MapFrom(src => src.PageNumber))
+                .ForMember(dest => dest.PageSize, opt => opt.MapFrom(src => src.PageSize));// Mapeos especiales para Login/Register con estructura anidada
             CreateMap<LoginCommandResult, LoginResponse>()
                 .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User))
                 .ForMember(dest => dest.TokenType, opt => opt.MapFrom(src => "Bearer"))
