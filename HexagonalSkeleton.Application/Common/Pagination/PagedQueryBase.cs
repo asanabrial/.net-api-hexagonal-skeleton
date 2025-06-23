@@ -29,19 +29,20 @@ namespace HexagonalSkeleton.Application.Common.Pagination
         public int PageSize { get; }
         public string? SearchTerm { get; }
         public string? SortBy { get; }
-        public string SortDirection { get; }        protected PagedQuery(int? pageNumber = null, int? pageSize = null, string? searchTerm = null, 
-                           string? sortBy = null, string? sortDirection = null)
+        public string SortDirection { get; }
+
+        protected PagedQuery(int? pageNumber = null, int? pageSize = null, string? searchTerm = null, string? sortBy = null, string? sortDirection = null)
         {
             PageNumber = pageNumber ?? DefaultPageNumber;
             PageSize = pageSize ?? DefaultPageSize;
             SearchTerm = string.IsNullOrWhiteSpace(searchTerm) ? null : searchTerm.Trim();
             SortBy = string.IsNullOrWhiteSpace(sortBy) ? null : sortBy.Trim();
-            SortDirection = ValidateSortDirection(sortDirection?.Trim()) && !string.IsNullOrWhiteSpace(sortDirection) 
-                            ? sortDirection.Trim().ToLowerInvariant() 
+            SortDirection = ValidateSortDirection(sortDirection?.Trim()) && !string.IsNullOrWhiteSpace(sortDirection)
+                            ? sortDirection.Trim().ToLowerInvariant()
                             : DefaultSortDirection;
         }/// <summary>
-        /// Creates domain pagination parameters from query
-        /// </summary>
+         /// Creates domain pagination parameters from query
+         /// </summary>
         public PaginationParams ToPaginationParams()
         {
             return PaginationParams.Create(PageNumber, PageSize, SortBy, SortDirection);
