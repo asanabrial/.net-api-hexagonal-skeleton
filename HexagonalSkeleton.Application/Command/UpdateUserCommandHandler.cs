@@ -11,8 +11,8 @@ namespace HexagonalSkeleton.Application.Command
         IUserReadRepository userReadRepository,
         IUserWriteRepository userWriteRepository,
         IMapper mapper)
-        : IRequestHandler<UpdateUserCommand, UpdateUserCommandResult>
-    {        public async Task<UpdateUserCommandResult> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
+        : IRequestHandler<UpdateUserCommand, UserDto>
+    {        public async Task<UserDto> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
         {
             var result = await validator.ValidateAsync(request, cancellationToken);
             if (!result.IsValid)
@@ -31,10 +31,11 @@ namespace HexagonalSkeleton.Application.Command
                 request.AboutMe);
 
             user.UpdatePhoneNumber(request.PhoneNumber);
-            user.UpdateLocation(request.Latitude, request.Longitude);            await userWriteRepository.UpdateAsync(user, cancellationToken);
+            user.UpdateLocation(request.Latitude, request.Longitude);
+            await userWriteRepository.UpdateAsync(user, cancellationToken);
             
-            // Map user data to result using AutoMapper
-            return mapper.Map<UpdateUserCommandResult>(user);
+            // Map user data to DTO using AutoMapper
+            return mapper.Map<UserDto>(user);
         }
     }
 }

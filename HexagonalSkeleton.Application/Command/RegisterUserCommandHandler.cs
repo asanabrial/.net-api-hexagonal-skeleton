@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using HexagonalSkeleton.Application.Events;
+using HexagonalSkeleton.Application.Dto;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain.Services;
 using MediatR;
@@ -13,8 +14,8 @@ namespace HexagonalSkeleton.Application.Command
         IUserReadRepository userReadRepository,
         IAuthenticationService authenticationService,
         IMapper mapper)
-        : IRequestHandler<RegisterUserCommand, RegisterUserCommandResult>
-    {        public async Task<RegisterUserCommandResult> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+        : IRequestHandler<RegisterUserCommand, AuthenticationDto>
+    {        public async Task<AuthenticationDto> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
             if (!validationResult.IsValid)
@@ -50,12 +51,14 @@ namespace HexagonalSkeleton.Application.Command
             var tokenInfo = await authenticationService.GenerateJwtTokenAsync(userId, cancellationToken);
             await publisher.Publish(new LoginEvent(userId), cancellationToken);
               
-            // Map user data to result using AutoMapper
-            var commandResult = mapper.Map<RegisterUserCommandResult>(createdUser);
-            commandResult.AccessToken = tokenInfo.Token; // Set the access token from TokenInfo
-            commandResult.ExpiresIn = tokenInfo.ExpiresIn; // Set the expiration time in seconds
-            
-            return commandResult;
+            // Map user data to DTO and create authentication response
+            var userDto = mapper.Map<UserDto>(createdUser);
+            return new AuthenticationDto
+            {
+                AccessToken = tokenInfo.Token,
+                ExpiresIn = tokenInfo.ExpiresIn,
+                User = userDto
+            };
         }
     }
 }

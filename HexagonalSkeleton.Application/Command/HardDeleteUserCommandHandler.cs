@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using HexagonalSkeleton.Application.Exceptions;
+using HexagonalSkeleton.Application.Dto;
 using HexagonalSkeleton.Domain.Ports;
 using MediatR;
 
@@ -13,9 +14,8 @@ namespace HexagonalSkeleton.Application.Command
             IValidator<HardDeleteUserCommand> validator,
             IUserReadRepository userReadRepository,
             IUserWriteRepository userWriteRepository)
-            : IRequestHandler<HardDeleteUserCommand, HardDeleteUserCommandResult>
-    {
-        public async Task<HardDeleteUserCommandResult> Handle(HardDeleteUserCommand request, CancellationToken cancellationToken)
+            : IRequestHandler<HardDeleteUserCommand, UserDeletionDto>
+    {        public async Task<UserDeletionDto> Handle(HardDeleteUserCommand request, CancellationToken cancellationToken)
         {
             // Validate the request - throw if invalid
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
@@ -28,10 +28,11 @@ namespace HexagonalSkeleton.Application.Command
                 throw new NotFoundException("User", request.Id);
 
             // Perform the deletion
-            await userWriteRepository.DeleteAsync(request.Id, cancellationToken);
-
-            // Return success result
-            return new HardDeleteUserCommandResult();
+            await userWriteRepository.DeleteAsync(request.Id, cancellationToken);            // Return deletion result
+            return new UserDeletionDto 
+            { 
+                UserId = request.Id
+            };
         }
     }
 }

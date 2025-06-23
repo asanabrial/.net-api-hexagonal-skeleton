@@ -50,9 +50,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
 
             _mockUserReadRepository.Setup(x => x.GetByIdAsync(command.Id, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);            _mockUserWriteRepository.Setup(x => x.UpdateAsync(user, It.IsAny<CancellationToken>()))
-                .Returns(Task.CompletedTask);
-
-            var expectedResult = new UpdateProfileUserCommandResult
+                .Returns(Task.CompletedTask);            var expectedResult = new UserDto
             {
                 Id = user.Id,
                 FirstName = "Jane",
@@ -62,7 +60,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
                 LastLogin = user.LastLogin
             };
 
-            _mockMapper.Setup(x => x.Map<UpdateProfileUserCommandResult>(It.IsAny<DomainUser>()))
+            _mockMapper.Setup(x => x.Map<UserDto>(It.IsAny<DomainUser>()))
                 .Returns(expectedResult);
 
             // Act
@@ -158,9 +156,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
 
             _mockUserReadRepository.Setup(x => x.GetByIdAsync(command.Id, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);            _mockUserWriteRepository.Setup(x => x.UpdateAsync(user, It.IsAny<CancellationToken>()))
-                .Returns(Task.CompletedTask);
-
-            var expectedResult = new UpdateProfileUserCommandResult
+                .Returns(Task.CompletedTask);            var expectedResult = new UserDto
             {
                 Id = user.Id,
                 FirstName = firstName,
@@ -170,7 +166,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
                 LastLogin = user.LastLogin
             };
 
-            _mockMapper.Setup(x => x.Map<UpdateProfileUserCommandResult>(It.IsAny<DomainUser>()))
+            _mockMapper.Setup(x => x.Map<UserDto>(It.IsAny<DomainUser>()))
                 .Returns(expectedResult);
 
             // Act

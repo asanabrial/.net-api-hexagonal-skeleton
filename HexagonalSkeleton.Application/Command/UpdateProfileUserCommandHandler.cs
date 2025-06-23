@@ -13,8 +13,8 @@ namespace HexagonalSkeleton.Application.Command
         IUserReadRepository userReadRepository,
         IUserWriteRepository userWriteRepository,
         IMapper mapper)
-        : IRequestHandler<UpdateProfileUserCommand, UpdateProfileUserCommandResult>
-    {        public async Task<UpdateProfileUserCommandResult> Handle(UpdateProfileUserCommand request, CancellationToken cancellationToken)
+        : IRequestHandler<UpdateProfileUserCommand, UserDto>
+    {        public async Task<UserDto> Handle(UpdateProfileUserCommand request, CancellationToken cancellationToken)
         {
             var result = await validator.ValidateAsync(request, cancellationToken);
             if (!result.IsValid)
@@ -25,8 +25,8 @@ namespace HexagonalSkeleton.Application.Command
                 throw new NotFoundException("User", request.Id);            user.UpdateProfile(request.FirstName, request.LastName, request.Birthdate, request.AboutMe);
             await userWriteRepository.UpdateAsync(user, cancellationToken);
             
-            // Map user data to result using AutoMapper
-            return mapper.Map<UpdateProfileUserCommandResult>(user);
+            // Map user data to DTO using AutoMapper
+            return mapper.Map<UserDto>(user);
         }
     }
 }

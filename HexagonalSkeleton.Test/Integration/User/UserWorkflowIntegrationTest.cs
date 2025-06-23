@@ -4,6 +4,7 @@ using FluentValidation;
 using MediatR;
 using HexagonalSkeleton.Application.Command;
 using HexagonalSkeleton.Application.Query;
+using HexagonalSkeleton.Application.Dto;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain.Services;
 using HexagonalSkeleton.Domain.ValueObjects;
@@ -68,27 +69,23 @@ public class UserWorkflowIntegrationTest
             .Returns(hash);        mockUserWriteRepository
             .Setup(r => r.CreateAsync(It.IsAny<HexagonalSkeleton.Domain.User>(), cancellationToken))
             .ReturnsAsync(userId);        
-            
-        mockAuthenticationService
+              mockAuthenticationService
             .Setup(a => a.GenerateJwtTokenAsync(userId, cancellationToken))
-            .ReturnsAsync(new TokenInfo(jwtToken, DateTime.UtcNow.AddDays(7)));// Setup AutoMapper mock to return a properly mapped result with nested structure
+            .ReturnsAsync(new TokenInfo(jwtToken, DateTime.UtcNow.AddDays(7)));        // Setup AutoMapper mock to return a properly mapped result with nested structure
         mockMapper
-            .Setup(m => m.Map<RegisterUserCommandResult>(It.IsAny<HexagonalSkeleton.Domain.User>()))
-            .Returns((HexagonalSkeleton.Domain.User user) => new RegisterUserCommandResult(string.Empty)
+            .Setup(m => m.Map<UserDto>(It.IsAny<HexagonalSkeleton.Domain.User>()))
+            .Returns((HexagonalSkeleton.Domain.User user) => new UserDto
             {
-                User = new UserInfoResult
-                {
-                    Id = user.Id,
-                    FirstName = user.FullName.FirstName,
-                    LastName = user.FullName.LastName,
-                    Email = user.Email.Value,
-                    PhoneNumber = user.PhoneNumber?.Value,
-                    Birthdate = user.Birthdate,
-                    Latitude = user.Location?.Latitude,
-                    Longitude = user.Location?.Longitude,
-                    AboutMe = user.AboutMe,
-                    CreatedAt = user.CreatedAt
-                }
+                Id = user.Id,
+                FirstName = user.FullName.FirstName,
+                LastName = user.FullName.LastName,
+                Email = user.Email.Value,
+                PhoneNumber = user.PhoneNumber?.Value,
+                Birthdate = user.Birthdate,
+                Latitude = user.Location?.Latitude,
+                Longitude = user.Location?.Longitude,
+                AboutMe = user.AboutMe,
+                CreatedAt = user.CreatedAt
             });
 
         // Set up the user retrieval mock for the registration handler
@@ -119,12 +116,10 @@ public class UserWorkflowIntegrationTest
             u.PhoneNumber.Value == command.PhoneNumber), cancellationToken), Times.Once);        // Now test retrieval of the created user
         getUserValidator
             .Setup(v => v.ValidateAsync(It.IsAny<GetUserQuery>(), cancellationToken))
-            .ReturnsAsync(new FluentValidation.Results.ValidationResult());
-
-        // Setup AutoMapper mock for GetUser operation
+            .ReturnsAsync(new FluentValidation.Results.ValidationResult());        // Setup AutoMapper mock for GetUser operation
         mockMapper
-            .Setup(m => m.Map<GetUserQueryResult>(It.IsAny<HexagonalSkeleton.Domain.User>()))
-            .Returns((HexagonalSkeleton.Domain.User user) => new GetUserQueryResult
+            .Setup(m => m.Map<UserDto>(It.IsAny<HexagonalSkeleton.Domain.User>()))
+            .Returns((HexagonalSkeleton.Domain.User user) => new UserDto
             {
                 Id = user.Id,
                 FirstName = user.FullName.FirstName,

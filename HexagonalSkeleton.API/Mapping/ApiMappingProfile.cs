@@ -16,34 +16,31 @@ namespace HexagonalSkeleton.API.Mapping
     /// </summary>
     public class ApiMappingProfile : Profile
     {        public ApiMappingProfile()
-        {            // Generic mapping for ALL paginated responses - SUPER REUSABLE!
+        {
+            // Generic mapping for ALL paginated responses - SUPER REUSABLE!
             // Works for any PagedQueryResult<TDto> to PagedResponse<TResponse>
             CreateMap(typeof(PagedQueryResult<>), typeof(PagedResponse<>))
                 .ForMember("Data", opt => opt.MapFrom("Items"))
                 .ForMember("TotalCount", opt => opt.MapFrom("Metadata.TotalCount"))
                 .ForMember("PageNumber", opt => opt.MapFrom("Metadata.PageNumber"))
-                .ForMember("PageSize", opt => opt.MapFrom("Metadata.PageSize"));            // Specific mapping for UsersResponse which inherits from PagedResponse<UserResponse>
+                .ForMember("PageSize", opt => opt.MapFrom("Metadata.PageSize"));
 
             // Request to Query mappings
-            CreateMap<GetAllUsersRequest, GetAllUsersQuery>();            // Mapeos especiales para Login/Register con estructura anidada
-            CreateMap<LoginCommandResult, LoginResponse>()
-                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User))
-                .ForMember(dest => dest.TokenType, opt => opt.MapFrom(src => "Bearer"))
-                .ForMember(dest => dest.ExpiresIn, opt => opt.MapFrom(src => src.ExpiresIn)); // Use real expiration time
-            
-            CreateMap<RegisterUserCommandResult, LoginResponse>()
-                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User))
-                .ForMember(dest => dest.TokenType, opt => opt.MapFrom(src => "Bearer"))
-                .ForMember(dest => dest.ExpiresIn, opt => opt.MapFrom(src => src.ExpiresIn)); // Use real expiration time
-                
-            // Mapeo de UserInfoResult a UserInfoResponse de la API
-            CreateMap<UserInfoResult, HexagonalSkeleton.API.Models.Auth.UserInfoResponse>();
+            CreateMap<GetAllUsersRequest, GetAllUsersQuery>();
 
-            // Mapeos especiales para Delete que requieren configuración de campos
-            CreateMap<HardDeleteUserCommandResult, DeleteUserResponse>()
-                .ForMember(dest => dest.UserId, opt => opt.Ignore())
-                .ForMember(dest => dest.DeletionType, opt => opt.MapFrom(src => "Hard"));            CreateMap<SoftDeleteUserCommandResult, DeleteUserResponse>()
-                .ForMember(dest => dest.UserId, opt => opt.Ignore())                .ForMember(dest => dest.DeletionType, opt => opt.MapFrom(src => "Soft"));
+            // DTO to Response mappings
+            CreateMap<UserDto, UserResponse>();
+            CreateMap<UserDeletionDto, DeleteUserResponse>();
+
+            // Authentication DTOs mappings
+            CreateMap<AuthenticationDto, LoginResponse>()
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User))
+                .ForMember(dest => dest.TokenType, opt => opt.MapFrom(src => "Bearer"))
+                .ForMember(dest => dest.ExpiresIn, opt => opt.MapFrom(src => src.ExpiresIn));
+
+            // User DTO to UserInfoResponse mapping for authentication
+            CreateMap<UserDto, HexagonalSkeleton.API.Models.Auth.UserInfoResponse>()
+                .ForMember(dest => dest.FullName, opt => opt.Ignore()); // Es una propiedad calculada
         }
     }
 }

@@ -40,9 +40,7 @@ namespace HexagonalSkeleton.Application.Query
             var pagedDomainResult = await userReadRepository.GetPagedAsync(
                 pagination, 
                 searchSpecification, 
-                cancellationToken);
-            
-            // Map domain entities to DTOs
+                cancellationToken);            // Map domain entities to DTOs
             var userDtos = mapper.Map<List<UserDto>>(pagedDomainResult.Items);
             
             // Return generic paginated result directly - SIMPLIFIED!

@@ -14,10 +14,9 @@ namespace HexagonalSkeleton.Application.Command
     public class SoftDeleteUserCommandHandler(
         IValidator<SoftDeleteUserCommand> validator,
         IUserReadRepository userReadRepository,
-        IUserWriteRepository userWriteRepository)
-        : IRequestHandler<SoftDeleteUserCommand, SoftDeleteUserCommandResult>
+        IUserWriteRepository userWriteRepository)        : IRequestHandler<SoftDeleteUserCommand, UserDeletionDto>
     {
-        public async Task<SoftDeleteUserCommandResult> Handle(SoftDeleteUserCommand request, CancellationToken cancellationToken)
+        public async Task<UserDeletionDto> Handle(SoftDeleteUserCommand request, CancellationToken cancellationToken)
         {            var result = await validator.ValidateAsync(request, cancellationToken);
             if (!result.IsValid)
                 throw new Exceptions.ValidationException(result.ToDictionary());
@@ -31,9 +30,11 @@ namespace HexagonalSkeleton.Application.Command
             user.Delete();
 
             // Persist the changes through the write repository
-            await userWriteRepository.UpdateAsync(user, cancellationToken);
-
-            return new SoftDeleteUserCommandResult();
+            await userWriteRepository.UpdateAsync(user, cancellationToken);            // Return deletion result
+            return new UserDeletionDto 
+            { 
+                UserId = request.Id
+            };
         }
     }
 }

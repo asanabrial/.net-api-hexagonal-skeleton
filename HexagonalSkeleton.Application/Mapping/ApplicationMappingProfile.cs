@@ -1,6 +1,4 @@
 using AutoMapper;
-using HexagonalSkeleton.Application.Command;
-using HexagonalSkeleton.Application.Query;
 using HexagonalSkeleton.Application.Dto;
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.ValueObjects;
@@ -34,66 +32,35 @@ namespace HexagonalSkeleton.Application.Mapping
 
             // PhoneNumber Value Object mappings
             CreateMap<PhoneNumber, string>().ConvertUsing(vo => vo != null ? vo.Value : string.Empty);
-        }        /// <summary>
-        /// Configures User aggregate mappings to various result DTOs
+        }
+
+        /// <summary>
+        /// Configures User aggregate mappings to various DTOs
         /// </summary>
         private void ConfigureUserMappings()
         {
-            // User to UserInfoResult mapping (for nested structures)
-            CreateMap<User, UserInfoResult>()
-                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
-                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName))
-                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email.Value))
-                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber != null ? src.PhoneNumber.Value : null))
-                .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Latitude : (double?)null))
-                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Longitude : (double?)null));
-
-            // Authentication result mappings (with AccessToken and nested user data)
-            CreateMap<User, LoginCommandResult>()
-                .ForMember(dest => dest.AccessToken, opt => opt.Ignore()) // Will be set manually after mapping
-                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src));
-
-            CreateMap<User, RegisterUserCommandResult>()
-                .ForMember(dest => dest.AccessToken, opt => opt.Ignore()) // Will be set manually after mapping
-                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src));
-
-            // Update command results (limited properties)
-            CreateMap<User, UpdateUserCommandResult>()
-                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
-                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName));
-
-            CreateMap<User, UpdateProfileUserCommandResult>()
-                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
-                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName));            // Query results (full user data)
-            CreateMap<User, GetUserQueryResult>()
-                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
-                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName))
-                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email.Value))
-                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber != null ? src.PhoneNumber.Value : null))
-                .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Latitude : (double?)null))
-                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Longitude : (double?)null))
-                .ForMember(dest => dest.AboutMe, opt => opt.MapFrom(src => src.AboutMe))
-                .ForMember(dest => dest.ProfileImageName, opt => opt.MapFrom(src => src.ProfileImageName))
-                .ForMember(dest => dest.LastLogin, opt => opt.MapFrom(src => src.LastLogin))
-                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
-
+            // User to UserDto mapping (comprehensive user data)
             CreateMap<User, UserDto>()
                 .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
                 .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName))
-                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email.Value))
-                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber != null ? src.PhoneNumber.Value : null))
                 .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Latitude : (double?)null))
-                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Longitude : (double?)null))
-                .ForMember(dest => dest.AboutMe, opt => opt.MapFrom(src => src.AboutMe))
-                .ForMember(dest => dest.ProfileImageName, opt => opt.MapFrom(src => src.ProfileImageName))
-                .ForMember(dest => dest.LastLogin, opt => opt.MapFrom(src => src.LastLogin))
-                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
-        }        /// <summary>
+                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Longitude : (double?)null));
+
+            // Authentication DTOs mappings (with AccessToken and nested user data)
+            CreateMap<User, AuthenticationDto>()
+                .ForMember(dest => dest.AccessToken, opt => opt.Ignore()) // Will be set manually after mapping
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src));
+        }
+
+        /// <summary>
         /// Configures collection mappings
+        /// Note: AutoMapper automatically handles collection mappings when individual mappings exist
         /// </summary>
         private void ConfigureCollectionMappings()
         {
-            CreateMap<IEnumerable<User>, List<UserDto>>();
+            // AutoMapper automatically handles collection mappings when individual object mappings exist
+            // For example: List<User> -> List<UserDto> is automatic if User -> UserDto exists
+            // Removing explicit collection mappings to avoid conflicts with indexer access
         }
     }
 }

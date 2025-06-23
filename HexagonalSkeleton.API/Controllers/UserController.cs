@@ -7,6 +7,7 @@ using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using HexagonalSkeleton.API.Models.Common;
 
 namespace HexagonalSkeleton.API.Controllers
 {    /// <summary>
@@ -135,13 +136,13 @@ namespace HexagonalSkeleton.API.Controllers
         /// <returns>Paginated list of users</returns>
         [HttpGet]
         [Authorize]
-        [ProducesResponseType(typeof(UsersResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PagedResponse<UserResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetAll([FromQuery] GetAllUsersRequest request)
         {
             var query = mapper.Map<GetAllUsersQuery>(request);
             var result = await mediator.Send(query);
-            return Ok(mapper.Map<UsersResponse>(result));
+            return Ok(mapper.Map<PagedResponse<UserResponse>>(result));
         }
     }
 }

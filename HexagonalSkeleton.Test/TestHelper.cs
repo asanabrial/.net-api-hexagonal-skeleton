@@ -66,17 +66,11 @@ namespace HexagonalSkeleton.Test
             return new GetUserQuery(id);
         }
 
-        public static GetAllUsersQuery CreateGetAllUsersQuery()
-        {
+        public static GetAllUsersQuery CreateGetAllUsersQuery()        {
             return new GetAllUsersQuery();
         }
 
-        public static LoginQuery CreateLoginQuery(
-            string email = "test@example.com", 
-            string password = "Password123!")
-        {
-            return new LoginQuery(email, password);
-        }        public static UpdateProfileUserCommand CreateUpdateProfileUserCommand(
+        public static UpdateProfileUserCommand CreateUpdateProfileUserCommand(
             int id = 1,
             string firstName = "John",  
             string lastName = "Doe",

@@ -4,7 +4,7 @@ using MediatR;
 
 namespace HexagonalSkeleton.Application.Command
 {
-    public class RegisterUserCommand : IRequest<RegisterUserCommandResult>
+    public class RegisterUserCommand : IRequest<AuthenticationDto>
     {
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;

@@ -3,7 +3,7 @@ using MediatR;
 
 namespace HexagonalSkeleton.Application.Command
 {
-    public class HardDeleteUserCommand : IRequest<HardDeleteUserCommandResult>
+    public class HardDeleteUserCommand : IRequest<UserDeletionDto>
     {
         /// <summary>
         /// Gets or sets the user id.

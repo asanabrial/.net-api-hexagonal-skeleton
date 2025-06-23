@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using HexagonalSkeleton.API.Models.Auth;
 using HexagonalSkeleton.API.Models.Users;
+using HexagonalSkeleton.API.Models.Common;
 using System.Text.Json;
 using System.Text;
 using System.Net.Http.Headers;
@@ -56,11 +57,10 @@ namespace HexagonalSkeleton.Test.Integration.User
             // Assert
             getAllResponse.EnsureSuccessStatusCode();
             var getAllContent = await getAllResponse.Content.ReadAsStringAsync();
-            
-            // Debug: Print the response
+              // Debug: Print the response
             Console.WriteLine($"GetAll Response: {getAllContent}");
             
-            var usersResponse = JsonSerializer.Deserialize<UsersResponse>(getAllContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var usersResponse = JsonSerializer.Deserialize<PagedResponse<UserResponse>>(getAllContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             
             Assert.NotNull(usersResponse);
             Assert.NotNull(usersResponse.Data);

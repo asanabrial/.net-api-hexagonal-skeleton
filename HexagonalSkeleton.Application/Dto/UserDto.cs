@@ -1,3 +1,5 @@
+using HexagonalSkeleton.Domain;
+
 namespace HexagonalSkeleton.Application.Dto
 {
     /// <summary>
@@ -9,7 +11,7 @@ namespace HexagonalSkeleton.Application.Dto
         public int Id { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
-        public string FullName => $"{FirstName} {LastName}".Trim();
+        public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string? PhoneNumber { get; set; }
         public DateTime? Birthdate { get; set; }
@@ -17,7 +19,8 @@ namespace HexagonalSkeleton.Application.Dto
         public double? Longitude { get; set; }
         public string? AboutMe { get; set; }
         public string? ProfileImageName { get; set; }
-        public DateTime LastLogin { get; set; }
+        public DateTime? LastLogin { get; set; }
         public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
     }
 }

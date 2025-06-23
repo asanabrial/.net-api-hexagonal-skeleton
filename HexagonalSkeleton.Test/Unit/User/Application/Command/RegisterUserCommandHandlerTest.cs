@@ -75,28 +75,28 @@ public class RegisterUserCommandHandlerTest
         var createdUser = TestHelper.CreateTestUser(userId);        _mockUserReadRepository
             .Setup(r => r.GetByIdAsync(userId, cancellationToken))
             .ReturnsAsync(createdUser);        
-        
-        _mockAuthenticationService
+          _mockAuthenticationService
             .Setup(a => a.GenerateJwtTokenAsync(userId, cancellationToken))
-            .ReturnsAsync(new TokenInfo(jwtToken, DateTime.UtcNow.AddDays(7)));// Setup AutoMapper mock to return a properly mapped result with nested structure
+            .ReturnsAsync(new TokenInfo(jwtToken, DateTime.UtcNow.AddDays(7)));
+
+        // Setup AutoMapper mock to return a properly mapped result with nested structure
         _mockMapper
-            .Setup(m => m.Map<RegisterUserCommandResult>(It.IsAny<HexagonalSkeleton.Domain.User>()))
-            .Returns((HexagonalSkeleton.Domain.User user) => new RegisterUserCommandResult(string.Empty)
+            .Setup(m => m.Map<UserDto>(It.IsAny<HexagonalSkeleton.Domain.User>()))
+            .Returns((HexagonalSkeleton.Domain.User user) => new UserDto
             {
-                User = new UserInfoResult
-                {
-                    Id = user.Id,
-                    FirstName = user.FullName.FirstName,
-                    LastName = user.FullName.LastName,
-                    Email = user.Email.Value,
-                    PhoneNumber = user.PhoneNumber?.Value,
-                    Birthdate = user.Birthdate,
-                    Latitude = user.Location?.Latitude,
-                    Longitude = user.Location?.Longitude,
-                    AboutMe = user.AboutMe,
-                    CreatedAt = user.CreatedAt
-                }
-            });// Act
+                Id = user.Id,
+                FirstName = user.FullName.FirstName,
+                LastName = user.FullName.LastName,
+                Email = user.Email.Value,
+                PhoneNumber = user.PhoneNumber?.Value,
+                Birthdate = user.Birthdate,
+                Latitude = user.Location?.Latitude,
+                Longitude = user.Location?.Longitude,
+                AboutMe = user.AboutMe,
+                CreatedAt = user.CreatedAt
+            });
+
+        // Act
         var result = await _handler.Handle(command, cancellationToken);
 
         // Assert

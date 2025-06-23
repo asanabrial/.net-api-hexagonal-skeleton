@@ -40,9 +40,7 @@ public class GetUserQueryHandlerTest
             .Setup(v => v.ValidateAsync(It.IsAny<GetUserQuery>(), cancellationToken))
             .ReturnsAsync(new FluentValidation.Results.ValidationResult());        _mockUserReadRepository
             .Setup(r => r.GetByIdAsync(userId, cancellationToken))
-            .ReturnsAsync(user);
-
-        var expectedResult = new GetUserQueryResult
+            .ReturnsAsync(user);        var expectedResult = new UserDto
         {
             Id = user.Id,
             FirstName = user.FullName.FirstName,
@@ -53,7 +51,7 @@ public class GetUserQueryHandlerTest
         };
 
         _mockMapper
-            .Setup(m => m.Map<GetUserQueryResult>(It.IsAny<HexagonalSkeleton.Domain.User>()))
+            .Setup(m => m.Map<UserDto>(It.IsAny<HexagonalSkeleton.Domain.User>()))
             .Returns(expectedResult);
 
         // Act

@@ -2,7 +2,7 @@
 using MediatR;
 
 namespace HexagonalSkeleton.Application.Command
-{    public class UpdateUserCommand : IRequest<UpdateUserCommandResult>
+{    public class UpdateUserCommand : IRequest<UserDto>
     {
         public required int Id { get; set; }
         public required string FirstName { get; set; }
