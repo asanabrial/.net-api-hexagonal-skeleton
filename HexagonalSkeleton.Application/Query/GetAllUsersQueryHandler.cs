@@ -12,16 +12,16 @@ namespace HexagonalSkeleton.Application.Query
 {
     /// <summary>
     /// Handler for GetAllUsersQuery with pagination support
+    /// Simplified to use generic PagedQueryResult directly
     /// Follows CQRS pattern and uses domain specifications for filtering
-    /// Demonstrates best practices for paginated queries that can be reused for other entities
     /// </summary>
     public class GetAllUsersQueryHandler(
         IValidator<GetAllUsersQuery> validator,
         IUserReadRepository userReadRepository,
         IMapper mapper)
-        : IRequestHandler<GetAllUsersQuery, GetAllUsersQueryResult>
+        : IRequestHandler<GetAllUsersQuery, PagedQueryResult<UserDto>>
     {
-        public async Task<GetAllUsersQueryResult> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
+        public async Task<PagedQueryResult<UserDto>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
         {
             // Validate input using FluentValidation
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
@@ -36,9 +36,7 @@ namespace HexagonalSkeleton.Application.Query
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {
                 searchSpecification = new UserSearchSpecification(request.SearchTerm);
-            }
-
-            // Get paginated users using domain value objects and specifications
+            }            // Get paginated users using domain value objects and specifications
             var pagedDomainResult = await userReadRepository.GetPagedAsync(
                 pagination, 
                 searchSpecification, 
@@ -46,8 +44,9 @@ namespace HexagonalSkeleton.Application.Query
             
             // Map domain entities to DTOs
             var userDtos = mapper.Map<List<UserDto>>(pagedDomainResult.Items);
-              // Create application result using factory method
-            return GetAllUsersQueryResult.FromDomain(pagedDomainResult, userDtos);
+            
+            // Return generic paginated result directly - SIMPLIFIED!
+            return PagedQueryResult<UserDto>.FromDomain(pagedDomainResult, userDtos);
         }
     }
 }

@@ -12,9 +12,7 @@ namespace HexagonalSkeleton.Domain
     public class User : AggregateRoot
     {
         // Private constructors force use of factory methods
-        private User() { }
-
-        private User(
+        private User() { }        private User(
             Email email,
             string passwordSalt,
             string passwordHash,
@@ -34,7 +32,10 @@ namespace HexagonalSkeleton.Domain
             AboutMe = aboutMe ?? string.Empty;
             
             CreatedAt = DateTime.UtcNow;
-            LastLogin = DateTime.UtcNow;            // Raise domain event
+            LastLogin = DateTime.UtcNow;
+            IsDeleted = false; // Explicitly set to false for new users
+            
+            // Raise domain event
             AddDomainEvent(new UserCreatedEvent(Id, Email.Value, FullName.FirstName, FullName.LastName, PhoneNumber.Value));
         }
 

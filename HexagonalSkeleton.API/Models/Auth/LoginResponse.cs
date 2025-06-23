@@ -1,14 +1,12 @@
 using AutoMapper;
-using HexagonalSkeleton.API.Models.Common;
 using HexagonalSkeleton.Application.Command;
 
 namespace HexagonalSkeleton.API.Models.Auth
 {    /// <summary>
     /// Response model for successful authentication
-    /// </summary>
-    [AutoMap(typeof(LoginCommandResult), ReverseMap = true)]
+    /// </summary>    [AutoMap(typeof(LoginCommandResult), ReverseMap = true)]
     [AutoMap(typeof(RegisterUserCommandResult), ReverseMap = true)]
-    public class LoginResponse : BaseApiResponse
+    public class LoginResponse
     {
         /// <summary>
         /// JWT access token for API authentication

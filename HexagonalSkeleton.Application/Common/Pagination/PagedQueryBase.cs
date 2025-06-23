@@ -2,8 +2,7 @@ using MediatR;
 using HexagonalSkeleton.Domain.ValueObjects;
 
 namespace HexagonalSkeleton.Application.Common.Pagination
-{
-    /// <summary>
+{    /// <summary>
     /// Base interface for paginated queries
     /// Provides common pagination parameters for all paginated operations
     /// </summary>
@@ -12,33 +11,40 @@ namespace HexagonalSkeleton.Application.Common.Pagination
         int PageNumber { get; }
         int PageSize { get; }
         string? SearchTerm { get; }
+        string? SortBy { get; }
+        string SortDirection { get; }
     }
 
     /// <summary>
     /// Base class for paginated queries with validation and common behavior
+    /// Includes sorting capabilities
     /// </summary>
     public abstract class PagedQuery : IPagedQuery
     {
         private const int DefaultPageNumber = 1;
         private const int DefaultPageSize = 10;
+        private const string DefaultSortDirection = "asc";
 
         public int PageNumber { get; }
         public int PageSize { get; }
         public string? SearchTerm { get; }
-
-        protected PagedQuery(int? pageNumber = null, int? pageSize = null, string? searchTerm = null)
+        public string? SortBy { get; }
+        public string SortDirection { get; }        protected PagedQuery(int? pageNumber = null, int? pageSize = null, string? searchTerm = null, 
+                           string? sortBy = null, string? sortDirection = null)
         {
             PageNumber = pageNumber ?? DefaultPageNumber;
             PageSize = pageSize ?? DefaultPageSize;
             SearchTerm = string.IsNullOrWhiteSpace(searchTerm) ? null : searchTerm.Trim();
-        }
-
-        /// <summary>
+            SortBy = string.IsNullOrWhiteSpace(sortBy) ? null : sortBy.Trim();
+            SortDirection = ValidateSortDirection(sortDirection?.Trim()) && !string.IsNullOrWhiteSpace(sortDirection) 
+                            ? sortDirection.Trim().ToLowerInvariant() 
+                            : DefaultSortDirection;
+        }/// <summary>
         /// Creates domain pagination parameters from query
         /// </summary>
         public PaginationParams ToPaginationParams()
         {
-            return PaginationParams.Create(PageNumber, PageSize);
+            return PaginationParams.Create(PageNumber, PageSize, SortBy, SortDirection);
         }
 
         /// <summary>
@@ -49,7 +55,20 @@ namespace HexagonalSkeleton.Application.Common.Pagination
         {
             return PageNumber > 0 && 
                    PageSize > 0 && 
-                   PageSize <= PaginationParams.MaxPageSize;
+                   PageSize <= PaginationParams.MaxPageSize &&
+                   ValidateSortDirection(SortDirection);
+        }
+
+        /// <summary>
+        /// Validates sort direction parameter
+        /// </summary>
+        private static bool ValidateSortDirection(string? sortDirection)
+        {
+            if (string.IsNullOrWhiteSpace(sortDirection))
+                return true;
+                
+            var normalized = sortDirection.Trim().ToLowerInvariant();
+            return normalized == "asc" || normalized == "desc";
         }
     }
 }

@@ -76,23 +76,21 @@ public class GetAllUsersQueryHandlerTest
 
         _mockMapper
             .Setup(m => m.Map<List<UserDto>>(It.IsAny<IReadOnlyList<HexagonalSkeleton.Domain.User>>()))
-            .Returns(expectedUserDtos);
-
-        // Act
+            .Returns(expectedUserDtos);        // Act
         var result = await _handler.Handle(query, cancellationToken);
 
-        // Assert
+        // Assert - Updated for simplified PagedQueryResult<UserDto>
         Assert.NotNull(result);
-        Assert.NotNull(result.Users);
-        Assert.Equal(2, result.Users.Count);
-        Assert.Equal(2, result.TotalCount);
-        Assert.Equal(1, result.PageNumber);
-        Assert.Equal(10, result.PageSize);
-        Assert.Equal(1, result.TotalPages);
-        Assert.False(result.HasNextPage);
-        Assert.False(result.HasPreviousPage);
+        Assert.NotNull(result.Items);
+        Assert.Equal(2, result.Items.Count);
+        Assert.Equal(2, result.Metadata.TotalCount);
+        Assert.Equal(1, result.Metadata.PageNumber);
+        Assert.Equal(10, result.Metadata.PageSize);
+        Assert.Equal(1, result.Metadata.TotalPages);
+        Assert.False(result.Metadata.HasNextPage);
+        Assert.False(result.Metadata.HasPreviousPage);
         
-        var firstUser = result.Users[0];
+        var firstUser = result.Items[0];
         Assert.Equal(users[0].Id, firstUser.Id);
         Assert.Equal(users[0].FullName.FirstName, firstUser.FirstName);
         Assert.Equal(users[0].FullName.LastName, firstUser.LastName);
@@ -137,13 +135,11 @@ public class GetAllUsersQueryHandlerTest
             .Returns(expectedUserDtos);
 
         // Act
-        var result = await _handler.Handle(query, cancellationToken);
-
-        // Assert
+        var result = await _handler.Handle(query, cancellationToken);        // Assert
         Assert.NotNull(result);
-        Assert.NotNull(result.Users);
-        Assert.Single(result.Users);
-        Assert.Equal(1, result.TotalCount);
+        Assert.NotNull(result.Items);
+        Assert.Single(result.Items);
+        Assert.Equal(1, result.Metadata.TotalCount);
 
         _mockUserReadRepository.Verify(r => r.GetPagedAsync(It.Is<PaginationParams>(p => p.PageNumber == 1 && p.PageSize == 10), It.IsAny<Specification<HexagonalSkeleton.Domain.User>>(), cancellationToken), Times.Once);
     }
@@ -167,15 +163,13 @@ public class GetAllUsersQueryHandlerTest
             .Returns(new List<UserDto>());
 
         // Act
-        var result = await _handler.Handle(query, cancellationToken);
-
-        // Assert
+        var result = await _handler.Handle(query, cancellationToken);        // Assert
         Assert.NotNull(result);
-        Assert.NotNull(result.Users);
-        Assert.Empty(result.Users);
-        Assert.Equal(0, result.TotalCount);
-        Assert.Equal(1, result.PageNumber);
-        Assert.Equal(10, result.PageSize);
+        Assert.NotNull(result.Items);
+        Assert.Empty(result.Items);
+        Assert.Equal(0, result.Metadata.TotalCount);
+        Assert.Equal(1, result.Metadata.PageNumber);
+        Assert.Equal(10, result.Metadata.PageSize);
 
         _mockUserReadRepository.Verify(r => r.GetPagedAsync(It.Is<PaginationParams>(p => p.PageNumber == 1 && p.PageSize == 10), null, cancellationToken), Times.Once);
     }

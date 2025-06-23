@@ -1,10 +1,9 @@
 namespace HexagonalSkeleton.API.Models.Common
-{
-    /// <summary>
+{    /// <summary>
     /// Generic paginated response for list operations
     /// </summary>
     /// <typeparam name="T">Type of items in the list</typeparam>
-    public class PagedResponse<T> : BaseApiResponse
+    public class PagedResponse<T>
     {
         /// <summary>
         /// List of items for current page

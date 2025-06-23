@@ -52,9 +52,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
                 .ToListAsync(cancellationToken);
             
             return MapToDomain(entities);
-        }
-
-        public async Task<PagedResult<User>> GetPagedAsync(
+        }        public async Task<PagedResult<User>> GetPagedAsync(
             PaginationParams pagination, 
             Specification<User>? specification = null, 
             CancellationToken cancellationToken = default)
@@ -70,9 +68,11 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
             // Get total count before pagination
             var totalCount = await query.CountAsync(cancellationToken);
 
-            // Apply pagination with consistent ordering
+            // Apply sorting if specified, otherwise default to Id
+            query = ApplySorting(query, pagination);
+
+            // Apply pagination
             var entities = await query
-                .OrderBy(u => u.Id)
                 .Skip(pagination.Skip)
                 .Take(pagination.Take)
                 .ToListAsync(cancellationToken);
@@ -98,9 +98,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
             var normalizedPhone = phoneNumber.Trim();
             return await CreateBaseQuery()
                 .AnyAsync(u => u.PhoneNumber != null && u.PhoneNumber == normalizedPhone, cancellationToken);
-        }
-
-        public async Task<List<User>> FindBySpecificationAsync(
+        }        public async Task<List<User>> FindBySpecificationAsync(
             Specification<User> specification, 
             CancellationToken cancellationToken = default)
         {
@@ -111,7 +109,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
             query = ApplySpecification(query, specification);
 
             var entities = await query
-                .OrderBy(u => u.Id)
+                .OrderBy(u => u.Id) // Keep consistent ordering for specifications
                 .ToListAsync(cancellationToken);
 
             return MapToDomain(entities);
@@ -158,14 +156,40 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
             var phone = (string)phoneField!.GetValue(spec)!;
 
             return entity => entity.PhoneNumber != null && entity.PhoneNumber == phone;
-        }
-
-        private Expression<Func<UserEntity, bool>> ConvertIdSpecification(UserByIdSpecification spec)
+        }        private Expression<Func<UserEntity, bool>> ConvertIdSpecification(UserByIdSpecification spec)
         {
             var idField = typeof(UserByIdSpecification)
                 .GetField("_id", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var id = (int)idField!.GetValue(spec)!;
 
-            return entity => entity.Id == id;        }
+            return entity => entity.Id == id;
+        }
+
+        /// <summary>
+        /// Applies sorting to the query based on pagination parameters
+        /// </summary>
+        private IQueryable<UserEntity> ApplySorting(IQueryable<UserEntity> query, PaginationParams pagination)
+        {
+            if (!pagination.HasSorting)
+            {
+                // Default sorting by Id for consistent pagination
+                return query.OrderBy(u => u.Id);
+            }
+
+            var sortBy = pagination.SortBy!.ToLowerInvariant();
+            var isAscending = pagination.IsAscending;
+
+            return sortBy switch
+            {
+                "id" => isAscending ? query.OrderBy(u => u.Id) : query.OrderByDescending(u => u.Id),
+                "name" => isAscending ? query.OrderBy(u => u.Name) : query.OrderByDescending(u => u.Name),
+                "surname" => isAscending ? query.OrderBy(u => u.Surname) : query.OrderByDescending(u => u.Surname),
+                "email" => isAscending ? query.OrderBy(u => u.Email) : query.OrderByDescending(u => u.Email),
+                "phonenumber" => isAscending ? query.OrderBy(u => u.PhoneNumber) : query.OrderByDescending(u => u.PhoneNumber),
+                "createdat" => isAscending ? query.OrderBy(u => u.CreatedAt) : query.OrderByDescending(u => u.CreatedAt),
+                "updatedat" => isAscending ? query.OrderBy(u => u.UpdatedAt) : query.OrderByDescending(u => u.UpdatedAt),
+                _ => query.OrderBy(u => u.Id) // Fallback to default sorting
+            };
+        }
     }
 }

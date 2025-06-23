@@ -131,19 +131,16 @@ namespace HexagonalSkeleton.API.Controllers
         }        /// <summary>
         /// Get all users with pagination support
         /// </summary>
-        /// <param name="pageNumber">Page number (1-based, default: 1)</param>
-        /// <param name="pageSize">Number of items per page (1-100, default: 10)</param>
-        /// <param name="searchTerm">Optional search term for filtering by name or email</param>
+        /// <param name="request">Pagination and filtering parameters</param>
         /// <returns>Paginated list of users</returns>
         [HttpGet]
         [Authorize]
         [ProducesResponseType(typeof(UsersResponse), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAll(
-            [FromQuery] int pageNumber = 1, 
-            [FromQuery] int pageSize = 10, 
-            [FromQuery] string? searchTerm = null)        {
-            var query = new GetAllUsersQuery(pageNumber, pageSize, searchTerm);
-            GetAllUsersQueryResult result = await mediator.Send(query);
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetAll([FromQuery] GetAllUsersRequest request)
+        {
+            var query = mapper.Map<GetAllUsersQuery>(request);
+            var result = await mediator.Send(query);
             return Ok(mapper.Map<UsersResponse>(result));
         }
     }

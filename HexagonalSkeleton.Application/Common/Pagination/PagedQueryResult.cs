@@ -4,43 +4,45 @@ namespace HexagonalSkeleton.Application.Common.Pagination
 {
     /// <summary>
     /// Generic paginated query result for application layer
-    /// Maps domain PagedResult to application DTOs
+    /// Simplified implementation following YAGNI and DRY principles
     /// </summary>
-    public class PagedQueryResult<TDto>
+    public sealed class PagedQueryResult<TDto>
     {
         public IReadOnlyList<TDto> Items { get; }
         public PaginationMetadata Metadata { get; }
 
-        public PagedQueryResult(IEnumerable<TDto> items, PaginationMetadata metadata)
+        private PagedQueryResult(IEnumerable<TDto> items, PaginationMetadata metadata)
         {
             Items = items?.ToList().AsReadOnly() ?? throw new ArgumentNullException(nameof(items));
             Metadata = metadata ?? throw new ArgumentNullException(nameof(metadata));
         }
 
         /// <summary>
-        /// Creates a PagedQueryResult from domain PagedResult
+        /// Factory method to create PagedQueryResult from domain PagedResult
+        /// Simplified Anti-Corruption Layer between domain and application
         /// </summary>
         public static PagedQueryResult<TDto> FromDomain<TDomain>(
             PagedResult<TDomain> domainResult, 
             IEnumerable<TDto> dtos)
         {
-            var metadata = new PaginationMetadata(
-                domainResult.PageNumber,
-                domainResult.PageSize,
-                domainResult.TotalCount,
-                domainResult.TotalPages,
-                domainResult.HasNextPage,
-                domainResult.HasPreviousPage
-            );
+            if (domainResult == null)
+                throw new ArgumentNullException(nameof(domainResult));
+            
+            if (dtos == null)
+                throw new ArgumentNullException(nameof(dtos));
 
+            var metadata = PaginationMetadata.FromDomain(domainResult);
             return new PagedQueryResult<TDto>(dtos, metadata);
         }
 
         /// <summary>
-        /// Creates an empty paginated result
+        /// Factory method to create empty result
         /// </summary>
         public static PagedQueryResult<TDto> Empty(PaginationParams pagination)
         {
+            if (pagination == null)
+                throw new ArgumentNullException(nameof(pagination));
+
             var metadata = new PaginationMetadata(
                 pagination.PageNumber,
                 pagination.PageSize,
@@ -55,8 +57,8 @@ namespace HexagonalSkeleton.Application.Common.Pagination
     }
 
     /// <summary>
-    /// Pagination metadata for API responses
-    /// Immutable value object for consistent pagination information
+    /// Pagination metadata value object
+    /// Simplified immutable record following DDD principles
     /// </summary>
     public record PaginationMetadata(
         int PageNumber,
@@ -67,10 +69,13 @@ namespace HexagonalSkeleton.Application.Common.Pagination
         bool HasPreviousPage)
     {
         /// <summary>
-        /// Creates pagination metadata from domain values
+        /// Factory method to create from domain PagedResult
         /// </summary>
         public static PaginationMetadata FromDomain<T>(PagedResult<T> domainResult)
         {
+            if (domainResult == null)
+                throw new ArgumentNullException(nameof(domainResult));
+
             return new PaginationMetadata(
                 domainResult.PageNumber,
                 domainResult.PageSize,
