@@ -6,7 +6,7 @@ namespace HexagonalSkeleton.Application.Dto
     /// Data Transfer Object for User information
     /// Used to transfer user data between application layers
     /// </summary>
-    public class UserDto
+    public class  UserDto
     {
         public int Id { get; set; }
         public string FirstName { get; set; } = string.Empty;

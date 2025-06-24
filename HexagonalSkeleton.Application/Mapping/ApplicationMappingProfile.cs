@@ -16,7 +16,6 @@ namespace HexagonalSkeleton.Application.Mapping
         {
             ConfigureValueObjectMappings();
             ConfigureUserMappings();
-            ConfigureCollectionMappings();
         }
 
         /// <summary>
@@ -50,17 +49,6 @@ namespace HexagonalSkeleton.Application.Mapping
             CreateMap<User, AuthenticationDto>()
                 .ForMember(dest => dest.AccessToken, opt => opt.Ignore()) // Will be set manually after mapping
                 .ForMember(dest => dest.User, opt => opt.MapFrom(src => src));
-        }
-
-        /// <summary>
-        /// Configures collection mappings
-        /// Note: AutoMapper automatically handles collection mappings when individual mappings exist
-        /// </summary>
-        private void ConfigureCollectionMappings()
-        {
-            // AutoMapper automatically handles collection mappings when individual object mappings exist
-            // For example: List<User> -> List<UserDto> is automatic if User -> UserDto exists
-            // Removing explicit collection mappings to avoid conflicts with indexer access
         }
     }
 }

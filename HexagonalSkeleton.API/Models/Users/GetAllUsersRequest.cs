@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using AutoMapper;
+using HexagonalSkeleton.Application.Query;
 
 namespace HexagonalSkeleton.API.Models.Users
 {
@@ -6,6 +8,7 @@ namespace HexagonalSkeleton.API.Models.Users
     /// Request model for getting all users with pagination and filtering
     /// Encapsulates query parameters following Request-Response pattern
     /// </summary>
+    [AutoMap(typeof(GetAllUsersQuery), ReverseMap = true)]
     public class GetAllUsersRequest
     {
         /// <summary>

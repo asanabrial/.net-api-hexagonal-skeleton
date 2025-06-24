@@ -1,11 +1,6 @@
 using AutoMapper;
-using HexagonalSkeleton.API.Models.Auth;
-using HexagonalSkeleton.API.Models.Users;
 using HexagonalSkeleton.API.Models.Common;
-using HexagonalSkeleton.Application.Command;
-using HexagonalSkeleton.Application.Query;
 using HexagonalSkeleton.Application.Common.Pagination;
-using HexagonalSkeleton.Application.Dto;
 
 namespace HexagonalSkeleton.API.Mapping
 {
@@ -24,23 +19,6 @@ namespace HexagonalSkeleton.API.Mapping
                 .ForMember("TotalCount", opt => opt.MapFrom("Metadata.TotalCount"))
                 .ForMember("PageNumber", opt => opt.MapFrom("Metadata.PageNumber"))
                 .ForMember("PageSize", opt => opt.MapFrom("Metadata.PageSize"));
-
-            // Request to Query mappings
-            CreateMap<GetAllUsersRequest, GetAllUsersQuery>();
-
-            // DTO to Response mappings
-            CreateMap<UserDto, UserResponse>();
-            CreateMap<UserDeletionDto, DeleteUserResponse>();
-
-            // Authentication DTOs mappings
-            CreateMap<AuthenticationDto, LoginResponse>()
-                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User))
-                .ForMember(dest => dest.TokenType, opt => opt.MapFrom(src => "Bearer"))
-                .ForMember(dest => dest.ExpiresIn, opt => opt.MapFrom(src => src.ExpiresIn));
-
-            // User DTO to UserInfoResponse mapping for authentication
-            CreateMap<UserDto, HexagonalSkeleton.API.Models.Auth.UserInfoResponse>()
-                .ForMember(dest => dest.FullName, opt => opt.Ignore()); // Es una propiedad calculada
         }
     }
 }
