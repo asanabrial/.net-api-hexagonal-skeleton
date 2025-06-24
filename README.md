@@ -179,3 +179,32 @@ This skeleton implements modern .NET API best practices:
 -   Queries for read operations
 -   Handlers isolated and testable
 -   Clean separation of concerns
+
+#### **Simplified User Filtering**
+
+This project uses a **simple, maintainable approach** for user filtering:
+
+-   **Single Search Parameter**: All user searches use a single `searchTerm` parameter
+-   **Multi-field Search**: Searches across name, surname, email, and phone number automatically
+-   **No Complex Specifications**: Removed the Specification pattern in favor of direct, readable LINQ queries
+-   **Easy to Extend**: Adding new searchable fields is straightforward
+
+**API Usage:**
+
+```bash
+# Get all users (paginated)
+GET /api/users?pageNumber=1&pageSize=10&sortBy=Name&sortOrder=ASC
+
+# Search users by any field
+GET /api/users?searchTerm=john&pageNumber=1&pageSize=10
+```
+
+**Benefits:**
+
+-   ✅ **Simple**: One parameter for all searches
+-   ✅ **Intuitive**: Users can search for anything in one field
+-   ✅ **Maintainable**: Easy to understand and modify
+-   ✅ **Testable**: Simple logic is easy to test
+-   ✅ **SOLID**: Follows SOLID principles without over-engineering
+
+See [UserFiltering_Simplified.md](docs/UserFiltering_Simplified.md) for detailed implementation.
