@@ -14,9 +14,7 @@ namespace HexagonalSkeleton.Application.Query
         /// <summary>
         /// Constructor for parameterless instantiation
         /// </summary>
-        public GetAllUsersQuery() : base() { }
-
-        /// <summary>
+        public GetAllUsersQuery() : base() { }        /// <summary>
         /// Constructor with pagination and sorting parameters
         /// </summary>
         public GetAllUsersQuery(

@@ -130,7 +130,8 @@ namespace HexagonalSkeleton.API.Controllers
             var result = await mediator.Send(new GetUserQuery(User.GetUserId()));
             return Ok(mapper.Map<UserResponse>(result));
         }        /// <summary>
-        /// Get all users with pagination support
+        /// Get all users with pagination and filtering support
+        /// Supports filtering by search term (name/email), phone number, or email
         /// </summary>
         /// <param name="request">Pagination and filtering parameters</param>
         /// <returns>Paginated list of users</returns>

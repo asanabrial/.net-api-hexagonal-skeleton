@@ -21,10 +21,9 @@ namespace HexagonalSkeleton.API.Models.Users
         /// Number of items per page (1-100, default: 10)
         /// </summary>
         [Range(1, 100, ErrorMessage = "Page size must be between 1 and 100")]
-        public int PageSize { get; set; } = 10;
-
-        /// <summary>
-        /// Optional search term for filtering by name or email
+        public int PageSize { get; set; } = 10;        /// <summary>
+        /// Search term for filtering users
+        /// Searches in: name, lastname, email, and phone number
         /// </summary>
         [StringLength(100, ErrorMessage = "Search term cannot exceed 100 characters")]
         public string? SearchTerm { get; set; }

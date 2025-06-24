@@ -53,9 +53,8 @@ namespace HexagonalSkeleton.Application.Command
             if (user == null)
                 throw new NotFoundException("User", request.Email);
 
-            // Record login through the aggregate - this will raise UserLoggedInEvent (domain event)
-            user.RecordLogin();
-            await _userWriteRepository.UpdateAsync(user, cancellationToken);
+            // Record login using the dedicated method - this will raise UserLoggedInEvent (domain event)
+            await _userWriteRepository.SetLastLoginAsync(user.Id, cancellationToken);
             // Note: UserLoggedInEvent is automatically published by the repository after save            // Generate token with expiration info
             var tokenInfo = await _authenticationService.GenerateJwtTokenAsync(user.Id, cancellationToken);
 

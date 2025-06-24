@@ -2,73 +2,134 @@ using AutoMapper;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.ValueObjects;
-using HexagonalSkeleton.Domain.Specifications;
-using HexagonalSkeleton.Domain.Specifications.Users;
-using HexagonalSkeleton.Infrastructure.Adapters.Base;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace HexagonalSkeleton.Infrastructure.Adapters
 {
     /// <summary>
-    /// Adapter implementing user read repository port
-    /// Follows hexagonal architecture by implementing domain ports with infrastructure details
-    /// Inherits from base adapter to follow DRY principle
+    /// Simple repository implementation - no complex specifications
+    /// Easy to understand for any developer joining the project
     /// </summary>
-    public class UserReadRepositoryAdapter : BaseRepositoryAdapter<UserEntity, User>, IUserReadRepository
+    public class UserReadRepositoryAdapter : IUserReadRepository
     {
-        public UserReadRepositoryAdapter(AppDbContext dbContext, IMapper mapper) 
-            : base(dbContext, mapper)
-        {
-        }
+        private readonly AppDbContext _dbContext;
+        private readonly IMapper _mapper;
 
-        protected override DbSet<UserEntity> GetDbSet() => _dbContext.Users;
+        public UserReadRepositoryAdapter(AppDbContext dbContext, IMapper mapper)
+        {
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+        }
 
         public async Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
-            ValidateId(id);
+            if (id <= 0)
+                throw new ArgumentException("ID must be greater than 0", nameof(id));
 
-            var entity = await CreateBaseQuery()
+            var entity = await _dbContext.Users
                 .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
             
-            return MapToDomain(entity);
+            return entity != null ? _mapper.Map<User>(entity) : null;
         }
 
         public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
         {
-            ValidateStringParameter(email, nameof(email));
+            if (string.IsNullOrWhiteSpace(email))
+                throw new ArgumentException("Email cannot be empty", nameof(email));
 
-            var normalizedEmail = email.Trim().ToLowerInvariant();
-            var entity = await CreateBaseQuery()
+            var normalizedEmail = email.Trim().ToLower();
+            var entity = await _dbContext.Users
                 .FirstOrDefaultAsync(u => u.Email != null && u.Email.ToLower() == normalizedEmail, cancellationToken);
             
-            return MapToDomain(entity);
+            return entity != null ? _mapper.Map<User>(entity) : null;
         }
 
         public async Task<List<User>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            var entities = await CreateBaseQuery()
-                .OrderBy(u => u.Id) // Ensure consistent ordering
+            var entities = await _dbContext.Users
+                .OrderBy(u => u.Id)
                 .ToListAsync(cancellationToken);
             
-            return MapToDomain(entities);
-        }        public async Task<PagedResult<User>> GetPagedAsync(
+            return _mapper.Map<List<User>>(entities);
+        }
+
+        /// <summary>
+        /// Get all active users with pagination (no search filter)
+        /// Super simple - anyone can understand this
+        /// </summary>
+        public async Task<PagedResult<User>> GetUsersAsync(
             PaginationParams pagination, 
-            Specification<User>? specification = null, 
             CancellationToken cancellationToken = default)
         {
             if (pagination == null)
                 throw new ArgumentNullException(nameof(pagination));
 
-            var query = CreateBaseQuery();
+            var query = _dbContext.Users
+                .Where(u => !u.IsDeleted); // Only active users
 
-            // Apply specification if provided
-            query = ApplySpecification(query, specification);
+            return await ExecutePagedQuery(query, pagination, cancellationToken);
+        }
 
-            // Get total count before pagination
+        /// <summary>
+        /// Search users by term in name, surname, email, or phone
+        /// Super simple query - anyone can understand this
+        /// </summary>
+        public async Task<PagedResult<User>> SearchUsersAsync(
+            PaginationParams pagination,
+            string searchTerm,
+            CancellationToken cancellationToken = default)
+        {
+            if (pagination == null)
+                throw new ArgumentNullException(nameof(pagination));
+            
+            if (string.IsNullOrWhiteSpace(searchTerm))
+                throw new ArgumentException("Search term cannot be empty", nameof(searchTerm));
+
+            var term = searchTerm.Trim().ToLower();
+
+            var query = _dbContext.Users
+                .Where(u => !u.IsDeleted && // Only active users
+                       (u.Name != null && u.Name.ToLower().Contains(term)) ||
+                       (u.Surname != null && u.Surname.ToLower().Contains(term)) ||
+                       (u.Email != null && u.Email.ToLower().Contains(term)) ||
+                       (u.PhoneNumber != null && u.PhoneNumber.Contains(term)));
+
+            return await ExecutePagedQuery(query, pagination, cancellationToken);
+        }
+
+        public async Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                throw new ArgumentException("Email cannot be empty", nameof(email));
+
+            var normalizedEmail = email.Trim().ToLower();
+            return await _dbContext.Users
+                .AnyAsync(u => u.Email != null && u.Email.ToLower() == normalizedEmail, cancellationToken);
+        }
+
+        public async Task<bool> ExistsByPhoneNumberAsync(string phoneNumber, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(phoneNumber))
+                throw new ArgumentException("Phone number cannot be empty", nameof(phoneNumber));
+
+            var normalizedPhone = phoneNumber.Trim();
+            return await _dbContext.Users
+                .AnyAsync(u => u.PhoneNumber != null && u.PhoneNumber == normalizedPhone, cancellationToken);
+        }
+
+        /// <summary>
+        /// Helper method to execute paginated queries
+        /// Keeps the code DRY and simple
+        /// </summary>
+        private async Task<PagedResult<User>> ExecutePagedQuery(
+            IQueryable<UserEntity> query, 
+            PaginationParams pagination, 
+            CancellationToken cancellationToken)
+        {
+            // Get total count
             var totalCount = await query.CountAsync(cancellationToken);
 
-            // Apply sorting if specified, otherwise default to Id
+            // Apply sorting
             query = ApplySorting(query, pagination);
 
             // Apply pagination
@@ -77,107 +138,21 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
                 .Take(pagination.Take)
                 .ToListAsync(cancellationToken);
 
-            var users = MapToDomain(entities);
+            var users = _mapper.Map<List<User>>(entities);
             
             return new PagedResult<User>(users, totalCount, pagination);
         }
 
-        public async Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken = default)
-        {
-            ValidateStringParameter(email, nameof(email));
-
-            var normalizedEmail = email.Trim().ToLowerInvariant();
-            return await CreateBaseQuery()
-                .AnyAsync(u => u.Email != null && u.Email.ToLower() == normalizedEmail, cancellationToken);
-        }
-
-        public async Task<bool> ExistsByPhoneNumberAsync(string phoneNumber, CancellationToken cancellationToken = default)
-        {
-            ValidateStringParameter(phoneNumber, nameof(phoneNumber));
-
-            var normalizedPhone = phoneNumber.Trim();
-            return await CreateBaseQuery()
-                .AnyAsync(u => u.PhoneNumber != null && u.PhoneNumber == normalizedPhone, cancellationToken);
-        }        public async Task<List<User>> FindBySpecificationAsync(
-            Specification<User> specification, 
-            CancellationToken cancellationToken = default)
-        {
-            if (specification == null)
-                throw new ArgumentNullException(nameof(specification));
-
-            var query = CreateBaseQuery();
-            query = ApplySpecification(query, specification);
-
-            var entities = await query
-                .OrderBy(u => u.Id) // Keep consistent ordering for specifications
-                .ToListAsync(cancellationToken);
-
-            return MapToDomain(entities);
-        }
-
-        protected override Expression<Func<UserEntity, bool>> ConvertDomainSpecificationToEntity(Specification<User> specification)
-        {
-            return specification switch
-            {
-                UserSearchSpecification searchSpec => ConvertSearchSpecification(searchSpec),
-                UserByEmailSpecification emailSpec => ConvertEmailSpecification(emailSpec),
-                UserByPhoneNumberSpecification phoneSpec => ConvertPhoneSpecification(phoneSpec),
-                UserByIdSpecification idSpec => ConvertIdSpecification(idSpec),
-                _ => throw new NotSupportedException($"Specification type {specification.GetType().Name} is not supported")
-            };
-        }
-
-        private Expression<Func<UserEntity, bool>> ConvertSearchSpecification(UserSearchSpecification spec)
-        {
-            // Extract the search term from the specification using reflection
-            var searchTermField = typeof(UserSearchSpecification)
-                .GetField("_searchTerm", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var searchTerm = (string)searchTermField!.GetValue(spec)!;
-
-            return entity =>
-                (entity.Name != null && entity.Name.ToLower().Contains(searchTerm)) ||
-                (entity.Surname != null && entity.Surname.ToLower().Contains(searchTerm)) ||
-                (entity.Email != null && entity.Email.ToLower().Contains(searchTerm));
-        }
-
-        private Expression<Func<UserEntity, bool>> ConvertEmailSpecification(UserByEmailSpecification spec)
-        {
-            var emailField = typeof(UserByEmailSpecification)
-                .GetField("_email", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var email = (string)emailField!.GetValue(spec)!;
-
-            return entity => entity.Email != null && entity.Email.ToLower() == email;
-        }
-
-        private Expression<Func<UserEntity, bool>> ConvertPhoneSpecification(UserByPhoneNumberSpecification spec)
-        {
-            var phoneField = typeof(UserByPhoneNumberSpecification)
-                .GetField("_phoneNumber", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var phone = (string)phoneField!.GetValue(spec)!;
-
-            return entity => entity.PhoneNumber != null && entity.PhoneNumber == phone;
-        }        private Expression<Func<UserEntity, bool>> ConvertIdSpecification(UserByIdSpecification spec)
-        {
-            var idField = typeof(UserByIdSpecification)
-                .GetField("_id", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var id = (int)idField!.GetValue(spec)!;
-
-            return entity => entity.Id == id;
-        }
-
         /// <summary>
-        /// Applies sorting to the query based on pagination parameters
+        /// Simple sorting logic
         /// </summary>
         private IQueryable<UserEntity> ApplySorting(IQueryable<UserEntity> query, PaginationParams pagination)
         {
             if (!pagination.HasSorting)
-            {
-                // Default sorting by Id for consistent pagination
                 return query.OrderBy(u => u.Id);
-            }
 
-            var sortBy = pagination.SortBy!.ToLowerInvariant();
             var isAscending = pagination.IsAscending;
+            var sortBy = pagination.SortBy!.ToLowerInvariant();
 
             return sortBy switch
             {
@@ -188,7 +163,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
                 "phonenumber" => isAscending ? query.OrderBy(u => u.PhoneNumber) : query.OrderByDescending(u => u.PhoneNumber),
                 "createdat" => isAscending ? query.OrderBy(u => u.CreatedAt) : query.OrderByDescending(u => u.CreatedAt),
                 "updatedat" => isAscending ? query.OrderBy(u => u.UpdatedAt) : query.OrderByDescending(u => u.UpdatedAt),
-                _ => query.OrderBy(u => u.Id) // Fallback to default sorting
+                _ => query.OrderBy(u => u.Id)
             };
         }
     }
