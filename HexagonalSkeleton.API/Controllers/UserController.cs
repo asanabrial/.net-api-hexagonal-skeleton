@@ -130,11 +130,21 @@ namespace HexagonalSkeleton.API.Controllers
             var result = await mediator.Send(new GetUserQuery(User.GetUserId()));
             return Ok(mapper.Map<UserResponse>(result));
         }        /// <summary>
-        /// Get all users with pagination and filtering support
-        /// Supports filtering by search term (name/email), phone number, or email
+        /// Get all users with advanced pagination and filtering support
+        /// 
+        /// Filtering Options:
+        /// - SearchTerm: Unified search across first name, last name, email, and phone (partial matching)
+        /// - Age filters: MinAge, MaxAge, OnlyAdults (18+)
+        /// - Status filters: OnlyActive, OnlyCompleteProfiles
+        /// - Location filters: Latitude, Longitude, RadiusInKm
+        /// 
+        /// Examples:
+        /// - GET /api/user?searchTerm=john (finds users with "john" in name, email, or phone)
+        /// - GET /api/user?searchTerm=@example.com (finds users with "@example.com" in email)
+        /// - GET /api/user?searchTerm=john&amp;onlyAdults=true&amp;minAge=25 (combines filters)
         /// </summary>
         /// <param name="request">Pagination and filtering parameters</param>
-        /// <returns>Paginated list of users</returns>
+        /// <returns>Paginated list of users matching the criteria</returns>
         [HttpGet]
         [Authorize]
         [ProducesResponseType(typeof(PagedResponse<UserResponse>), StatusCodes.Status200OK)]
@@ -142,6 +152,35 @@ namespace HexagonalSkeleton.API.Controllers
         public async Task<IActionResult> GetAll([FromQuery] GetAllUsersRequest request)
         {
             var query = mapper.Map<GetAllUsersQuery>(request);
+            var result = await mediator.Send(query);
+            return Ok(mapper.Map<PagedResponse<UserResponse>>(result));
+        }        /// <summary>
+        /// Find nearby adult users with complete profiles
+        /// Demonstrates advanced filtering using Specification pattern
+        /// </summary>
+        /// <param name="latitude">Center latitude for search</param>
+        /// <param name="longitude">Center longitude for search</param>
+        /// <param name="radiusInKm">Search radius in kilometers (default: 50)</param>
+        /// <param name="pageNumber">Page number (default: 1)</param>
+        /// <param name="pageSize">Page size (default: 10)</param>
+        /// <returns>Paginated list of nearby adult users with complete profiles</returns>
+        [HttpGet("nearby-adults")]
+        [Authorize]
+        [ProducesResponseType(typeof(PagedResponse<UserResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetNearbyAdultUsers(
+            [FromQuery] double latitude,
+            [FromQuery] double longitude,
+            [FromQuery] double radiusInKm = 50,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var query = new FindNearbyAdultUsersQuery(latitude, longitude, radiusInKm)
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+            
             var result = await mediator.Send(query);
             return Ok(mapper.Map<PagedResponse<UserResponse>>(result));
         }

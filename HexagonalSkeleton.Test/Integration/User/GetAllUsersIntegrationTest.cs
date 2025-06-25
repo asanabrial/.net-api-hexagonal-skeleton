@@ -11,12 +11,12 @@ using System.Net.Http.Headers;
 
 namespace HexagonalSkeleton.Test.Integration.User
 {
-    public class GetAllUsersIntegrationTest : IClassFixture<WebApplicationFactory<Program>>
+    public class GetAllUsersIntegrationTest : IClassFixture<TestWebApplicationFactory>
     {
-        private readonly WebApplicationFactory<Program> _factory;
+        private readonly TestWebApplicationFactory _factory;
         private readonly HttpClient _client;
 
-        public GetAllUsersIntegrationTest(WebApplicationFactory<Program> factory)
+        public GetAllUsersIntegrationTest(TestWebApplicationFactory factory)
         {
             _factory = factory;
             _client = _factory.CreateClient();

@@ -1,11 +1,12 @@
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.ValueObjects;
+using HexagonalSkeleton.Domain.Specifications;
 
 namespace HexagonalSkeleton.Domain.Ports
 {
     /// <summary>
-    /// Simple user read repository - easy to understand for newcomers
-    /// Only essential methods: get all users or search users
+    /// User read repository with specification pattern support
+    /// Follows hexagonal architecture principles with clean separation of concerns
     /// </summary>
     public interface IUserReadRepository
     {
@@ -33,6 +34,30 @@ namespace HexagonalSkeleton.Domain.Ports
         /// Search users by any field (name, surname, email, phone) with pagination
         /// </summary>
         Task<PagedResult<User>> SearchUsersAsync(PaginationParams pagination, string searchTerm, CancellationToken cancellationToken = default);
+        
+        /// <summary>
+        /// Get users that satisfy the given specification with pagination
+        /// This is the core method for specification pattern implementation
+        /// </summary>
+        Task<PagedResult<User>> GetUsersAsync(ISpecification<User> specification, PaginationParams pagination, CancellationToken cancellationToken = default);
+        
+        /// <summary>
+        /// Get all users that satisfy the given specification (without pagination)
+        /// Use with caution - consider pagination for large datasets
+        /// </summary>
+        Task<List<User>> GetUsersAsync(ISpecification<User> specification, CancellationToken cancellationToken = default);
+        
+        /// <summary>
+        /// Count users that satisfy the given specification
+        /// Useful for getting total count without fetching data
+        /// </summary>
+        Task<int> CountUsersAsync(ISpecification<User> specification, CancellationToken cancellationToken = default);
+        
+        /// <summary>
+        /// Check if any user satisfies the given specification
+        /// More efficient than counting when you only need to know if any exist
+        /// </summary>
+        Task<bool> AnyUsersAsync(ISpecification<User> specification, CancellationToken cancellationToken = default);
         
         /// <summary>
         /// Check if user exists by email

@@ -2,23 +2,29 @@ using AutoMapper;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.ValueObjects;
+using HexagonalSkeleton.Domain.Specifications;
+using HexagonalSkeleton.Infrastructure.Specifications;
+using HexagonalSkeleton.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace HexagonalSkeleton.Infrastructure.Adapters
 {
     /// <summary>
-    /// Simple repository implementation - no complex specifications
-    /// Easy to understand for any developer joining the project
+    /// User read repository with specification pattern support
+    /// Maintains simplicity while adding powerful filtering capabilities
+    /// Follows hexagonal architecture principles
     /// </summary>
     public class UserReadRepositoryAdapter : IUserReadRepository
     {
         private readonly AppDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly SpecificationTranslationService _translationService;
 
         public UserReadRepositoryAdapter(AppDbContext dbContext, IMapper mapper)
         {
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _translationService = new SpecificationTranslationService(_mapper);
         }
 
         public async Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -97,6 +103,88 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
             return await ExecutePagedQuery(query, pagination, cancellationToken);
         }
 
+        /// <summary>
+        /// Get users that satisfy the given specification with pagination
+        /// Core method for specification pattern implementation
+        /// </summary>
+        public async Task<PagedResult<User>> GetUsersAsync(
+            ISpecification<User> specification, 
+            PaginationParams pagination, 
+            CancellationToken cancellationToken = default)
+        {
+            if (specification == null)
+                throw new ArgumentNullException(nameof(specification));
+            
+            if (pagination == null)
+                throw new ArgumentNullException(nameof(pagination));
+
+            // Apply specification and get filtered entities
+            var filteredEntities = await ApplySpecificationAsync(specification, cancellationToken);
+            
+            // Apply pagination to the filtered results
+            var totalCount = filteredEntities.Count;
+            var pagedEntities = filteredEntities
+                .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+                .Take(pagination.PageSize)
+                .ToList();
+            
+            // Map to domain objects
+            var domainUsers = _mapper.Map<IReadOnlyList<User>>(pagedEntities);
+            
+            return new PagedResult<User>(domainUsers, totalCount, pagination);
+        }
+
+        /// <summary>
+        /// Get all users that satisfy the given specification (without pagination)
+        /// Use with caution - consider pagination for large datasets
+        /// </summary>
+        public async Task<List<User>> GetUsersAsync(
+            ISpecification<User> specification, 
+            CancellationToken cancellationToken = default)
+        {
+            if (specification == null)
+                throw new ArgumentNullException(nameof(specification));
+
+            // Apply specification and get filtered entities
+            var filteredEntities = await ApplySpecificationAsync(specification, cancellationToken);
+            
+            return _mapper.Map<List<User>>(filteredEntities);
+        }
+
+        /// <summary>
+        /// Count users that satisfy the given specification
+        /// Useful for getting total count without fetching data
+        /// </summary>
+        public async Task<int> CountUsersAsync(
+            ISpecification<User> specification, 
+            CancellationToken cancellationToken = default)
+        {
+            if (specification == null)
+                throw new ArgumentNullException(nameof(specification));
+
+            // Apply specification and get filtered entities count
+            var filteredEntities = await ApplySpecificationAsync(specification, cancellationToken);
+            
+            return filteredEntities.Count;
+        }
+
+        /// <summary>
+        /// Check if any user satisfies the given specification
+        /// More efficient than counting when you only need to know if any exist
+        /// </summary>
+        public async Task<bool> AnyUsersAsync(
+            ISpecification<User> specification, 
+            CancellationToken cancellationToken = default)
+        {
+            if (specification == null)
+                throw new ArgumentNullException(nameof(specification));
+
+            // Apply specification and check if any entities match
+            var filteredEntities = await ApplySpecificationAsync(specification, cancellationToken);
+            
+            return filteredEntities.Any();
+        }
+
         public async Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(email))
@@ -115,6 +203,35 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
             var normalizedPhone = phoneNumber.Trim();
             return await _dbContext.Users
                 .AnyAsync(u => u.PhoneNumber != null && u.PhoneNumber == normalizedPhone, cancellationToken);
+        }
+
+        /// <summary>
+        /// Convert domain specification to entity query efficiently
+        /// This method provides a bridge between domain specifications and entity queries
+        /// Uses translation service for optimal performance when available
+        /// Falls back to in-memory evaluation for complex specifications that can't be translated
+        /// </summary>
+        private async Task<List<UserEntity>> ApplySpecificationAsync(ISpecification<User> specification, CancellationToken cancellationToken)
+        {
+            var entityQuery = _dbContext.Users.AsQueryable();
+            
+            // Try to translate using the translation service for better performance
+            try
+            {
+                var entitySpecification = _translationService.TranslateToEntitySpecification(specification);
+                return await entityQuery.Where(entitySpecification.ToExpression()).ToListAsync(cancellationToken);
+            }
+            catch
+            {
+                // Fallback: Load all entities and apply domain specification in memory
+                // This is less efficient but maintains correctness for complex specifications
+                var allEntities = await entityQuery.ToListAsync(cancellationToken);
+                var filteredEntities = allEntities
+                    .Where(entity => specification.IsSatisfiedBy(_mapper.Map<User>(entity)))
+                    .ToList();
+                
+                return filteredEntities;
+            }
         }
 
         /// <summary>

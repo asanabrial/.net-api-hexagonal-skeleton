@@ -5,6 +5,8 @@ using HexagonalSkeleton.Application.Dto;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.ValueObjects;
+using HexagonalSkeleton.Domain.Specifications;
+using HexagonalSkeleton.Application.Services;
 using AutoMapper;
 using FluentValidation;
 using FluentValidation.Results;
@@ -19,6 +21,7 @@ public class GetAllUsersQueryHandlerTest
 {
     private readonly Mock<IValidator<GetAllUsersQuery>> _mockValidator;
     private readonly Mock<IUserReadRepository> _mockUserReadRepository;
+    private readonly Mock<IUserSpecificationService> _mockSpecificationService;
     private readonly Mock<IMapper> _mockMapper;
     private readonly GetAllUsersQueryHandler _handler;
 
@@ -26,13 +29,23 @@ public class GetAllUsersQueryHandlerTest
     {
         _mockValidator = new Mock<IValidator<GetAllUsersQuery>>();
         _mockUserReadRepository = new Mock<IUserReadRepository>();
+        _mockSpecificationService = new Mock<IUserSpecificationService>();
         _mockMapper = new Mock<IMapper>();
-        _handler = new GetAllUsersQueryHandler(_mockValidator.Object, _mockUserReadRepository.Object, _mockMapper.Object);
+        _handler = new GetAllUsersQueryHandler(
+            _mockValidator.Object, 
+            _mockUserReadRepository.Object, 
+            _mockSpecificationService.Object,
+            _mockMapper.Object);
 
         // Setup validator to return valid by default
         _mockValidator
             .Setup(v => v.ValidateAsync(It.IsAny<GetAllUsersQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
+
+        // Setup specification service to return a default specification
+        _mockSpecificationService
+            .Setup(s => s.BuildSpecification(It.IsAny<GetAllUsersQuery>()))
+            .Returns(new Mock<ISpecification<HexagonalSkeleton.Domain.User>>().Object);
     }
 
     [Fact]
@@ -52,7 +65,7 @@ public class GetAllUsersQueryHandlerTest
         var pagedResult = new PagedResult<HexagonalSkeleton.Domain.User>(users, 2, pagination);
 
         _mockUserReadRepository
-            .Setup(r => r.GetUsersAsync(It.IsAny<PaginationParams>(), cancellationToken))
+            .Setup(r => r.GetUsersAsync(It.IsAny<ISpecification<HexagonalSkeleton.Domain.User>>(), It.IsAny<PaginationParams>(), cancellationToken))
             .ReturnsAsync(pagedResult);
 
         var expectedUserDtos = new List<UserDto>
@@ -74,8 +87,7 @@ public class GetAllUsersQueryHandlerTest
         Assert.Equal(2, result.Items.Count);
         Assert.Equal(2, result.Metadata.TotalCount);
 
-        _mockUserReadRepository.Verify(r => r.GetUsersAsync(It.IsAny<PaginationParams>(), cancellationToken), Times.Once);
-        _mockUserReadRepository.Verify(r => r.SearchUsersAsync(It.IsAny<PaginationParams>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockUserReadRepository.Verify(r => r.GetUsersAsync(It.IsAny<ISpecification<HexagonalSkeleton.Domain.User>>(), It.IsAny<PaginationParams>(), cancellationToken), Times.Once);
     }
 
     [Fact]
@@ -94,7 +106,7 @@ public class GetAllUsersQueryHandlerTest
         var pagedResult = new PagedResult<HexagonalSkeleton.Domain.User>(users, 1, pagination);
 
         _mockUserReadRepository
-            .Setup(r => r.SearchUsersAsync(It.IsAny<PaginationParams>(), "john", cancellationToken))
+            .Setup(r => r.GetUsersAsync(It.IsAny<ISpecification<HexagonalSkeleton.Domain.User>>(), It.IsAny<PaginationParams>(), cancellationToken))
             .ReturnsAsync(pagedResult);
 
         var expectedUserDtos = new List<UserDto>
@@ -115,8 +127,7 @@ public class GetAllUsersQueryHandlerTest
         Assert.Single(result.Items);
         Assert.Equal(1, result.Metadata.TotalCount);
 
-        _mockUserReadRepository.Verify(r => r.SearchUsersAsync(It.IsAny<PaginationParams>(), "john", cancellationToken), Times.Once);
-        _mockUserReadRepository.Verify(r => r.GetUsersAsync(It.IsAny<PaginationParams>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockUserReadRepository.Verify(r => r.GetUsersAsync(It.IsAny<ISpecification<HexagonalSkeleton.Domain.User>>(), It.IsAny<PaginationParams>(), cancellationToken), Times.Once);
     }
 
     [Fact]
@@ -131,7 +142,7 @@ public class GetAllUsersQueryHandlerTest
         var pagedResult = new PagedResult<HexagonalSkeleton.Domain.User>(users, 0, pagination);
 
         _mockUserReadRepository
-            .Setup(r => r.GetUsersAsync(It.IsAny<PaginationParams>(), cancellationToken))
+            .Setup(r => r.GetUsersAsync(It.IsAny<ISpecification<HexagonalSkeleton.Domain.User>>(), It.IsAny<PaginationParams>(), cancellationToken))
             .ReturnsAsync(pagedResult);
 
         _mockMapper
@@ -146,8 +157,7 @@ public class GetAllUsersQueryHandlerTest
         Assert.Empty(result.Items);
         Assert.Equal(0, result.Metadata.TotalCount);
 
-        _mockUserReadRepository.Verify(r => r.GetUsersAsync(It.IsAny<PaginationParams>(), cancellationToken), Times.Once);
-        _mockUserReadRepository.Verify(r => r.SearchUsersAsync(It.IsAny<PaginationParams>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockUserReadRepository.Verify(r => r.GetUsersAsync(It.IsAny<ISpecification<HexagonalSkeleton.Domain.User>>(), It.IsAny<PaginationParams>(), cancellationToken), Times.Once);
     }
 
     [Fact]
@@ -167,7 +177,7 @@ public class GetAllUsersQueryHandlerTest
         var pagedResult = new PagedResult<HexagonalSkeleton.Domain.User>(users, 1, pagination);
 
         _mockUserReadRepository
-            .Setup(r => r.SearchUsersAsync(It.IsAny<PaginationParams>(), phoneNumber, cancellationToken))
+            .Setup(r => r.GetUsersAsync(It.IsAny<ISpecification<HexagonalSkeleton.Domain.User>>(), It.IsAny<PaginationParams>(), cancellationToken))
             .ReturnsAsync(pagedResult);
 
         var userDtos = new List<UserDto>
@@ -187,7 +197,7 @@ public class GetAllUsersQueryHandlerTest
         Assert.Single(result.Items);
         Assert.Equal(phoneNumber, result.Items[0].PhoneNumber);
 
-        _mockUserReadRepository.Verify(r => r.SearchUsersAsync(It.IsAny<PaginationParams>(), phoneNumber, cancellationToken), Times.Once);
+        _mockUserReadRepository.Verify(r => r.GetUsersAsync(It.IsAny<ISpecification<HexagonalSkeleton.Domain.User>>(), It.IsAny<PaginationParams>(), cancellationToken), Times.Once);
     }
 
     [Fact]
@@ -207,7 +217,7 @@ public class GetAllUsersQueryHandlerTest
         var pagedResult = new PagedResult<HexagonalSkeleton.Domain.User>(users, 1, pagination);
 
         _mockUserReadRepository
-            .Setup(r => r.SearchUsersAsync(It.IsAny<PaginationParams>(), email, cancellationToken))
+            .Setup(r => r.GetUsersAsync(It.IsAny<ISpecification<HexagonalSkeleton.Domain.User>>(), It.IsAny<PaginationParams>(), cancellationToken))
             .ReturnsAsync(pagedResult);
 
         var userDtos = new List<UserDto>
@@ -227,6 +237,6 @@ public class GetAllUsersQueryHandlerTest
         Assert.Single(result.Items);
         Assert.Equal(email, result.Items[0].Email);
 
-        _mockUserReadRepository.Verify(r => r.SearchUsersAsync(It.IsAny<PaginationParams>(), email, cancellationToken), Times.Once);
+        _mockUserReadRepository.Verify(r => r.GetUsersAsync(It.IsAny<ISpecification<HexagonalSkeleton.Domain.User>>(), It.IsAny<PaginationParams>(), cancellationToken), Times.Once);
     }
 }

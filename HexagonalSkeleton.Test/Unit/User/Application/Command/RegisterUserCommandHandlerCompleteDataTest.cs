@@ -104,6 +104,7 @@ namespace HexagonalSkeleton.Test.Unit.User.Application.Command
                     Id = user.Id,
                     FirstName = user.FullName.FirstName,
                     LastName = user.FullName.LastName,
+                    FullName = user.FullName.GetFullName(),
                     Email = user.Email.Value,
                     PhoneNumber = user.PhoneNumber?.Value,
                     Birthdate = user.Birthdate,

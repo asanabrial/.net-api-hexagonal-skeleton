@@ -35,20 +35,8 @@ builder.Services.AddSingleton<IExceptionMapper, ValidationExceptionMapper>();
 
 builder.Services.AddOptions();
 
-var connectionStr = builder.Configuration.GetConnectionString("HexagonalSkeleton");
-var serverVersion = ServerVersion.AutoDetect(connectionStr);
-
-builder.Services.AddDbContextPool<AppDbContext>(
-    dbContextOptions =>
-        dbContextOptions.UseMySql(connectionStr, serverVersion, options =>
-            options.MigrationsAssembly("HexagonalSkeleton.MigrationDb"))
-        // The following three options help with debugging, but should
-        // be changed or removed for production.
-        .LogTo(Console.WriteLine, LogLevel.Information)
-        .EnableSensitiveDataLogging()
-        .EnableDetailedErrors()
-);
-
+// Configure production database with MySQL
+builder.Services.AddProductionDatabase(builder.Configuration);
 
 builder.Services.AddMediatR(cfg => {
     cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
@@ -78,6 +66,7 @@ app.UseExceptionHandler();
 app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();

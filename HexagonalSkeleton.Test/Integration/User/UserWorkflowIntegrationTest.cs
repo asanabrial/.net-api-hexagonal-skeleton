@@ -79,6 +79,7 @@ public class UserWorkflowIntegrationTest
                 Id = user.Id,
                 FirstName = user.FullName.FirstName,
                 LastName = user.FullName.LastName,
+                FullName = user.FullName.GetFullName(),
                 Email = user.Email.Value,
                 PhoneNumber = user.PhoneNumber?.Value,
                 Birthdate = user.Birthdate,
@@ -124,6 +125,7 @@ public class UserWorkflowIntegrationTest
                 Id = user.Id,
                 FirstName = user.FullName.FirstName,
                 LastName = user.FullName.LastName,
+                FullName = user.FullName.GetFullName(),
                 Birthdate = user.Birthdate,
                 Email = user.Email.Value,
                 LastLogin = user.LastLogin

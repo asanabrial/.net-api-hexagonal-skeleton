@@ -3,6 +3,7 @@ using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.Services;
 using HexagonalSkeleton.Infrastructure;
 using HexagonalSkeleton.Infrastructure.Adapters;
+using HexagonalSkeleton.Application.Services;
 
 namespace HexagonalSkeleton.API.Config
 {
@@ -22,6 +23,9 @@ namespace HexagonalSkeleton.API.Config
             
             // Domain Services (DDD)
             services.AddScoped<UserDomainService>();
+            
+            // Application Services (Clean Architecture - Application Layer)
+            services.AddScoped<IUserSpecificationService, UserSpecificationService>();
             
             // Infrastructure Services
             services.AddScoped<IAuthenticationService, AuthenticationService>();

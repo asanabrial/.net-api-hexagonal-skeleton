@@ -10,39 +10,15 @@ using HexagonalSkeleton.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace HexagonalSkeleton.Test.Integration
-{    public class RegisterUserIntegrationTest : IClassFixture<WebApplicationFactory<Program>>
+{    
+    public class RegisterUserIntegrationTest : IClassFixture<TestWebApplicationFactory>
     {
-        private readonly WebApplicationFactory<Program> _factory;
+        private readonly TestWebApplicationFactory _factory;
         private readonly HttpClient _client;
-        private readonly string _databaseName = "TestDb" + Guid.NewGuid().ToString();
 
-        public RegisterUserIntegrationTest(WebApplicationFactory<Program> factory)
+        public RegisterUserIntegrationTest(TestWebApplicationFactory factory)
         {
-            _factory = factory.WithWebHostBuilder(builder =>
-            {
-                builder.ConfigureServices(services =>
-                {
-                    // Remove all DbContext related registrations
-                    var descriptors = services.Where(d => 
-                        d.ServiceType == typeof(DbContextOptions<AppDbContext>) ||
-                        d.ServiceType == typeof(AppDbContext) ||
-                        d.ServiceType.IsGenericType && 
-                        d.ServiceType.GetGenericTypeDefinition() == typeof(DbContextOptions<>) ||
-                        d.ImplementationType?.FullName?.Contains("DbContext") == true ||
-                        d.ServiceType.FullName?.Contains("DbContext") == true)
-                        .ToList();
-                    
-                    foreach (var descriptor in descriptors)
-                    {
-                        services.Remove(descriptor);
-                    }                    // Add in-memory database for testing with consistent name per test class instance
-                    services.AddDbContext<AppDbContext>(options =>
-                    {
-                        options.UseInMemoryDatabase(_databaseName);
-                    }, ServiceLifetime.Scoped);
-                });
-            });
-            
+            _factory = factory;
             _client = _factory.CreateClient();
         }        [Fact]
         public async Task RegisterUser_ShouldReturnAllUserData()
