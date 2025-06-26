@@ -1,4 +1,4 @@
-using HexagonalSkeleton.Infrastructure.Persistence;
+using HexagonalSkeleton.Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore.Query;
 
 namespace HexagonalSkeleton.Infrastructure.Extensions

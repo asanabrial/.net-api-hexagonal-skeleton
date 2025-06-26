@@ -1,4 +1,4 @@
-using HexagonalSkeleton.Infrastructure;
+using HexagonalSkeleton.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace HexagonalSkeleton.API.Config
@@ -13,7 +13,7 @@ namespace HexagonalSkeleton.API.Config
         /// Configures production database services with MySQL and connection pooling
         /// Optimized for production workloads with proper logging and error handling
         /// </summary>
-        public static IServiceCollection AddProductionDatabase(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
         {
             var connectionStr = configuration.GetConnectionString("HexagonalSkeleton");
             var serverVersion = ServerVersion.AutoDetect(connectionStr);

@@ -1,5 +1,6 @@
 using AutoMapper;
 using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Features.UserAuthentication.Dto;
 
 namespace HexagonalSkeleton.API.Models.Auth
 {    /// <summary>

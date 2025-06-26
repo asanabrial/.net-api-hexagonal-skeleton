@@ -2,13 +2,13 @@ using Xunit;
 using Moq;
 using FluentValidation;
 using MediatR;
-using HexagonalSkeleton.Application.Command;
-using HexagonalSkeleton.Application.Query;
 using HexagonalSkeleton.Application.Dto;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain.Services;
 using HexagonalSkeleton.Domain.ValueObjects;
 using AutoMapper;
+using HexagonalSkeleton.Application.Features.UserManagement.Queries;
+using HexagonalSkeleton.Application.Features.UserRegistration.Commands;
 
 namespace HexagonalSkeleton.Test.Integration.User;
 

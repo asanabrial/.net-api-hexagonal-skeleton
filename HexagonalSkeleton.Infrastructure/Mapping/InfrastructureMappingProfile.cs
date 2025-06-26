@@ -1,6 +1,7 @@
 using AutoMapper;
 using HexagonalSkeleton.Domain.ValueObjects;
 using HexagonalSkeleton.Domain;
+using HexagonalSkeleton.Infrastructure.Persistence.Entities;
 
 namespace HexagonalSkeleton.Infrastructure.Mapping
 {

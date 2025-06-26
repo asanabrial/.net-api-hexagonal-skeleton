@@ -1,5 +1,6 @@
 using AutoMapper;
 using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Features.UserAuthentication.Dto;
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.ValueObjects;
 

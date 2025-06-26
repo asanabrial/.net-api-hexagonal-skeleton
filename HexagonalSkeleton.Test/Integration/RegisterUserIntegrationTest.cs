@@ -6,8 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using HexagonalSkeleton.API;
 using HexagonalSkeleton.API.Models.Users;
 using HexagonalSkeleton.API.Models.Auth;
-using HexagonalSkeleton.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using HexagonalSkeleton.Infrastructure.Persistence;
 
 namespace HexagonalSkeleton.Test.Integration
 {    

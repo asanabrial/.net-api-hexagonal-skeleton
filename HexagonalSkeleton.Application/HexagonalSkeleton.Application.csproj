@@ -15,4 +15,8 @@
     <ProjectReference Include="..\HexagonalSkeleton.Domain\HexagonalSkeleton.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\SocialNetwork\Dto\" />
+  </ItemGroup>
+
 </Project>

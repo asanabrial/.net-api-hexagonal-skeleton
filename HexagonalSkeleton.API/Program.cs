@@ -2,8 +2,7 @@ using FluentValidation;
 using HexagonalSkeleton.API.Config;
 using HexagonalSkeleton.API.Handler;
 using HexagonalSkeleton.API.Handler.ExceptionMapping;
-using HexagonalSkeleton.Infrastructure;
-using Microsoft.EntityFrameworkCore;
+using HexagonalSkeleton.Application.Features.UserRegistration.Commands;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,14 +35,12 @@ builder.Services.AddSingleton<IExceptionMapper, ValidationExceptionMapper>();
 builder.Services.AddOptions();
 
 // Configure production database with MySQL
-builder.Services.AddProductionDatabase(builder.Configuration);
+builder.Services.AddDatabase(builder.Configuration);
 
 builder.Services.AddMediatR(cfg => {
     cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
-    cfg.RegisterServicesFromAssemblyContaining<HexagonalSkeleton.Application.Command.RegisterUserCommand>();
 });
 
-builder.Services.AddValidatorsFromAssemblyContaining<HexagonalSkeleton.Application.Command.RegisterUserCommand>();
 builder.Services.AddRouting(opt =>
 {
     opt.LowercaseUrls = true;

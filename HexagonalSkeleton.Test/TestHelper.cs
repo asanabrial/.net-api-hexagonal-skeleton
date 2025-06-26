@@ -1,5 +1,7 @@
-using HexagonalSkeleton.Application.Command;
-using HexagonalSkeleton.Application.Query;
+using HexagonalSkeleton.Application.Features.UserManagement.Commands;
+using HexagonalSkeleton.Application.Features.UserManagement.Queries;
+using HexagonalSkeleton.Application.Features.UserProfile.Commands;
+using HexagonalSkeleton.Application.Features.UserRegistration.Commands;
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.ValueObjects;
 

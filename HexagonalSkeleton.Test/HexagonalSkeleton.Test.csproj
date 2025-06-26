@@ -40,12 +40,12 @@
   <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Unit\User\Domain\" />
-  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HexagonalSkeleton.API\HexagonalSkeleton.API.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Unit\Application\Features\SocialNetwork\Queries\" />
+    <Folder Include="Unit\Application\Features\UserAuthentication\Commands\" />
   </ItemGroup>
 
 </Project>

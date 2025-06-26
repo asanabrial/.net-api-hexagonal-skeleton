@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 using HexagonalSkeleton.Domain.Specifications;
-using HexagonalSkeleton.Infrastructure;
+using HexagonalSkeleton.Infrastructure.Persistence.Entities;
 
 namespace HexagonalSkeleton.Infrastructure.Specifications
 {

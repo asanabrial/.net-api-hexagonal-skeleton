@@ -3,7 +3,7 @@ using AutoMapper;
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.Specifications;
 using HexagonalSkeleton.Domain.Specifications.Users;
-using HexagonalSkeleton.Infrastructure;
+using HexagonalSkeleton.Infrastructure.Persistence.Entities;
 using HexagonalSkeleton.Infrastructure.Specifications;
 
 namespace HexagonalSkeleton.Infrastructure.Services

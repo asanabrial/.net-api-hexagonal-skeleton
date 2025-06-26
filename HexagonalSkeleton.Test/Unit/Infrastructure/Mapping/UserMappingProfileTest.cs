@@ -1,8 +1,8 @@
 using Xunit;
 using AutoMapper;
-using HexagonalSkeleton.Infrastructure;
 using HexagonalSkeleton.Infrastructure.Mapping;
 using DomainUser = HexagonalSkeleton.Domain.User;
+using HexagonalSkeleton.Infrastructure.Persistence.Entities;
 
 namespace HexagonalSkeleton.Test.Unit.Infrastructure.Mapping
 {

@@ -1,5 +1,6 @@
 using AutoMapper;
 using HexagonalSkeleton.Domain.Specifications;
+using HexagonalSkeleton.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 

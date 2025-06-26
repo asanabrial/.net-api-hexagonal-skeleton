@@ -1,16 +1,21 @@
 ﻿using HexagonalSkeleton.API.Identity;
 using HexagonalSkeleton.API.Models.Auth;
 using HexagonalSkeleton.API.Models.Users;
-using HexagonalSkeleton.Application.Command;
-using HexagonalSkeleton.Application.Query;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using HexagonalSkeleton.API.Models.Common;
+using HexagonalSkeleton.Application.Features.UserManagement.Queries;
+using HexagonalSkeleton.Application.Features.UserManagement.Commands;
+using HexagonalSkeleton.Application.Features.UserProfile.Commands;
+using HexagonalSkeleton.Application.Features.UserRegistration.Commands;
+using HexagonalSkeleton.Application.Features.UserAuthentication.Commands;
+using HexagonalSkeleton.Application.Features.SocialNetwork.Queries;
 
 namespace HexagonalSkeleton.API.Controllers
-{    /// <summary>
+{
+    /// <summary>
     /// User management API controller
     /// Implements Hexagonal Architecture with CQRS pattern using MediatR
     /// </summary>
@@ -18,7 +23,8 @@ namespace HexagonalSkeleton.API.Controllers
     [Route("api/[controller]")]
     [Produces("application/json")]
     public class UserController(ISender mediator, IMapper mapper) : ControllerBase
-    {        /// <summary>
+    {
+        /// <summary>
         /// Authenticate user and initiate login session
         /// </summary>
         /// <param name="request">Login credentials</param>
@@ -32,12 +38,17 @@ namespace HexagonalSkeleton.API.Controllers
             var command = mapper.Map<LoginCommand>(request);
             var result = await mediator.Send(command);
             return Ok(mapper.Map<LoginResponse>(result));
-        }        /// <summary>
+        }
+
+        /// <summary>
         /// Register a new user
         /// </summary>
         /// <param name="request">User registration data</param>
         /// <returns>Created user information</returns>
-        [HttpPost]        [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status201Created)]        [ProducesResponseType(StatusCodes.Status400BadRequest)]        public async Task<IActionResult> Register(CreateUserRequest request)
+        [HttpPost]
+        [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Register(CreateUserRequest request)
         {
             var command = mapper.Map<RegisterUserCommand>(request);
             var result = await mediator.Send(command);
@@ -46,7 +57,9 @@ namespace HexagonalSkeleton.API.Controllers
             var response = mapper.Map<LoginResponse>(result);
             
             return Created("", response);
-        }/// <summary>
+        }
+        
+        /// <summary>
         /// Update user information (full update)
         /// </summary>
         /// <param name="request">Complete user data</param>
@@ -61,7 +74,9 @@ namespace HexagonalSkeleton.API.Controllers
             var command = mapper.Map<UpdateUserCommand>(request);
             var result = await mediator.Send(command);
             return Ok(mapper.Map<UserResponse>(result));
-        }        /// <summary>
+        }
+        
+        /// <summary>
         /// Update user profile (partial update)
         /// </summary>
         /// <param name="request">Profile update data</param>
@@ -78,7 +93,9 @@ namespace HexagonalSkeleton.API.Controllers
             command.Id = User.GetUserId();
             var result = await mediator.Send(command);
             return Ok(mapper.Map<UserResponse>(result));
-        }        /// <summary>
+        }
+        
+        /// <summary>
         /// Permanently delete a user (hard delete)
         /// </summary>
         /// <param name="id">User identifier</param>
@@ -91,7 +108,9 @@ namespace HexagonalSkeleton.API.Controllers
         {
             var result = await mediator.Send(new HardDeleteUserCommand(id));
             return Ok(mapper.Map<DeleteUserResponse>(result));
-        }        /// <summary>
+        }
+        
+        /// <summary>
         /// Soft delete a user (logical deletion)
         /// </summary>
         /// <param name="id">User identifier</param>
@@ -104,7 +123,9 @@ namespace HexagonalSkeleton.API.Controllers
         {
             var result = await mediator.Send(new SoftDeleteUserCommand(id));
             return Ok(mapper.Map<DeleteUserResponse>(result));
-        }        /// <summary>
+        }
+        
+        /// <summary>
         /// Get user by identifier
         /// </summary>
         /// <param name="id">User identifier</param>
@@ -117,7 +138,9 @@ namespace HexagonalSkeleton.API.Controllers
         {
             var result = await mediator.Send(new GetUserQuery(id));
             return Ok(mapper.Map<UserResponse>(result));
-        }        /// <summary>
+        }
+        
+        /// <summary>
         /// Get current authenticated user's information
         /// </summary>
         /// <returns>Current user information</returns>
@@ -129,7 +152,9 @@ namespace HexagonalSkeleton.API.Controllers
         {
             var result = await mediator.Send(new GetUserQuery(User.GetUserId()));
             return Ok(mapper.Map<UserResponse>(result));
-        }        /// <summary>
+        }
+        
+        /// <summary>
         /// Get all users with advanced pagination and filtering support
         /// 
         /// Filtering Options:
@@ -154,7 +179,9 @@ namespace HexagonalSkeleton.API.Controllers
             var query = mapper.Map<GetAllUsersQuery>(request);
             var result = await mediator.Send(query);
             return Ok(mapper.Map<PagedResponse<UserResponse>>(result));
-        }        /// <summary>
+        }
+        
+        /// <summary>
         /// Find nearby adult users with complete profiles
         /// Demonstrates advanced filtering using Specification pattern
         /// </summary>

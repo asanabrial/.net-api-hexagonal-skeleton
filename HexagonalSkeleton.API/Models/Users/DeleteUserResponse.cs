@@ -1,5 +1,5 @@
 using AutoMapper;
-using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 
 namespace HexagonalSkeleton.API.Models.Users
 {

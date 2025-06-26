@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using AutoMapper;
-using HexagonalSkeleton.Application.Command;
+using HexagonalSkeleton.Application.Features.UserAuthentication.Commands;
 
 namespace HexagonalSkeleton.API.Models.Auth
 {

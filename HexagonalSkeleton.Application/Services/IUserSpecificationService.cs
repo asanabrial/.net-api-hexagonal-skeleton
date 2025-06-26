@@ -1,6 +1,6 @@
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.Specifications;
-using HexagonalSkeleton.Application.Query;
+using HexagonalSkeleton.Application.Features.UserManagement.Queries;
 
 namespace HexagonalSkeleton.Application.Services
 {

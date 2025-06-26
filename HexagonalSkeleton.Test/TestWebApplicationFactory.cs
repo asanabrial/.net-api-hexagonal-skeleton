@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using HexagonalSkeleton.API;
-using HexagonalSkeleton.Infrastructure;
 using System.Linq;
+using HexagonalSkeleton.Infrastructure.Persistence;
 
 namespace HexagonalSkeleton.Test
 {

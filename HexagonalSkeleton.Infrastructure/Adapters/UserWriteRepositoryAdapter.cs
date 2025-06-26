@@ -2,6 +2,8 @@ using AutoMapper;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
 using MediatR;
+using HexagonalSkeleton.Infrastructure.Persistence;
+using HexagonalSkeleton.Infrastructure.Persistence.Entities;
 
 namespace HexagonalSkeleton.Infrastructure.Adapters
 {

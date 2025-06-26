@@ -6,6 +6,8 @@ using HexagonalSkeleton.Domain.Specifications;
 using HexagonalSkeleton.Infrastructure.Specifications;
 using HexagonalSkeleton.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using HexagonalSkeleton.Infrastructure.Persistence;
+using HexagonalSkeleton.Infrastructure.Persistence.Entities;
 
 namespace HexagonalSkeleton.Infrastructure.Adapters
 {

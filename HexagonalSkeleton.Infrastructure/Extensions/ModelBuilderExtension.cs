@@ -1,7 +1,7 @@
-using HexagonalSkeleton.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using HexagonalSkeleton.Infrastructure.Persistence.Entities;
 
 namespace HexagonalSkeleton.Infrastructure.Extensions
 {
