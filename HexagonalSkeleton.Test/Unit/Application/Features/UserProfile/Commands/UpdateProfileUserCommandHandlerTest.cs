@@ -1,6 +1,7 @@
 using FluentValidation;
 using FluentValidation.Results;
 using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Features.UserProfile.Dto;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Test.Unit.User.Domain;
@@ -50,7 +51,9 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
 
             _mockUserReadRepository.Setup(x => x.GetByIdAsync(command.Id, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);            _mockUserWriteRepository.Setup(x => x.UpdateAsync(user, It.IsAny<CancellationToken>()))
-                .Returns(Task.CompletedTask);            var expectedResult = new UserDto
+                .Returns(Task.CompletedTask);
+
+            var expectedResult = new UserProfileDto
             {
                 Id = user.Id,
                 FirstName = "Jane",
@@ -60,7 +63,7 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
                 LastLogin = user.LastLogin
             };
 
-            _mockMapper.Setup(x => x.Map<UserDto>(It.IsAny<DomainUser>()))
+            _mockMapper.Setup(x => x.Map<UserProfileDto>(It.IsAny<DomainUser>()))
                 .Returns(expectedResult);
 
             // Act
@@ -156,7 +159,9 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
 
             _mockUserReadRepository.Setup(x => x.GetByIdAsync(command.Id, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);            _mockUserWriteRepository.Setup(x => x.UpdateAsync(user, It.IsAny<CancellationToken>()))
-                .Returns(Task.CompletedTask);            var expectedResult = new UserDto
+                .Returns(Task.CompletedTask);
+
+            var expectedResult = new UserProfileDto
             {
                 Id = user.Id,
                 FirstName = firstName,
@@ -166,7 +171,7 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
                 LastLogin = user.LastLogin
             };
 
-            _mockMapper.Setup(x => x.Map<UserDto>(It.IsAny<DomainUser>()))
+            _mockMapper.Setup(x => x.Map<UserProfileDto>(It.IsAny<DomainUser>()))
                 .Returns(expectedResult);
 
             // Act

@@ -6,6 +6,11 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using HexagonalSkeleton.API;
 using System.Linq;
 using HexagonalSkeleton.Infrastructure.Persistence;
+using FluentValidation;
+using MediatR;
+using AutoMapper;
+using HexagonalSkeleton.API.Models.Auth;
+using HexagonalSkeleton.Application.Features.UserRegistration.Dto;
 
 namespace HexagonalSkeleton.Test
 {
@@ -27,6 +32,29 @@ namespace HexagonalSkeleton.Test
                 services.AddDbContext<AppDbContext>(options =>
                 {
                     options.UseInMemoryDatabase("TestDatabase");
+                });
+
+                // Add FluentValidation for tests (since it's missing from production config)
+                services.AddValidatorsFromAssembly(
+                    typeof(HexagonalSkeleton.Application.Features.UserProfile.Commands.UpdateProfileUserCommand).Assembly);
+
+                // Override MediatR configuration to include Application assembly
+                services.RemoveAll(typeof(MediatR.IMediator));
+                services.RemoveAll(typeof(MediatR.ISender));
+                services.RemoveAll(typeof(MediatR.IPublisher));
+                
+                services.AddMediatR(cfg => {
+                    cfg.RegisterServicesFromAssemblies(
+                        typeof(Program).Assembly,
+                        typeof(HexagonalSkeleton.Application.Features.UserProfile.Commands.UpdateProfileUserCommand).Assembly
+                    );
+                });
+
+                // Add test-specific AutoMapper configuration
+                services.AddAutoMapper(cfg =>
+                {
+                    cfg.AddProfile<HexagonalSkeleton.API.Mapping.ApiMappingProfile>();
+                    cfg.AddProfile<TestMappingProfile>();
                 });
 
                 // Ensure database is created for tests
@@ -70,6 +98,23 @@ namespace HexagonalSkeleton.Test
             using var scope = serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             context.Database.EnsureCreated();
+        }
+    }
+
+    /// <summary>
+    /// AutoMapper profile specifically for tests
+    /// Includes mappings missing from production that tests need
+    /// </summary>
+    public class TestMappingProfile : Profile
+    {
+        public TestMappingProfile()
+        {
+            // Mapping para el registro de usuarios que falta en producción
+            CreateMap<RegisterUserDto, LoginResponse>()
+                .ForMember(dest => dest.AccessToken, opt => opt.MapFrom(src => src.AccessToken))
+                .ForMember(dest => dest.TokenType, opt => opt.MapFrom(src => src.TokenType))
+                .ForMember(dest => dest.ExpiresIn, opt => opt.MapFrom(src => src.ExpiresIn))
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User));
         }
     }
 }
