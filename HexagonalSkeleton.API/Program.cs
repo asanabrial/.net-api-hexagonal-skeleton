@@ -1,8 +1,10 @@
+using System.Reflection;
 using FluentValidation;
 using HexagonalSkeleton.API.Config;
 using HexagonalSkeleton.API.Handler;
 using HexagonalSkeleton.API.Handler.ExceptionMapping;
 using HexagonalSkeleton.Application.Features.UserRegistration.Commands;
+using MediatR;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,11 +38,7 @@ builder.Services.AddOptions();
 
 // Configure production database with MySQL
 builder.Services.AddDatabase(builder.Configuration);
-
-builder.Services.AddMediatR(cfg => {
-    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
-});
-
+builder.Services.AddApplicationLayer();
 builder.Services.AddRouting(opt =>
 {
     opt.LowercaseUrls = true;
@@ -48,6 +46,8 @@ builder.Services.AddRouting(opt =>
 
 builder.Services.AddOptions();
 builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddApplicationLayer();
 
 var app = builder.Build();
 
