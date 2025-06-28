@@ -1,4 +1,4 @@
-﻿using HexagonalSkeleton.Application.Dto;
+﻿using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Application.Common.Pagination;
 using HexagonalSkeleton.Application.Services;
@@ -18,13 +18,13 @@ namespace HexagonalSkeleton.Application.Features.UserManagement.Queries
         IUserReadRepository userReadRepository,
         IUserSpecificationService specificationService,
         IMapper mapper)
-        : IRequestHandler<GetAllUsersQuery, PagedQueryResult<UserDto>>
+        : IRequestHandler<GetAllUsersQuery, PagedQueryResult<GetAllUsersDto>>
     {
         /// <summary>
         /// Handles the query execution with clean separation of concerns
         /// Each step has a single responsibility and is easily testable
         /// </summary>
-        public async Task<PagedQueryResult<UserDto>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
+        public async Task<PagedQueryResult<GetAllUsersDto>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
         {
             // Step 1: Validate input (Input validation responsibility)
             await ValidateRequestAsync(request, cancellationToken);
@@ -69,10 +69,10 @@ namespace HexagonalSkeleton.Application.Features.UserManagement.Queries
         /// Maps domain entities to DTOs for the application layer
         /// Uses AutoMapper for consistent mapping
         /// </summary>
-        private PagedQueryResult<UserDto> MapToResult(Domain.ValueObjects.PagedResult<Domain.User> pagedDomainResult)
+        private PagedQueryResult<GetAllUsersDto> MapToResult(Domain.ValueObjects.PagedResult<Domain.User> pagedDomainResult)
         {
-            var userDtos = mapper.Map<List<UserDto>>(pagedDomainResult.Items);
-            return PagedQueryResult<UserDto>.FromDomain(pagedDomainResult, userDtos);
+            var userDtos = mapper.Map<List<GetAllUsersDto>>(pagedDomainResult.Items);
+            return PagedQueryResult<GetAllUsersDto>.FromDomain(pagedDomainResult, userDtos);
         }
     }
 }

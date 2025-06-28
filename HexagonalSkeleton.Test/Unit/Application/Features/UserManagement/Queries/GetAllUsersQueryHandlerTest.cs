@@ -1,6 +1,6 @@
 using Xunit;
 using Moq;
-using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.ValueObjects;
@@ -68,14 +68,14 @@ public class GetAllUsersQueryHandlerTest
             .Setup(r => r.GetUsersAsync(It.IsAny<ISpecification<User>>(), It.IsAny<PaginationParams>(), cancellationToken))
             .ReturnsAsync(pagedResult);
 
-        var expectedUserDtos = new List<UserDto>
+        var expectedUserDtos = new List<GetAllUsersDto>
         {
-            new UserDto { Id = users[0].Id },
-            new UserDto { Id = users[1].Id }
+            new GetAllUsersDto { Id = users[0].Id },
+            new GetAllUsersDto { Id = users[1].Id }
         };
 
         _mockMapper
-            .Setup(m => m.Map<List<UserDto>>(It.IsAny<IReadOnlyList<User>>()))
+            .Setup(m => m.Map<List<GetAllUsersDto>>(It.IsAny<IReadOnlyList<User>>()))
             .Returns(expectedUserDtos);
 
         // Act
@@ -109,13 +109,13 @@ public class GetAllUsersQueryHandlerTest
             .Setup(r => r.GetUsersAsync(It.IsAny<ISpecification<User>>(), It.IsAny<PaginationParams>(), cancellationToken))
             .ReturnsAsync(pagedResult);
 
-        var expectedUserDtos = new List<UserDto>
+        var expectedUserDtos = new List<GetAllUsersDto>
         {
-            new UserDto { Id = users[0].Id }
+            new GetAllUsersDto { Id = users[0].Id }
         };
 
         _mockMapper
-            .Setup(m => m.Map<List<UserDto>>(It.IsAny<IReadOnlyList<User>>()))
+            .Setup(m => m.Map<List<GetAllUsersDto>>(It.IsAny<IReadOnlyList<User>>()))
             .Returns(expectedUserDtos);
 
         // Act
@@ -146,8 +146,8 @@ public class GetAllUsersQueryHandlerTest
             .ReturnsAsync(pagedResult);
 
         _mockMapper
-            .Setup(m => m.Map<List<UserDto>>(It.IsAny<IReadOnlyList<User>>()))
-            .Returns(new List<UserDto>());
+            .Setup(m => m.Map<List<GetAllUsersDto>>(It.IsAny<IReadOnlyList<User>>()))
+            .Returns(new List<GetAllUsersDto>());
 
         // Act
         var result = await _handler.Handle(query, cancellationToken);
@@ -180,13 +180,13 @@ public class GetAllUsersQueryHandlerTest
             .Setup(r => r.GetUsersAsync(It.IsAny<ISpecification<User>>(), It.IsAny<PaginationParams>(), cancellationToken))
             .ReturnsAsync(pagedResult);
 
-        var userDtos = new List<UserDto>
+        var userDtos = new List<GetAllUsersDto>
         {
-            new UserDto { Id = 1, PhoneNumber = phoneNumber }
+            new GetAllUsersDto { Id = 1, PhoneNumber = phoneNumber }
         };
 
         _mockMapper
-            .Setup(m => m.Map<List<UserDto>>(It.IsAny<IReadOnlyList<User>>()))
+            .Setup(m => m.Map<List<GetAllUsersDto>>(It.IsAny<IReadOnlyList<User>>()))
             .Returns(userDtos);
 
         // Act
@@ -220,13 +220,13 @@ public class GetAllUsersQueryHandlerTest
             .Setup(r => r.GetUsersAsync(It.IsAny<ISpecification<User>>(), It.IsAny<PaginationParams>(), cancellationToken))
             .ReturnsAsync(pagedResult);
 
-        var userDtos = new List<UserDto>
+        var userDtos = new List<GetAllUsersDto>
         {
-            new UserDto { Id = 1, Email = email }
+            new GetAllUsersDto { Id = 1, Email = email }
         };
 
         _mockMapper
-            .Setup(m => m.Map<List<UserDto>>(It.IsAny<IReadOnlyList<User>>()))
+            .Setup(m => m.Map<List<GetAllUsersDto>>(It.IsAny<IReadOnlyList<User>>()))
             .Returns(userDtos);
 
         // Act

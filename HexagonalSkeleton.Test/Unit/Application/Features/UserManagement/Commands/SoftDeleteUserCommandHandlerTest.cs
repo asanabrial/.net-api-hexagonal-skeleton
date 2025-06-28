@@ -1,6 +1,6 @@
 using FluentValidation;
 using FluentValidation.Results;
-using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Application.Features.UserManagement.Commands;
 using HexagonalSkeleton.Domain.Ports;

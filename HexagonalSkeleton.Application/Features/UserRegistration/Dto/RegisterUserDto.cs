@@ -1,14 +1,14 @@
-using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Features.UserAuthentication.Dto;
 
 namespace HexagonalSkeleton.Application.Features.UserRegistration.Dto
 {
     /// <summary>
-    /// DTO for authentication response containing token and user information
-    /// Used specifically for login/register operations
+    /// DTO for user registration response containing token and user information
+    /// Used specifically for register operations
     /// </summary>
     public class RegisterUserDto
     {        /// <summary>
-        /// JWT access token for the authenticated user
+        /// JWT access token for the registered user
         /// </summary>
         public required string AccessToken { get; set; } = string.Empty;
 
@@ -23,8 +23,8 @@ namespace HexagonalSkeleton.Application.Features.UserRegistration.Dto
         public int ExpiresIn { get; set; }
 
         /// <summary>
-        /// User information
+        /// Registered user information
         /// </summary>
-        public UserDto User { get; set; } = new();
+        public AuthenticatedUserDto User { get; set; } = new();
     }
 }

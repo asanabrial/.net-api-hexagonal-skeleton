@@ -1,9 +1,9 @@
-﻿using HexagonalSkeleton.Application.Dto;
+﻿using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 using MediatR;
 
 namespace HexagonalSkeleton.Application.Features.UserManagement.Queries
 {
-    public class GetUserQuery : IRequest<UserDto>
+    public class GetUserQuery : IRequest<GetUserDto>
     {
         /// <summary>
         /// Gets or sets the user id.

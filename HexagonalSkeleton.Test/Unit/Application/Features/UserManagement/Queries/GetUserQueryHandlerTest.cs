@@ -1,7 +1,7 @@
 using Xunit;
 using Moq;
 using FluentValidation;
-using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
@@ -40,7 +40,7 @@ public class GetUserQueryHandlerTest
             .Setup(v => v.ValidateAsync(It.IsAny<GetUserQuery>(), cancellationToken))
             .ReturnsAsync(new FluentValidation.Results.ValidationResult());        _mockUserReadRepository
             .Setup(r => r.GetByIdAsync(userId, cancellationToken))
-            .ReturnsAsync(user);        var expectedResult = new UserDto
+            .ReturnsAsync(user);        var expectedResult = new GetUserDto
         {
             Id = user.Id,
             FirstName = user.FullName.FirstName,
@@ -51,7 +51,7 @@ public class GetUserQueryHandlerTest
         };
 
         _mockMapper
-            .Setup(m => m.Map<UserDto>(It.IsAny<User>()))
+            .Setup(m => m.Map<GetUserDto>(It.IsAny<User>()))
             .Returns(expectedResult);
 
         // Act

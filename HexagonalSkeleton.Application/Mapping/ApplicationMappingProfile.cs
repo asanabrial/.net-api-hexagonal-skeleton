@@ -1,6 +1,7 @@
 using AutoMapper;
-using HexagonalSkeleton.Application.Dto;
 using HexagonalSkeleton.Application.Features.UserAuthentication.Dto;
+using HexagonalSkeleton.Application.Features.UserManagement.Dto;
+using HexagonalSkeleton.Application.Features.SocialNetwork.Dto;
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.ValueObjects;
 
@@ -39,8 +40,32 @@ namespace HexagonalSkeleton.Application.Mapping
         /// </summary>
         private void ConfigureUserMappings()
         {
-            // User to UserDto mapping (comprehensive user data)
-            CreateMap<User, UserDto>()
+            // User to GetUserDto mapping (for single user queries)
+            CreateMap<User, GetUserDto>()
+                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName))
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName.GetFullName()))
+                .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Latitude : (double?)null))
+                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Longitude : (double?)null));
+
+            // User to GetAllUsersDto mapping (for user list queries)
+            CreateMap<User, GetAllUsersDto>()
+                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName))
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName.GetFullName()))
+                .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Latitude : (double?)null))
+                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Longitude : (double?)null));
+
+            // User to NearbyUserDto mapping (for social network queries)
+            CreateMap<User, NearbyUserDto>()
+                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName))
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName.GetFullName()))
+                .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Latitude : (double?)null))
+                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Longitude : (double?)null));
+
+            // User to AuthenticatedUserDto mapping (for authentication responses)
+            CreateMap<User, AuthenticatedUserDto>()
                 .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
                 .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName))
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName.GetFullName()))

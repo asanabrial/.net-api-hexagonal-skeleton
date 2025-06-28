@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using FluentValidation;
-using HexagonalSkeleton.Application.Dto;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 using HexagonalSkeleton.Domain.Ports;

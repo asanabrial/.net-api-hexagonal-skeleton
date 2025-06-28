@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using FluentValidation;
-using HexagonalSkeleton.Application.Dto;
 using HexagonalSkeleton.Application.Events;
 using HexagonalSkeleton.Application.Features.UserRegistration.Dto;
+using HexagonalSkeleton.Application.Features.UserAuthentication.Dto;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain.Services;
 using MediatR;
@@ -53,7 +53,7 @@ namespace HexagonalSkeleton.Application.Features.UserRegistration.Commands
             await publisher.Publish(new LoginEvent(userId), cancellationToken);
               
             // Map user data to DTO and create authentication response
-            var userDto = mapper.Map<UserDto>(createdUser);
+            var userDto = mapper.Map<AuthenticatedUserDto>(createdUser);
             return new RegisterUserDto
             {
                 AccessToken = tokenInfo.Token,

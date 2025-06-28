@@ -2,7 +2,7 @@ using Xunit;
 using Moq;
 using FluentValidation;
 using MediatR;
-using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Features.UserAuthentication.Dto;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.ValueObjects;
@@ -98,8 +98,8 @@ namespace HexagonalSkeleton.Test.Application.Features.UserRegistration.Commands
                 .Setup(a => a.GenerateJwtTokenAsync(userId, cancellationToken))
                 .ReturnsAsync(new TokenInfo(jwtToken, DateTime.UtcNow.AddDays(7)));            // Setup AutoMapper mock to return a properly mapped result with nested structure
             _mockMapper
-                .Setup(m => m.Map<UserDto>(It.IsAny<User>()))
-                .Returns((User user) => new UserDto
+                .Setup(m => m.Map<AuthenticatedUserDto>(It.IsAny<User>()))
+                .Returns((User user) => new AuthenticatedUserDto
                 {
                     Id = user.Id,
                     FirstName = user.FullName.FirstName,

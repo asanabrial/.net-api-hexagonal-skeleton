@@ -1,12 +1,14 @@
 using AutoMapper;
-using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 
 namespace HexagonalSkeleton.API.Models.Users
 {
     /// <summary>
     /// Response model for user operations
+    /// Maps to multiple DTOs depending on the context
     /// </summary>
-    [AutoMap(typeof(UserDto), ReverseMap = true)]
+    [AutoMap(typeof(GetUserDto), ReverseMap = true)]
+    [AutoMap(typeof(GetAllUsersDto), ReverseMap = true)]
     public class UserResponse
     {
         /// <summary>

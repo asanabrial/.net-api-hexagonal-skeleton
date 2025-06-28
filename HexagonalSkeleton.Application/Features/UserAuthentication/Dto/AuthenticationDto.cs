@@ -1,5 +1,3 @@
-using HexagonalSkeleton.Application.Dto;
-
 namespace HexagonalSkeleton.Application.Features.UserAuthentication.Dto
 {
     /// <summary>
@@ -25,6 +23,6 @@ namespace HexagonalSkeleton.Application.Features.UserAuthentication.Dto
         /// <summary>
         /// User information
         /// </summary>
-        public UserDto User { get; set; } = new();
+        public AuthenticatedUserDto User { get; set; } = new();
     }
 }

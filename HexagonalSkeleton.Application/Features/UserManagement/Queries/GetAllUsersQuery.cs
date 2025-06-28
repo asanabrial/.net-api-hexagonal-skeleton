@@ -1,5 +1,5 @@
 ﻿using HexagonalSkeleton.Application.Common.Pagination;
-using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 using MediatR;
 
 namespace HexagonalSkeleton.Application.Features.UserManagement.Queries
@@ -9,7 +9,7 @@ namespace HexagonalSkeleton.Application.Features.UserManagement.Queries
     /// Follows CQRS pattern and clean architecture principles
     /// Supports multiple filter criteria that can be combined
     /// </summary>
-    public class GetAllUsersQuery : PagedQuery, IRequest<PagedQueryResult<UserDto>>
+    public class GetAllUsersQuery : PagedQuery, IRequest<PagedQueryResult<GetAllUsersDto>>
     {
         /// <summary>
         /// Constructor for parameterless instantiation

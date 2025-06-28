@@ -1,7 +1,6 @@
 using FluentValidation;
 using HexagonalSkeleton.Application.Events;
 using HexagonalSkeleton.Application.Exceptions;
-using HexagonalSkeleton.Application.Dto;
 using HexagonalSkeleton.Domain.Ports;
 using MediatR;
 using AutoMapper;
@@ -64,7 +63,7 @@ namespace HexagonalSkeleton.Application.Features.UserAuthentication.Commands
             await _publisher.Publish(new LoginEvent(user.Id), cancellationToken);
             
             // Map user data to DTO and create authentication response
-            var userDto = _mapper.Map<UserDto>(user);
+            var userDto = _mapper.Map<AuthenticatedUserDto>(user);
             return new AuthenticationDto
             {
                 AccessToken = tokenInfo.Token,

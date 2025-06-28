@@ -1,12 +1,11 @@
-using HexagonalSkeleton.Domain;
-
-namespace HexagonalSkeleton.Application.Dto
+namespace HexagonalSkeleton.Application.Features.UserManagement.Dto
 {
     /// <summary>
-    /// Data Transfer Object for User information
-    /// Used to transfer user data between application layers
+    /// DTO for getting all users in list/paginated queries
+    /// Used specifically for GetAllUsersQuery
+    /// Contains essential information for user listing
     /// </summary>
-    public class  UserDto
+    public class GetAllUsersDto
     {
         public int Id { get; set; }
         public string FirstName { get; set; } = string.Empty;

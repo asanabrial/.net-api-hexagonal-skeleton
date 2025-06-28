@@ -1,5 +1,4 @@
 using AutoMapper;
-using HexagonalSkeleton.Application.Dto;
 using HexagonalSkeleton.Application.Features.UserAuthentication.Dto;
 
 namespace HexagonalSkeleton.API.Models.Auth
@@ -33,7 +32,7 @@ namespace HexagonalSkeleton.API.Models.Auth
     /// <summary>
     /// Basic user information included in login response
     /// </summary>
-    [AutoMap(typeof(UserDto), ReverseMap = true)]
+    [AutoMap(typeof(AuthenticatedUserDto), ReverseMap = true)]
     public class UserInfoResponse
     {
         public int Id { get; set; }

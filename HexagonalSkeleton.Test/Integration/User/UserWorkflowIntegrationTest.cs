@@ -2,7 +2,8 @@ using Xunit;
 using Moq;
 using FluentValidation;
 using MediatR;
-using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Features.UserManagement.Dto;
+using HexagonalSkeleton.Application.Features.UserAuthentication.Dto;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain.Services;
 using HexagonalSkeleton.Domain.ValueObjects;
@@ -73,8 +74,8 @@ public class UserWorkflowIntegrationTest
             .Setup(a => a.GenerateJwtTokenAsync(userId, cancellationToken))
             .ReturnsAsync(new TokenInfo(jwtToken, DateTime.UtcNow.AddDays(7)));        // Setup AutoMapper mock to return a properly mapped result with nested structure
         mockMapper
-            .Setup(m => m.Map<UserDto>(It.IsAny<HexagonalSkeleton.Domain.User>()))
-            .Returns((HexagonalSkeleton.Domain.User user) => new UserDto
+            .Setup(m => m.Map<AuthenticatedUserDto>(It.IsAny<HexagonalSkeleton.Domain.User>()))
+            .Returns((HexagonalSkeleton.Domain.User user) => new AuthenticatedUserDto
             {
                 Id = user.Id,
                 FirstName = user.FullName.FirstName,
@@ -119,8 +120,8 @@ public class UserWorkflowIntegrationTest
             .Setup(v => v.ValidateAsync(It.IsAny<GetUserQuery>(), cancellationToken))
             .ReturnsAsync(new FluentValidation.Results.ValidationResult());        // Setup AutoMapper mock for GetUser operation
         mockMapper
-            .Setup(m => m.Map<UserDto>(It.IsAny<HexagonalSkeleton.Domain.User>()))
-            .Returns((HexagonalSkeleton.Domain.User user) => new UserDto
+            .Setup(m => m.Map<GetUserDto>(It.IsAny<HexagonalSkeleton.Domain.User>()))
+            .Returns((HexagonalSkeleton.Domain.User user) => new GetUserDto
             {
                 Id = user.Id,
                 FirstName = user.FullName.FirstName,

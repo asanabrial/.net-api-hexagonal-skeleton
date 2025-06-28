@@ -1,4 +1,4 @@
-using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Features.SocialNetwork.Dto;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Application.Common.Pagination;
 using HexagonalSkeleton.Domain.Specifications.Users;
@@ -16,9 +16,9 @@ namespace HexagonalSkeleton.Application.Features.SocialNetwork.Queries
     public class FindNearbyAdultUsersQueryHandler(
         IUserReadRepository userReadRepository,
         IMapper mapper)
-        : IRequestHandler<FindNearbyAdultUsersQuery, PagedQueryResult<UserDto>>
+        : IRequestHandler<FindNearbyAdultUsersQuery, PagedQueryResult<NearbyUserDto>>
     {
-        public async Task<PagedQueryResult<UserDto>> Handle(FindNearbyAdultUsersQuery request, CancellationToken cancellationToken)
+        public async Task<PagedQueryResult<NearbyUserDto>> Handle(FindNearbyAdultUsersQuery request, CancellationToken cancellationToken)
         {
             // Build complex specification using composition
             var specification = UserSpecificationBuilder.Create()
@@ -45,10 +45,10 @@ namespace HexagonalSkeleton.Application.Features.SocialNetwork.Queries
                 cancellationToken);
 
             // Map domain entities to DTOs
-            var userDtos = mapper.Map<List<UserDto>>(pagedDomainResult.Items);
+            var userDtos = mapper.Map<List<NearbyUserDto>>(pagedDomainResult.Items);
             
             // Return result
-            return PagedQueryResult<UserDto>.FromDomain(pagedDomainResult, userDtos);
+            return PagedQueryResult<NearbyUserDto>.FromDomain(pagedDomainResult, userDtos);
         }
     }
 }

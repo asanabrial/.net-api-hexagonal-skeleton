@@ -1,5 +1,5 @@
 using HexagonalSkeleton.Application.Common.Pagination;
-using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Features.SocialNetwork.Dto;
 using MediatR;
 
 namespace HexagonalSkeleton.Application.Features.SocialNetwork.Queries
@@ -9,7 +9,7 @@ namespace HexagonalSkeleton.Application.Features.SocialNetwork.Queries
     /// Demonstrates complex filtering using Specification pattern
     /// Example of business-focused query that combines multiple criteria
     /// </summary>
-    public class FindNearbyAdultUsersQuery : IRequest<PagedQueryResult<UserDto>>
+    public class FindNearbyAdultUsersQuery : IRequest<PagedQueryResult<NearbyUserDto>>
     {
         public double Latitude { get; set; }
         public double Longitude { get; set; }

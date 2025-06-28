@@ -6,6 +6,7 @@ namespace HexagonalSkeleton.API.Config
 {
     public static class ApplicationServiceExtension
     {
+        
         public static IServiceCollection AddCqrsLayer(this IServiceCollection services)
         {
             // Auto-descubre assemblies que contengan handlers o validators

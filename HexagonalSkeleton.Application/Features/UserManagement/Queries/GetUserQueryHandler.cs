@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using HexagonalSkeleton.Application.Dto;
+using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
 using MediatR;
@@ -9,8 +9,8 @@ namespace HexagonalSkeleton.Application.Features.UserManagement.Queries
 {    public class GetUserQueryHandler(
         IValidator<GetUserQuery> validator,
         IUserReadRepository userReadRepository,
-        IMapper mapper)        : IRequestHandler<GetUserQuery, UserDto>
-    {        public async Task<UserDto> Handle(GetUserQuery request, CancellationToken cancellationToken)
+        IMapper mapper)        : IRequestHandler<GetUserQuery, GetUserDto>
+    {        public async Task<GetUserDto> Handle(GetUserQuery request, CancellationToken cancellationToken)
         {
             var result = await validator.ValidateAsync(request, cancellationToken);
             if (!result.IsValid)
@@ -23,7 +23,7 @@ namespace HexagonalSkeleton.Application.Features.UserManagement.Queries
             if (user == null)
                 throw new NotFoundException("User", request.Id);
 
-            return mapper.Map<UserDto>(user);
+            return mapper.Map<GetUserDto>(user);
         }
     }
 }

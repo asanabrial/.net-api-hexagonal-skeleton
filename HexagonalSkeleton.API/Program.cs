@@ -15,6 +15,10 @@ builder.Services.AddSingletons();
 builder.Services.AddTransients();
 builder.Services.AddSwagger();
 builder.Services.AddAuthentication(builder.Configuration);
+
+// Register MediatR and FluentValidation
+builder.Services.AddCqrsLayer();
+
 // AutoMapper with API profiles
 builder.Services.AddAutoMapperProfiles();
 
@@ -28,17 +32,11 @@ builder.Services.AddAuthorization();
 builder.Services.AddExceptionHandler<ExceptionHandler>();
 builder.Services.AddProblemDetails();
 
-// Exception mapping services - Using Singleton lifetime
-builder.Services.AddSingleton<ExceptionMappingService>();
-builder.Services.AddSingleton<IExceptionMapper, DomainExceptionMapper>();
-builder.Services.AddSingleton<IExceptionMapper, ApplicationExceptionMapper>();
-builder.Services.AddSingleton<IExceptionMapper, ValidationExceptionMapper>();
-
 builder.Services.AddOptions();
 
 // Configure production database with MySQL
 builder.Services.AddDatabase(builder.Configuration);
-builder.Services.AddCqrsLayer();
+
 builder.Services.AddRouting(opt =>
 {
     opt.LowercaseUrls = true;
