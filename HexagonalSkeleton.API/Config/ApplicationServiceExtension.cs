@@ -6,7 +6,7 @@ namespace HexagonalSkeleton.API.Config
 {
     public static class ApplicationServiceExtension
     {
-        public static IServiceCollection AddApplicationLayer(this IServiceCollection services)
+        public static IServiceCollection AddCqrsLayer(this IServiceCollection services)
         {
             // Auto-descubre assemblies que contengan handlers o validators
             var applicationAssemblies = GetApplicationAssemblies();
@@ -22,9 +22,7 @@ namespace HexagonalSkeleton.API.Config
             return AppDomain.CurrentDomain.GetAssemblies()
                 .Where(assembly =>
                     // Solo assemblies de nuestro proyecto
-                    assembly.FullName?.StartsWith("HexagonalSkeleton", StringComparison.OrdinalIgnoreCase) == true &&
-                    // SOLO assemblies de la capa Application
-                    assembly.FullName.Contains("Application", StringComparison.OrdinalIgnoreCase) &&
+                    assembly.FullName!.StartsWith("HexagonalSkeleton.Application", StringComparison.OrdinalIgnoreCase) &&
                     // Que contengan handlers de MediatR o validators
                     (HasMediatRHandlers(assembly) || HasFluentValidators(assembly)));
         }

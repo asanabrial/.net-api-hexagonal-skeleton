@@ -38,7 +38,7 @@ builder.Services.AddOptions();
 
 // Configure production database with MySQL
 builder.Services.AddDatabase(builder.Configuration);
-builder.Services.AddApplicationLayer();
+builder.Services.AddCqrsLayer();
 builder.Services.AddRouting(opt =>
 {
     opt.LowercaseUrls = true;
@@ -46,8 +46,6 @@ builder.Services.AddRouting(opt =>
 
 builder.Services.AddOptions();
 builder.Services.AddHttpContextAccessor();
-
-builder.Services.AddApplicationLayer();
 
 var app = builder.Build();
 
