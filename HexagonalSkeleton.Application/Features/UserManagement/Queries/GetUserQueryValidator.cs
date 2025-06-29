@@ -6,7 +6,7 @@ namespace HexagonalSkeleton.Application.Features.UserManagement.Queries
     {        public GetUserQueryValidator()
         {
             RuleFor(r => r.Id)
-                .GreaterThan(0);
+                .NotEqual(Guid.Empty);
         }
     }
 }

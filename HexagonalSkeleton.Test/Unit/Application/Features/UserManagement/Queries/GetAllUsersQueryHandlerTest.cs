@@ -58,7 +58,7 @@ public class GetAllUsersQueryHandlerTest
         var users = new List<User>
         {
             TestHelper.CreateTestUser(),
-            TestHelper.CreateTestUser(id: 2, email: "user2@example.com")
+            TestHelper.CreateTestUser(id: Guid.NewGuid(), email: "user2@example.com")
         };
 
         var pagination = PaginationParams.Create(1, 10);
@@ -103,7 +103,7 @@ public class GetAllUsersQueryHandlerTest
         };
 
         var pagination = PaginationParams.Create(1, 10);
-        var pagedResult = new PagedResult<User>(users, 1, pagination);
+        var pagedResult = new PagedResult<User>(users, 2, pagination);
 
         _mockUserReadRepository
             .Setup(r => r.GetUsersAsync(It.IsAny<ISpecification<User>>(), It.IsAny<PaginationParams>(), cancellationToken))
@@ -125,7 +125,7 @@ public class GetAllUsersQueryHandlerTest
         Assert.NotNull(result);
         Assert.NotNull(result.Items);
         Assert.Single(result.Items);
-        Assert.Equal(1, result.Metadata.TotalCount);
+        Assert.Equal(2, result.Metadata.TotalCount);
 
         _mockUserReadRepository.Verify(r => r.GetUsersAsync(It.IsAny<ISpecification<User>>(), It.IsAny<PaginationParams>(), cancellationToken), Times.Once);
     }
@@ -182,7 +182,7 @@ public class GetAllUsersQueryHandlerTest
 
         var userDtos = new List<GetAllUsersDto>
         {
-            new GetAllUsersDto { Id = 1, PhoneNumber = phoneNumber }
+            new GetAllUsersDto { Id = Guid.NewGuid(), PhoneNumber = phoneNumber }
         };
 
         _mockMapper
@@ -222,7 +222,7 @@ public class GetAllUsersQueryHandlerTest
 
         var userDtos = new List<GetAllUsersDto>
         {
-            new GetAllUsersDto { Id = 1, Email = email }
+            new GetAllUsersDto { Id = Guid.NewGuid(), Email = email }
         };
 
         _mockMapper
@@ -240,3 +240,4 @@ public class GetAllUsersQueryHandlerTest
         _mockUserReadRepository.Verify(r => r.GetUsersAsync(It.IsAny<ISpecification<User>>(), It.IsAny<PaginationParams>(), cancellationToken), Times.Once);
     }
 }
+

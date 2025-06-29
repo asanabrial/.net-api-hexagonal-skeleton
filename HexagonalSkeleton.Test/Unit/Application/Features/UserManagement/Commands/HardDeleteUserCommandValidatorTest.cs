@@ -24,13 +24,11 @@ public class HardDeleteUserCommandValidatorTest
         result.ShouldNotHaveValidationErrorFor(c => c.Id);
     }
 
-    [Theory]
-    [InlineData(0)]
-    [InlineData(-1)]
-    public void Validate_InvalidId_ShouldHaveValidationError(int invalidId)
+    [Fact]
+    public void Validate_EmptyGuid_ShouldHaveValidationError()
     {
         // Arrange
-        var command = TestHelper.CreateHardDeleteUserCommand(invalidId);
+        var command = TestHelper.CreateHardDeleteUserCommand(Guid.Empty);
 
         // Act & Assert
         var result = _validator.TestValidate(command);

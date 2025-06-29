@@ -24,10 +24,10 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
         }        /// <summary>
         /// Generates a JWT token for authenticated user with expiration information
         /// </summary>
-        public async Task<TokenInfo> GenerateJwtTokenAsync(int userId, CancellationToken cancellationToken = default)
+        public async Task<TokenInfo> GenerateJwtTokenAsync(Guid userId, CancellationToken cancellationToken = default)
         {
-            if (userId <= 0)
-                throw new ArgumentException("User ID must be greater than zero", nameof(userId));
+            if (userId == Guid.Empty)
+                throw new ArgumentException("User ID cannot be empty", nameof(userId));
 
             var user = await _userReadRepository.GetByIdAsync(userId, cancellationToken);
             if (user == null)

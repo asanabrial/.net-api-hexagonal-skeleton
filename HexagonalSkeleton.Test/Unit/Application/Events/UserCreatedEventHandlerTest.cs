@@ -21,8 +21,9 @@ public class UserCreatedEventHandlerTest
     public async Task Handle_UserCreatedEvent_ShouldLogCreation()
     {
         // Arrange
+        var userId = Guid.NewGuid();
         var userCreatedEvent = new UserCreatedEvent(
-            userId: 123,
+            userId: userId,
             email: "test@example.com",
             name: "John",
             surname: "Doe",
@@ -38,7 +39,7 @@ public class UserCreatedEventHandlerTest
                 LogLevel.Information,
                 It.IsAny<EventId>(),
                 It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("User created") && 
-                                              v.ToString()!.Contains("123") &&
+                                              v.ToString()!.Contains(userId.ToString()) &&
                                               v.ToString()!.Contains("test@example.com") &&
                                               v.ToString()!.Contains("John") &&
                                               v.ToString()!.Contains("Doe")),
@@ -52,7 +53,7 @@ public class UserCreatedEventHandlerTest
     {
         // Arrange
         var userCreatedEvent = new UserCreatedEvent(
-            userId: 123,
+            userId: Guid.NewGuid(),
             email: "test@example.com",
             name: "John",
             surname: "Doe",

@@ -37,13 +37,13 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
         {
             // Arrange
             var command = new UpdateProfileUserCommand(
-                id: 1,
+                id: Guid.NewGuid(),
                 aboutMe: "Updated about me",
                 firstName: "Jane",
                 lastName: "Smith",
                 birthdate: new DateTime(1985, 5, 15));
             
-            var user = TestHelper.CreateTestUser(1);
+            var user = TestHelper.CreateTestUser(Guid.NewGuid());
 
             _mockValidator.Setup(x => x.ValidateAsync(command, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResult());
@@ -85,7 +85,7 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
         {
             // Arrange
             var command = new UpdateProfileUserCommand(
-                id: 0,
+                id: Guid.Empty,
                 aboutMe: "",
                 firstName: "",
                 lastName: "",
@@ -93,7 +93,7 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
             
             var validationErrors = new List<ValidationFailure>
             {
-                new ValidationFailure("Id", "Id must be greater than 0"),
+                new ValidationFailure("Id", "Id cannot be empty"),
                 new ValidationFailure("FirstName", "First name is required"),
                 new ValidationFailure("LastName", "Last name is required")
             };
@@ -108,14 +108,14 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
             Assert.True(exception.Errors.ContainsKey("FirstName"));
             Assert.True(exception.Errors.ContainsKey("LastName"));
 
-            _mockUserReadRepository.Verify(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+            _mockUserReadRepository.Verify(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
             _mockUserWriteRepository.Verify(x => x.UpdateAsync(It.IsAny<DomainUser>(), It.IsAny<CancellationToken>()), Times.Never);
         }        [Fact]
         public async Task Handle_WithNonExistentUser_ShouldThrowNotFoundException()
         {
             // Arrange
             var command = new UpdateProfileUserCommand(
-                id: 999,
+                id: Guid.NewGuid(),
                 aboutMe: "Updated about me",
                 firstName: "Jane",
                 lastName: "Smith",
@@ -132,7 +132,7 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
                 _handler.Handle(command, CancellationToken.None));
 
             Assert.Contains("User", exception.Message);
-            Assert.Contains("999", exception.Message);
+            Assert.Contains(command.Id.ToString(), exception.Message);
 
             _mockUserWriteRepository.Verify(x => x.UpdateAsync(It.IsAny<DomainUser>(), It.IsAny<CancellationToken>()), Times.Never);
         }
@@ -145,13 +145,13 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
         {
             // Arrange
             var command = new UpdateProfileUserCommand(
-                id: 1,
+                id: Guid.NewGuid(),
                 aboutMe: "Test bio",
                 firstName: firstName,
                 lastName: lastName,
                 birthdate: new DateTime(1990, 1, 1));
             
-            var user = TestHelper.CreateTestUser(1);
+            var user = TestHelper.CreateTestUser(Guid.NewGuid());
 
             _mockValidator.Setup(x => x.ValidateAsync(command, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResult());
@@ -185,13 +185,13 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
         {
             // Arrange
             var command = new UpdateProfileUserCommand(
-                id: 1,
+                id: Guid.NewGuid(),
                 aboutMe: "Updated about me",
                 firstName: "Jane",
                 lastName: "Smith",
                 birthdate: new DateTime(1985, 5, 15));
             
-            var user = TestHelper.CreateTestUser(1);
+            var user = TestHelper.CreateTestUser(Guid.NewGuid());
 
             _mockValidator.Setup(x => x.ValidateAsync(command, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResult());
@@ -214,13 +214,13 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
         {
             // Arrange
             var command = new UpdateProfileUserCommand(
-                id: 1,
+                id: Guid.NewGuid(),
                 aboutMe: "Updated about me",
                 firstName: "Jane",
                 lastName: "Smith",
                 birthdate: new DateTime(1985, 5, 15));
             
-            var user = TestHelper.CreateTestUser(1);
+            var user = TestHelper.CreateTestUser(Guid.NewGuid());
             var initialUpdatedAt = user.UpdatedAt;
 
             _mockValidator.Setup(x => x.ValidateAsync(command, It.IsAny<CancellationToken>()))
@@ -242,3 +242,4 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
         }
     }
 }
+

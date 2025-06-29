@@ -9,6 +9,6 @@ namespace HexagonalSkeleton.Application.Features.UserManagement.Dto
         /// <summary>
         /// ID of the deleted user
         /// </summary>
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
     }
 }

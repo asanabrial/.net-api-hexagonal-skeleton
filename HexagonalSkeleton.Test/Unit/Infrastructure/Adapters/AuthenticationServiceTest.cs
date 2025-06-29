@@ -49,7 +49,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
         [Fact]        public async Task GenerateJwtTokenAsync_WithValidUserId_ShouldReturnToken()
         {
             // Arrange
-            var userId = 1;
+            var userId = Guid.NewGuid();
             var user = CreateTestUser(userId);
             _mockUserReadRepository.Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);
@@ -66,22 +66,20 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             Assert.True(tokenInfo.ExpiresAt > DateTime.UtcNow);
         }
 
-        [Theory]
-        [InlineData(0)]
-        [InlineData(-1)]
-        public async Task GenerateJwtTokenAsync_WithInvalidUserId_ShouldThrowArgumentException(int userId)
+        [Fact]
+        public async Task GenerateJwtTokenAsync_WithEmptyGuid_ShouldThrowArgumentException()
         {
             // Act & Assert
             var exception = await Assert.ThrowsAsync<ArgumentException>(() => 
-                _authenticationService.GenerateJwtTokenAsync(userId));
+                _authenticationService.GenerateJwtTokenAsync(Guid.Empty));
             
             Assert.Equal("userId", exception.ParamName);
-            Assert.Contains("User ID must be greater than zero", exception.Message);
+            Assert.Contains("User ID cannot be empty", exception.Message);
         }        [Fact]
         public async Task GenerateJwtTokenAsync_WithNonExistentUser_ShouldThrowArgumentException()
         {
             // Arrange
-            var userId = 999;
+            var userId = Guid.NewGuid();
             _mockUserReadRepository.Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((DomainUser?)null);
 
@@ -97,7 +95,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
         public async Task GenerateJwtTokenAsync_WithDeletedUser_ShouldThrowInvalidOperationException()
         {
             // Arrange
-            var userId = 1;
+            var userId = Guid.NewGuid();
             var user = CreateTestUser(userId);
             user.Delete(); // Mark as deleted
             
@@ -120,7 +118,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var salt = _authenticationService.GenerateSalt();
             var hashedPassword = _authenticationService.HashPassword(password, salt);
             
-            var user = CreateTestUser(1);            // Use reflection to set password properties since they're protected
+            var user = CreateTestUser(Guid.NewGuid());            // Use reflection to set password properties since they're protected
             var passwordHashProperty = typeof(DomainUser).GetProperty("PasswordHash");
             var passwordSaltProperty = typeof(DomainUser).GetProperty("PasswordSalt");
             passwordHashProperty?.SetValue(user, hashedPassword);
@@ -143,7 +141,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var salt = _authenticationService.GenerateSalt();
             var hashedPassword = _authenticationService.HashPassword("correctpassword", salt);
             
-            var user = CreateTestUser(1);
+            var user = CreateTestUser(Guid.NewGuid());
             var passwordHashProperty = typeof(DomainUser).GetProperty("PasswordHash");
             var passwordSaltProperty = typeof(DomainUser).GetProperty("PasswordSalt");
             passwordHashProperty?.SetValue(user, hashedPassword);
@@ -181,7 +179,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var email = "test@example.com";
             var password = "password123";
             
-            var user = CreateTestUser(1);
+            var user = CreateTestUser(Guid.NewGuid());
             user.Delete(); // Mark as deleted
 
             _mockUserReadRepository.Setup(x => x.GetByEmailAsync(email, It.IsAny<CancellationToken>()))
@@ -343,7 +341,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
 
             // Assert
             Assert.Equal(hash2, hash1);
-        }        private static DomainUser CreateTestUser(int id)
+        }        private static DomainUser CreateTestUser(Guid id)
         {
             return DomainUser.Reconstitute(
                 id: id,

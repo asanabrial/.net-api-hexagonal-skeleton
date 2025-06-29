@@ -82,7 +82,7 @@ namespace HexagonalSkeleton.Domain
 
         // Factory method for recreation from persistence (without domain events)
         public static User Reconstitute(
-            int id,
+            Guid id,
             string email,
             string firstName,
             string lastName,

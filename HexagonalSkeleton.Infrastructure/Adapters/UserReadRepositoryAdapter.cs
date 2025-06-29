@@ -29,10 +29,10 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
             _translationService = new SpecificationTranslationService(_mapper);
         }
 
-        public async Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            if (id <= 0)
-                throw new ArgumentException("ID must be greater than 0", nameof(id));
+            if (id == Guid.Empty)
+                throw new ArgumentException("ID cannot be empty", nameof(id));
 
             var entity = await _dbContext.Users
                 .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);

@@ -14,7 +14,7 @@ namespace HexagonalSkeleton.API.Models.Users
         /// <summary>
         /// User identifier
         /// </summary>
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         /// <summary>
         /// User's first name

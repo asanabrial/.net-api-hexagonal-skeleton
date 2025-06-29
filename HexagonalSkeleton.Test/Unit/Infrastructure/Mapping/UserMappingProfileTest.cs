@@ -59,7 +59,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Mapping
             // Arrange
             var entity = new UserEntity
             {
-                Id = 1,
+                Id = Guid.NewGuid(),
                 Email = "test@example.com",
                 Name = "John",
                 Surname = "Doe",
@@ -83,7 +83,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Mapping
 
             // Assert
             Assert.NotNull(user);
-            Assert.Equal(1, user.Id);
+            Assert.Equal(entity.Id, user.Id);
             Assert.Equal("test@example.com", user.Email.Value);
             Assert.Equal("John", user.FullName.FirstName);
             Assert.Equal("Doe", user.FullName.LastName);

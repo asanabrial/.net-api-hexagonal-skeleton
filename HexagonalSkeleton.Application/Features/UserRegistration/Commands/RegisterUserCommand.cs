@@ -5,7 +5,7 @@ using MediatR;
 
 namespace HexagonalSkeleton.Application.Features.UserRegistration.Commands
 {
-    public class RegisterUserCommand : IRequest<RegisterUserDto>
+    public class RegisterUserCommand : IRequest<RegisterDto>
     {
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;

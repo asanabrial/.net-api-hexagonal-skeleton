@@ -27,11 +27,11 @@ public class GetUserQueryHandlerTest
             _mockValidator.Object,
             _mockUserReadRepository.Object,
             _mockMapper.Object);
-    }[Fact]
+    }    [Fact]
     public async Task Handle_ValidQuery_ShouldReturnUser()
     {
         // Arrange
-        var userId = 1;
+        var userId = Guid.NewGuid();
         var query = new GetUserQuery(userId);
         var cancellationToken = CancellationToken.None;
         var user = TestHelper.CreateTestUser();
@@ -71,24 +71,24 @@ public class GetUserQueryHandlerTest
     public async Task Handle_InvalidQuery_ShouldThrowValidationException()
     {
         // Arrange
-        var query = new GetUserQuery(0); // Invalid ID
+        var query = new GetUserQuery(Guid.Empty); // Invalid ID
         var cancellationToken = CancellationToken.None;
         var validationErrors = new FluentValidation.Results.ValidationResult();
-        validationErrors.Errors.Add(new FluentValidation.Results.ValidationFailure("Id", "Id must be greater than 0"));
+        validationErrors.Errors.Add(new FluentValidation.Results.ValidationFailure("Id", "Id cannot be empty"));
 
         _mockValidator
             .Setup(v => v.ValidateAsync(It.IsAny<GetUserQuery>(), cancellationToken))
             .ReturnsAsync(validationErrors);        // Act
         var act = async () => await _handler.Handle(query, cancellationToken);        // Assert
         await Assert.ThrowsAsync<HexagonalSkeleton.Application.Exceptions.ValidationException>(act);
-        _mockUserReadRepository.Verify(r => r.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockUserReadRepository.Verify(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
     public async Task Handle_UserNotFound_ShouldThrowNotFoundException()
     {
         // Arrange
-        var userId = 999;
+        var userId = Guid.NewGuid();
         var query = new GetUserQuery(userId);
         var cancellationToken = CancellationToken.None;
 
@@ -101,8 +101,9 @@ public class GetUserQueryHandlerTest
             .ReturnsAsync((User?)null);        // Act
         var act = async () => await _handler.Handle(query, cancellationToken);        // Assert
         var exception = await Assert.ThrowsAsync<NotFoundException>(act);
-        Assert.Equal("User with identifier '999' was not found", exception.Message);
+        Assert.Equal($"User with identifier '{userId}' was not found", exception.Message);
 
         _mockUserReadRepository.Verify(r => r.GetByIdAsync(userId, cancellationToken), Times.Once);
     }
 }
+

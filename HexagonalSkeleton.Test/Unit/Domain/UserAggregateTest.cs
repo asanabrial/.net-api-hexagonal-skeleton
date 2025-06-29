@@ -306,7 +306,7 @@ public class UserAggregateTest
     {
         // Arrange
         var user1 = TestHelper.CreateTestUser(latitude: 40.7128, longitude: -74.0060); // NYC
-        var user2 = TestHelper.CreateTestUser(id: 2, email: "user2@example.com", phoneNumber: "+1234567891",
+        var user2 = TestHelper.CreateTestUser(id: Guid.NewGuid(), email: "user2@example.com", phoneNumber: "+1234567891",
                                               latitude: 51.5074, longitude: -0.1278); // London
 
         // Act
@@ -321,7 +321,7 @@ public class UserAggregateTest
     {
         // Arrange
         var user1 = TestHelper.CreateTestUser(latitude: 40.7128, longitude: -74.0060);
-        var user2 = TestHelper.CreateTestUser(id: 2, email: "user2@example.com", phoneNumber: "+1234567891",
+        var user2 = TestHelper.CreateTestUser(id: Guid.NewGuid(), email: "user2@example.com", phoneNumber: "+1234567891",
                                               latitude: 40.7589, longitude: -73.9851); // Times Square (nearby)
 
         // Act
@@ -336,7 +336,7 @@ public class UserAggregateTest
     {
         // Arrange
         var user1 = TestHelper.CreateTestUser(latitude: 40.7128, longitude: -74.0060); // NYC
-        var user2 = TestHelper.CreateTestUser(id: 2, email: "user2@example.com", phoneNumber: "+1234567891",
+        var user2 = TestHelper.CreateTestUser(id: Guid.NewGuid(), email: "user2@example.com", phoneNumber: "+1234567891",
                                               latitude: 51.5074, longitude: -0.1278); // London
 
         // Act

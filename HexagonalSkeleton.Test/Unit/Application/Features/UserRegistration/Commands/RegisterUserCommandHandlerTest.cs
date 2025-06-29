@@ -46,7 +46,7 @@ public class RegisterUserCommandHandlerTest
         var cancellationToken = CancellationToken.None;
         var salt = "salt";
         var hash = "hash";
-        var userId = 1;
+        var userId = Guid.NewGuid();
         var jwtToken = "jwt-token";
 
         _mockValidator

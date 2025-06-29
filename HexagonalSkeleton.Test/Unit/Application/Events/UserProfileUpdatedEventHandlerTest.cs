@@ -21,8 +21,9 @@ public class UserProfileUpdatedEventHandlerTest
     public async Task Handle_UserProfileUpdatedEvent_ShouldLogUpdate()
     {
         // Arrange
+        var userId = Guid.NewGuid();
         var userProfileUpdatedEvent = new UserProfileUpdatedEvent(
-            userId: 123,
+            userId: userId,
             email: "test@example.com",
             previousName: "John",
             newName: "Jane");
@@ -37,7 +38,7 @@ public class UserProfileUpdatedEventHandlerTest
                 LogLevel.Information,
                 It.IsAny<EventId>(),
                 It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("User profile updated") && 
-                                              v.ToString()!.Contains("123") &&
+                                              v.ToString()!.Contains(userId.ToString()) &&
                                               v.ToString()!.Contains("test@example.com") &&
                                               v.ToString()!.Contains("John") &&
                                               v.ToString()!.Contains("Jane")),
@@ -51,7 +52,7 @@ public class UserProfileUpdatedEventHandlerTest
     {
         // Arrange
         var userProfileUpdatedEvent = new UserProfileUpdatedEvent(
-            userId: 123,
+            userId: Guid.NewGuid(),
             email: "test@example.com",
             previousName: "John",
             newName: "Jane");

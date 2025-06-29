@@ -7,12 +7,12 @@ namespace HexagonalSkeleton.Domain.Events
     /// </summary>
     public class UserProfileUpdatedEvent : DomainEvent
     {
-        public int UserId { get; }
+        public Guid UserId { get; }
         public string Email { get; }
         public string? PreviousName { get; }
         public string? NewName { get; }
 
-        public UserProfileUpdatedEvent(int userId, string email, string? previousName, string? newName)
+        public UserProfileUpdatedEvent(Guid userId, string email, string? previousName, string? newName)
         {
             UserId = userId;
             Email = email;

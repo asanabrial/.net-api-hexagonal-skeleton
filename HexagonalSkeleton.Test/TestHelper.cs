@@ -12,7 +12,7 @@ namespace HexagonalSkeleton.Test
     /// </summary>
     public static class TestHelper
     {        public static User CreateTestUser(
-            int id = 1,
+            Guid id = default,
             string email = "test@example.com",
             string firstName = "John",
             string lastName = "Doe",
@@ -21,8 +21,9 @@ namespace HexagonalSkeleton.Test
             double longitude = -74.0060,
             DateTime? birthdate = null)
         {
+            var userId = id == default ? Guid.NewGuid() : id;
             return User.Reconstitute(
-                id: id,
+                id: userId,
                 email: email,
                 firstName: firstName, 
                 lastName: lastName,
@@ -63,8 +64,9 @@ namespace HexagonalSkeleton.Test
                 aboutMe: "Test about me");
         }
 
-        public static GetUserQuery CreateGetUserQuery(int id = 1)
+        public static GetUserQuery CreateGetUserQuery(Guid id = default)
         {
+            if (id == default) id = Guid.NewGuid();
             return new GetUserQuery(id);
         }
 
@@ -73,11 +75,12 @@ namespace HexagonalSkeleton.Test
         }
 
         public static UpdateProfileUserCommand CreateUpdateProfileUserCommand(
-            int id = 1,
+            Guid id = default,
             string firstName = "John",  
             string lastName = "Doe",
             string aboutMe = "Updated about me")
         {
+            if (id == default) id = Guid.NewGuid();
             return new UpdateProfileUserCommand(
                 id: id,
                 aboutMe: aboutMe,
@@ -86,14 +89,16 @@ namespace HexagonalSkeleton.Test
                 birthdate: DateTime.UtcNow.AddYears(-25));
         }
 
-        public static SoftDeleteUserCommand CreateSoftDeleteUserCommand(int id = 1)
+        public static SoftDeleteUserCommand CreateSoftDeleteUserCommand(Guid? id = null)
         {
-            return new SoftDeleteUserCommand(id);
+            var userId = id ?? Guid.NewGuid();
+            return new SoftDeleteUserCommand(userId);
         }
 
-        public static HardDeleteUserCommand CreateHardDeleteUserCommand(int id = 1)
+        public static HardDeleteUserCommand CreateHardDeleteUserCommand(Guid? id = null)
         {  
-            return new HardDeleteUserCommand(id);
+            var userId = id ?? Guid.NewGuid();
+            return new HardDeleteUserCommand(userId);
         }
     }
 }

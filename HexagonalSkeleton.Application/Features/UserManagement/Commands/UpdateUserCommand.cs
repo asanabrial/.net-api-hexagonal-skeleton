@@ -4,7 +4,7 @@ using MediatR;
 namespace HexagonalSkeleton.Application.Features.UserManagement.Commands
 {    public class UpdateUserCommand : IRequest<UpdateUserDto>
     {
-        public required int Id { get; set; }
+        public required Guid Id { get; set; }
         public required string FirstName { get; set; }
         public required string LastName { get; set; }
         public required DateTime Birthdate { get; set; }

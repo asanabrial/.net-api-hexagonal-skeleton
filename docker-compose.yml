@@ -1,18 +1,17 @@
 services:
-    mariadb:
-        image: mariadb:11.4
-        container_name: hexagonal-mariadb
+    postgresql:
+        image: postgres:17
+        container_name: hexagonal-postgresql
         environment:
-            MYSQL_ROOT_PASSWORD: root123
-            MYSQL_DATABASE: HexagonalSkeleton
-            MYSQL_USER: hexagonal_user
-            MYSQL_PASSWORD: hexagonal_password
+            POSTGRES_DB: HexagonalSkeleton
+            POSTGRES_USER: hexagonal_user
+            POSTGRES_PASSWORD: hexagonal_password
         ports:
-            - "3306:3306"
+            - "5432:5432"
         volumes:
-            - mariadb_data:/var/lib/mysql
+            - postgresql_data:/var/lib/postgresql/data
         healthcheck:
-            test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+            test: ["CMD-SHELL", "pg_isready -U hexagonal_user -d HexagonalSkeleton"]
             interval: 10s
             timeout: 5s
             retries: 3
@@ -20,4 +19,4 @@ services:
         restart: unless-stopped
 
 volumes:
-    mariadb_data:
+    postgresql_data:

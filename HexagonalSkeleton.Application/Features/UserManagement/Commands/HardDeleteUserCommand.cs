@@ -8,13 +8,13 @@ namespace HexagonalSkeleton.Application.Features.UserManagement.Commands
         /// <summary>
         /// Gets or sets the user id.
         /// </summary>
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         // Constructor for compatibility (optional)
         public HardDeleteUserCommand() { }
 
         // Constructor with parameters for direct instantiation
-        public HardDeleteUserCommand(int id)
+        public HardDeleteUserCommand(Guid id)
         {
             Id = id;
         }

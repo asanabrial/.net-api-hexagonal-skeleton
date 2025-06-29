@@ -18,7 +18,7 @@
         {
             "label": "start-database",
             "type": "shell",
-            "command": "docker-compose up -d --wait && echo 'MariaDB ready'",
+            "command": "docker-compose up -d --wait && echo 'DB ready'",
             "group": "build",
             "presentation": {
                 "echo": true,

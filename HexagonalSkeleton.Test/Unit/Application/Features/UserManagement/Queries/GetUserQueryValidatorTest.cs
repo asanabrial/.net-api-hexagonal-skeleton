@@ -17,20 +17,18 @@ public class GetUserQueryValidatorTest
     public void Validate_ValidId_ShouldNotHaveValidationError()
     {
         // Arrange
-        var query = new GetUserQuery(1);
+        var query = new GetUserQuery(Guid.NewGuid());
 
         // Act & Assert
         var result = _validator.TestValidate(query);
         result.ShouldNotHaveValidationErrorFor(q => q.Id);
     }
 
-    [Theory]
-    [InlineData(0)]
-    [InlineData(-1)]
-    public void Validate_InvalidId_ShouldHaveValidationError(int invalidId)
+    [Fact]
+    public void Validate_EmptyGuid_ShouldHaveValidationError()
     {
         // Arrange
-        var query = new GetUserQuery(invalidId);
+        var query = new GetUserQuery(Guid.Empty);
 
         // Act & Assert
         var result = _validator.TestValidate(query);

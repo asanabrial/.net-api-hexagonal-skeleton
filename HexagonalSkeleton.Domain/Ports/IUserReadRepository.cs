@@ -13,7 +13,7 @@ namespace HexagonalSkeleton.Domain.Ports
         /// <summary>
         /// Get a single user by ID
         /// </summary>
-        Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+        Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
         
         /// <summary>
         /// Get a single user by email (for login/validation)

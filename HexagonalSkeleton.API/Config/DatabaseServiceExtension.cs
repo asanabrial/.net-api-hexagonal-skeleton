@@ -10,17 +10,16 @@ namespace HexagonalSkeleton.API.Config
     public static class DatabaseServiceExtension
     {
         /// <summary>
-        /// Configures production database services with MySQL and connection pooling
+        /// Configures production database services with PostgreSQL and connection pooling
         /// Optimized for production workloads with proper logging and error handling
         /// </summary>
         public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
         {
             var connectionStr = configuration.GetConnectionString("HexagonalSkeleton");
-            var serverVersion = ServerVersion.AutoDetect(connectionStr);
 
             services.AddDbContextPool<AppDbContext>(
                 dbContextOptions =>
-                    dbContextOptions.UseMySql(connectionStr, serverVersion, options =>
+                    dbContextOptions.UseNpgsql(connectionStr, options =>
                         options.MigrationsAssembly("HexagonalSkeleton.MigrationDb"))
                     // The following three options help with debugging, but should
                     // be changed or removed for production.

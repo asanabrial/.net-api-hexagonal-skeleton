@@ -4,6 +4,7 @@ using FluentValidation;
 using MediatR;
 using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 using HexagonalSkeleton.Application.Features.UserAuthentication.Dto;
+using HexagonalSkeleton.Application.Features.UserRegistration.Dto;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain.Services;
 using HexagonalSkeleton.Domain.ValueObjects;
@@ -42,7 +43,7 @@ public class UserWorkflowIntegrationTest
 
         // Test data
         var command = TestHelper.CreateRegisterUserCommand();
-        var userId = 1;
+        var userId = Guid.NewGuid();
         var salt = "salt123";
         var hash = "hash123";
         var jwtToken = "jwt-token-123";
@@ -90,6 +91,24 @@ public class UserWorkflowIntegrationTest
                 CreatedAt = user.CreatedAt
             });
 
+        // Setup AutoMapper mock for RegisterUserInfoDto
+        mockMapper
+            .Setup(m => m.Map<RegisterUserInfoDto>(It.IsAny<HexagonalSkeleton.Domain.User>()))
+            .Returns((HexagonalSkeleton.Domain.User user) => new RegisterUserInfoDto
+            {
+                Id = user.Id,
+                FirstName = user.FullName.FirstName,
+                LastName = user.FullName.LastName,
+                FullName = user.FullName.GetFullName(),
+                Email = user.Email.Value,
+                PhoneNumber = user.PhoneNumber?.Value,
+                Birthdate = user.Birthdate,
+                Latitude = user.Location?.Latitude,
+                Longitude = user.Location?.Longitude,
+                AboutMe = user.AboutMe,
+                CreatedAt = user.CreatedAt
+            });
+
         // Set up the user retrieval mock for the registration handler
         var createdUser = TestHelper.CreateTestUser(
             id: userId,
@@ -103,7 +122,9 @@ public class UserWorkflowIntegrationTest
             .ReturnsAsync(createdUser);
 
         // Act - Execute the registration command
-        var registrationResult = await registerHandler.Handle(command, cancellationToken);        // Assert - Verify registration was successful
+        var registrationResult = await registerHandler.Handle(command, cancellationToken);
+
+        // Assert - Verify registration was successful
         Assert.NotNull(registrationResult);
         Assert.NotNull(registrationResult.AccessToken);
         Assert.NotNull(registrationResult.User);
@@ -170,8 +191,8 @@ public class UserWorkflowIntegrationTest
         Assert.True(UserDomainService.IsProfileComplete(user));
 
         // Test 4: User authorization rules
-        var user1 = TestHelper.CreateTestUser(id: 1);
-        var user2 = TestHelper.CreateTestUser(id: 2);
+        var user1 = TestHelper.CreateTestUser(id: Guid.NewGuid());
+        var user2 = TestHelper.CreateTestUser(id: Guid.NewGuid());
 
         Assert.True(UserDomainService.CanUserUpdateProfile(user1, user1));
         Assert.False(UserDomainService.CanUserUpdateProfile(user1, user2));
@@ -203,3 +224,4 @@ public class UserWorkflowIntegrationTest
         Assert.Equal("JD", fullName.GetInitials());
     }
 }
+

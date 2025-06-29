@@ -11,7 +11,7 @@ namespace HexagonalSkeleton.Infrastructure.Persistence.Entities
     /// </summary>
     public interface IBaseEntity
     {
-        int Id { get; set; }
+        Guid Id { get; set; }
         DateTime CreatedAt { get; set; }
         DateTime? UpdatedAt { get; set; }
         DateTime? DeletedAt { get; set; }
@@ -24,8 +24,7 @@ namespace HexagonalSkeleton.Infrastructure.Persistence.Entities
     public abstract class BaseEntity : IBaseEntity
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
         public DateTime? DeletedAt { get; set; }

@@ -14,11 +14,11 @@ namespace HexagonalSkeleton.Domain.Events
     /// </summary>
     public class UserLoggedInEvent : DomainEvent
     {
-        public int UserId { get; }
+        public Guid UserId { get; }
         public string Email { get; }
         public DateTime LoginTime { get; }
 
-        public UserLoggedInEvent(int userId, string email, DateTime loginTime)
+        public UserLoggedInEvent(Guid userId, string email, DateTime loginTime)
         {
             UserId = userId;
             Email = email;

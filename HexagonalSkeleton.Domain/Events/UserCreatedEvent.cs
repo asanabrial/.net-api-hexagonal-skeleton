@@ -8,14 +8,14 @@ namespace HexagonalSkeleton.Domain.Events
     /// </summary>
     public class UserCreatedEvent : DomainEvent
     {
-        public int UserId { get; }
+        public Guid UserId { get; }
         public string Email { get; }
         public string Name { get; }
         public string Surname { get; }
         public DateTime CreatedAt { get; }
         public string PhoneNumber { get; }
 
-        public UserCreatedEvent(int userId, string email, string name, string surname, string phoneNumber)
+        public UserCreatedEvent(Guid userId, string email, string name, string surname, string phoneNumber)
         {
             UserId = userId;
             Email = email ?? throw new ArgumentNullException(nameof(email));

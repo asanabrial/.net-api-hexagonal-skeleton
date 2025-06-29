@@ -67,7 +67,7 @@ namespace HexagonalSkeleton.Test.Integration
 
             // Verify all user data is returned
             Assert.NotNull(loginResponse.User);
-            Assert.True(loginResponse.User.Id > 0, $"Expected User.Id > 0, but got {loginResponse.User.Id}");
+            Assert.NotEqual(Guid.Empty, loginResponse.User.Id);
             Assert.Equal("John", loginResponse.User.FirstName);
             Assert.Equal("Doe", loginResponse.User.LastName);
             Assert.Equal("John Doe", loginResponse.User.FullName);

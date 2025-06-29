@@ -46,7 +46,7 @@ namespace HexagonalSkeleton.API.Controllers
         /// <param name="request">User registration data</param>
         /// <returns>Created user information</returns>
         [HttpPost]
-        [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(RegisterUserResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register(CreateUserRequest request)
         {
@@ -54,7 +54,7 @@ namespace HexagonalSkeleton.API.Controllers
             var result = await mediator.Send(command);
             
             // Use AutoMapper for the entire response now that we have nested structure
-            var response = mapper.Map<LoginResponse>(result);
+            var response = mapper.Map<RegisterUserResponse>(result);
             
             return Created("", response);
         }
@@ -100,11 +100,11 @@ namespace HexagonalSkeleton.API.Controllers
         /// </summary>
         /// <param name="id">User identifier</param>
         /// <returns>Deletion result</returns>
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{id:guid}")]
         [Authorize]
         [ProducesResponseType(typeof(DeleteUserResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             var result = await mediator.Send(new HardDeleteUserCommand(id));
             return Ok(mapper.Map<DeleteUserResponse>(result));
@@ -115,11 +115,11 @@ namespace HexagonalSkeleton.API.Controllers
         /// </summary>
         /// <param name="id">User identifier</param>
         /// <returns>Deletion result</returns>
-        [HttpPost("{id:int}/soft-delete")]
+        [HttpPost("{id:guid}/soft-delete")]
         [Authorize]
         [ProducesResponseType(typeof(DeleteUserResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> SoftDelete(int id)
+        public async Task<IActionResult> SoftDelete(Guid id)
         {
             var result = await mediator.Send(new SoftDeleteUserCommand(id));
             return Ok(mapper.Map<DeleteUserResponse>(result));
@@ -130,11 +130,11 @@ namespace HexagonalSkeleton.API.Controllers
         /// </summary>
         /// <param name="id">User identifier</param>
         /// <returns>User information</returns>
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:guid}")]
         [Authorize]
         [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(Guid id)
         {
             var result = await mediator.Send(new GetUserQuery(id));
             return Ok(mapper.Map<UserResponse>(result));

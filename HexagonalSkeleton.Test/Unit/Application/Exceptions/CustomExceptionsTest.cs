@@ -62,7 +62,8 @@ namespace HexagonalSkeleton.Test.Unit.Application.Exceptions
 
             // Assert
             Assert.Equal(2, exception.Errors.Count);
-            Assert.Equal(2, exception.Errors["email"].Length); Assert.Single(exception.Errors["password"]);
+            Assert.Equal(2, exception.Errors["email"].Length);
+            Assert.Single(exception.Errors["password"]);
         }
 
         [Fact]

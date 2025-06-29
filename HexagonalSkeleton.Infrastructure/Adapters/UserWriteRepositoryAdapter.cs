@@ -25,7 +25,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
             _mediator = mediator;
         }
 
-        public async Task<int> CreateAsync(User user, CancellationToken cancellationToken = default)
+        public async Task<Guid> CreateAsync(User user, CancellationToken cancellationToken = default)
         {
             var entity = _mapper.Map<UserEntity>(user);
             _dbContext.Users.Add(entity);
@@ -45,7 +45,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
             await SaveChangesAndPublishEventsAsync([user], cancellationToken);
         }
 
-        public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
+        public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var entity = await _dbContext.Users.FindAsync(id);
             if (entity != null)
@@ -55,7 +55,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
             }
         }
 
-        public async Task SetLastLoginAsync(int userId, CancellationToken cancellationToken = default)
+        public async Task SetLastLoginAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             var entity = await _dbContext.Users.FindAsync(userId);
             if (entity != null)
@@ -76,7 +76,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
             }
         }
 
-        public async Task<User?> GetTrackedByIdAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<User?> GetTrackedByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             var entity = await _dbContext.Users.FindAsync(id);
             return _mapper.Map<User>(entity);

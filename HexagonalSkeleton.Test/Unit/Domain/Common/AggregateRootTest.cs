@@ -46,7 +46,7 @@ public class AggregateRootTest
         var aggregate = new TestAggregate();
 
         // Assert
-        Assert.Equal(0, aggregate.Id);
+        Assert.NotEqual(Guid.Empty, aggregate.Id); // ID should be auto-generated
         Assert.False(aggregate.IsDeleted);
         Assert.Null(aggregate.DeletedAt);
         Assert.Null(aggregate.UpdatedAt);

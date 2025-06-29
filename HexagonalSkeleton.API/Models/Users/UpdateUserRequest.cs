@@ -15,7 +15,7 @@ namespace HexagonalSkeleton.API.Models.Users
         /// </summary>
         [Required(ErrorMessage = "User ID is required")]
         [Range(1, int.MaxValue, ErrorMessage = "User ID must be greater than 0")]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         /// <summary>
         /// User's first name

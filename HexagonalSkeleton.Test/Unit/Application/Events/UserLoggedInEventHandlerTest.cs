@@ -21,9 +21,10 @@ public class UserLoggedInEventHandlerTest
     public async Task Handle_UserLoggedInEvent_ShouldLogLogin()
     {
         // Arrange
+        var userId = Guid.NewGuid();
         var loginTime = DateTime.UtcNow;
         var userLoggedInEvent = new UserLoggedInEvent(
-            userId: 123,
+            userId: userId,
             email: "test@example.com",
             loginTime: loginTime);
         var cancellationToken = CancellationToken.None;
@@ -37,7 +38,7 @@ public class UserLoggedInEventHandlerTest
                 LogLevel.Information,
                 It.IsAny<EventId>(),
                 It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("User logged in") && 
-                                              v.ToString()!.Contains("123") &&
+                                              v.ToString()!.Contains(userId.ToString()) &&
                                               v.ToString()!.Contains("test@example.com")),
                 It.IsAny<Exception>(),
                 It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
@@ -50,7 +51,7 @@ public class UserLoggedInEventHandlerTest
         // Arrange
         var loginTime = DateTime.UtcNow;
         var userLoggedInEvent = new UserLoggedInEvent(
-            userId: 123,
+            userId: Guid.NewGuid(),
             email: "test@example.com",
             loginTime: loginTime);
         var cancellationToken = CancellationToken.None;

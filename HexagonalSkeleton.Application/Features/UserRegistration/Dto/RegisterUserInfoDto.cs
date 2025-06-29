@@ -1,10 +1,10 @@
-namespace HexagonalSkeleton.Application.Features.SocialNetwork.Dto
+namespace HexagonalSkeleton.Application.Features.UserRegistration.Dto
 {
     /// <summary>
-    /// DTO for nearby users in social network features
-    /// Contains location-relevant user information
+    /// DTO for user information in authentication responses
+    /// Contains essential user data needed after login/register
     /// </summary>
-    public class NearbyUserDto
+    public class RegisterUserInfoDto
     {
         public Guid Id { get; set; }
         public string FirstName { get; set; } = string.Empty;

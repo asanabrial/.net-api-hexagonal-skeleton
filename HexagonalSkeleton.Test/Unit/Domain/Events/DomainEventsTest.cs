@@ -9,7 +9,7 @@ public class DomainEventsTest
     public void UserCreatedEvent_ShouldInitializeCorrectly()
     {
         // Arrange
-        var userId = 123;
+        var userId = Guid.NewGuid();
         var email = "test@example.com";
         var name = "John";
         var surname = "Doe";
@@ -33,7 +33,7 @@ public class DomainEventsTest
     {
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() => 
-            new UserCreatedEvent(123, null!, "John", "Doe", "+1234567890"));
+            new UserCreatedEvent(Guid.NewGuid(), null!, "John", "Doe", "+1234567890"));
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public class DomainEventsTest
     {
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() => 
-            new UserCreatedEvent(123, "test@example.com", null!, "Doe", "+1234567890"));
+            new UserCreatedEvent(Guid.NewGuid(), "test@example.com", null!, "Doe", "+1234567890"));
     }
 
     [Fact]
@@ -49,14 +49,14 @@ public class DomainEventsTest
     {
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() => 
-            new UserCreatedEvent(123, "test@example.com", "John", null!, "+1234567890"));
+            new UserCreatedEvent(Guid.NewGuid(), "test@example.com", "John", null!, "+1234567890"));
     }
 
     [Fact]
     public void UserProfileUpdatedEvent_ShouldInitializeCorrectly()
     {
         // Arrange
-        var userId = 123;
+        var userId = Guid.NewGuid();
         var email = "test@example.com";
         var previousName = "John";
         var newName = "Jane";
@@ -76,7 +76,7 @@ public class DomainEventsTest
     public void UserLoggedInEvent_ShouldInitializeCorrectly()
     {
         // Arrange
-        var userId = 123;
+        var userId = Guid.NewGuid();
         var email = "test@example.com";
         var loginTime = DateTime.UtcNow;
 

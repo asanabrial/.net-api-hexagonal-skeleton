@@ -1,6 +1,8 @@
 using AutoMapper;
+using HexagonalSkeleton.API.Models.Auth;
 using HexagonalSkeleton.API.Models.Common;
 using HexagonalSkeleton.Application.Common.Pagination;
+using HexagonalSkeleton.Application.Features.UserRegistration.Dto;
 
 namespace HexagonalSkeleton.API.Mapping
 {
@@ -12,6 +14,9 @@ namespace HexagonalSkeleton.API.Mapping
     public class ApiMappingProfile : Profile
     {        public ApiMappingProfile()
         {
+            // Mapping for RegisterUserInfoDto to UserInfoResponse
+            CreateMap<RegisterUserInfoDto, UserInfoResponse>();
+
             // Generic mapping for ALL paginated responses - SUPER REUSABLE!
             // Works for any PagedQueryResult<TDto> to PagedResponse<TResponse>
             CreateMap(typeof(PagedQueryResult<>), typeof(PagedResponse<>))

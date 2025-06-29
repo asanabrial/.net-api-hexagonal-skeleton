@@ -33,8 +33,8 @@ namespace HexagonalSkeleton.Test.Application.Features.UserManagement.Commands
         public async Task Handle_WithValidCommand_ShouldReturnSuccessResult()
         {
             // Arrange
-            var command = new SoftDeleteUserCommand(1);
-            var user = TestHelper.CreateTestUser(1);
+            var command = new SoftDeleteUserCommand(Guid.NewGuid());
+            var user = TestHelper.CreateTestUser(Guid.NewGuid());
 
             _mockValidator.Setup(x => x.ValidateAsync(command, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResult());
@@ -58,10 +58,10 @@ namespace HexagonalSkeleton.Test.Application.Features.UserManagement.Commands
         public async Task Handle_WithInvalidCommand_ShouldThrowValidationException()
         {
             // Arrange
-            var command = new SoftDeleteUserCommand(0);
+            var command = new SoftDeleteUserCommand(Guid.Empty);
             var validationErrors = new List<ValidationFailure>
             {
-                new ValidationFailure("Id", "Id must be greater than 0")
+                new ValidationFailure("Id", "Id cannot be empty")
             };
             var validationResult = new ValidationResult(validationErrors);
 
@@ -71,15 +71,15 @@ namespace HexagonalSkeleton.Test.Application.Features.UserManagement.Commands
             // Act & Assert
             var exception = await Assert.ThrowsAsync<HexagonalSkeleton.Application.Exceptions.ValidationException>(() =>
                 _handler.Handle(command, CancellationToken.None));            Assert.True(exception.Errors.ContainsKey("Id"));
-            Assert.Contains("Id must be greater than 0", exception.Errors["Id"]);
+            Assert.Contains("Id cannot be empty", exception.Errors["Id"]);
 
-            _mockUserReadRepository.Verify(x => x.GetByIdAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Never);
+            _mockUserReadRepository.Verify(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
             _mockUserWriteRepository.Verify(x => x.UpdateAsync(It.IsAny<DomainUser>(), It.IsAny<CancellationToken>()), Times.Never);
         }        [Fact]
         public async Task Handle_WithNonExistentUser_ShouldThrowNotFoundException()
         {
             // Arrange
-            var command = new SoftDeleteUserCommand(999);
+            var command = new SoftDeleteUserCommand(Guid.NewGuid());
 
             _mockValidator.Setup(x => x.ValidateAsync(command, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResult());
@@ -92,7 +92,7 @@ namespace HexagonalSkeleton.Test.Application.Features.UserManagement.Commands
                 _handler.Handle(command, CancellationToken.None));
 
             Assert.Contains("User", exception.Message);
-            Assert.Contains("999", exception.Message);
+            Assert.Contains(command.Id.ToString(), exception.Message);
 
             _mockUserWriteRepository.Verify(x => x.UpdateAsync(It.IsAny<DomainUser>(), It.IsAny<CancellationToken>()), Times.Never);
         }
@@ -101,8 +101,8 @@ namespace HexagonalSkeleton.Test.Application.Features.UserManagement.Commands
         public async Task Handle_WithValidCommand_ShouldCallRepositoriesInCorrectOrder()
         {
             // Arrange
-            var command = new SoftDeleteUserCommand(1);
-            var user = TestHelper.CreateTestUser(1);
+            var command = new SoftDeleteUserCommand(Guid.NewGuid());
+            var user = TestHelper.CreateTestUser(Guid.NewGuid());
 
             _mockValidator.Setup(x => x.ValidateAsync(command, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResult());
@@ -128,13 +128,11 @@ namespace HexagonalSkeleton.Test.Application.Features.UserManagement.Commands
                 .Returns(Task.CompletedTask);
         }
 
-        [Theory]
-        [InlineData(1)]
-        [InlineData(5)]
-        [InlineData(100)]
-        public async Task Handle_WithDifferentValidIds_ShouldSucceed(int userId)
+        [Fact]
+        public async Task Handle_WithDifferentValidIds_ShouldSucceed()
         {
             // Arrange
+            var userId = Guid.NewGuid();
             var command = new SoftDeleteUserCommand(userId);
             var user = TestHelper.CreateTestUser(userId);
 
@@ -158,8 +156,8 @@ namespace HexagonalSkeleton.Test.Application.Features.UserManagement.Commands
         public async Task Handle_WhenRepositoryThrowsException_ShouldPropagateException()
         {
             // Arrange
-            var command = new SoftDeleteUserCommand(1);
-            var user = TestHelper.CreateTestUser(1);
+            var command = new SoftDeleteUserCommand(Guid.NewGuid());
+            var user = TestHelper.CreateTestUser(Guid.NewGuid());
 
             _mockValidator.Setup(x => x.ValidateAsync(command, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResult());
@@ -181,8 +179,8 @@ namespace HexagonalSkeleton.Test.Application.Features.UserManagement.Commands
         public async Task Handle_ShouldMarkUserAsDeleted()
         {
             // Arrange
-            var command = new SoftDeleteUserCommand(1);
-            var user = TestHelper.CreateTestUser(1);
+            var command = new SoftDeleteUserCommand(Guid.NewGuid());
+            var user = TestHelper.CreateTestUser(Guid.NewGuid());
             var initialDeletedAt = user.DeletedAt;
 
             _mockValidator.Setup(x => x.ValidateAsync(command, It.IsAny<CancellationToken>()))
@@ -204,3 +202,4 @@ namespace HexagonalSkeleton.Test.Application.Features.UserManagement.Commands
         }
     }
 }
+

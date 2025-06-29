@@ -1,12 +1,13 @@
 using AutoMapper;
 using HexagonalSkeleton.Application.Features.UserAuthentication.Dto;
+using HexagonalSkeleton.Application.Features.UserRegistration.Dto;
 
 namespace HexagonalSkeleton.API.Models.Auth
 {    /// <summary>
      /// Response model for successful authentication
      /// </summary>
-    [AutoMap(typeof(AuthenticationDto), ReverseMap = true)]
-    public class LoginResponse
+    [AutoMap(typeof(RegisterDto), ReverseMap = true)]
+    public class RegisterUserResponse
     {
         /// <summary>
         /// JWT access token for API authentication
@@ -32,8 +33,8 @@ namespace HexagonalSkeleton.API.Models.Auth
     /// <summary>
     /// Basic user information included in login response
     /// </summary>
-    [AutoMap(typeof(AuthenticatedUserDto), ReverseMap = true)]
-    public class UserInfoResponse
+    [AutoMap(typeof(RegisterUserInfoDto), ReverseMap = true)]
+    public class RegisterUserInfoResponse
     {
         public Guid Id { get; set; }
         public string FirstName { get; set; } = string.Empty;

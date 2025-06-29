@@ -6,18 +6,18 @@ namespace HexagonalSkeleton.Domain.ValueObjects
     /// </summary>
     public record UserId
     {
-        public int Value { get; }
+        public Guid Value { get; }
 
-        public UserId(int value)
+        public UserId(Guid value)
         {
-            if (value <= 0)
-                throw new ArgumentException("User ID must be greater than zero", nameof(value));
+            if (value == Guid.Empty)
+                throw new ArgumentException("User ID cannot be empty", nameof(value));
             
             Value = value;
         }
 
-        public static implicit operator int(UserId userId) => userId.Value;
-        public static implicit operator UserId(int value) => new(value);
+        public static implicit operator Guid(UserId userId) => userId.Value;
+        public static implicit operator UserId(Guid value) => new(value);
 
         public override string ToString() => Value.ToString();
     }

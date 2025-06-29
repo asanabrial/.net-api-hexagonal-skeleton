@@ -23,7 +23,7 @@ public class LoginEventHandlerTest
     public async Task Handle_LoginEvent_ShouldUpdateLastLoginAndLog()
     {
         // Arrange
-        var userId = 123;
+        var userId = Guid.NewGuid();
         var loginEvent = new LoginEvent(userId);
         var cancellationToken = CancellationToken.None;
 
@@ -60,7 +60,7 @@ public class LoginEventHandlerTest
     public async Task Handle_LoginEvent_ShouldHandleRepositoryException()
     {
         // Arrange
-        var userId = 123;
+        var userId = Guid.NewGuid();
         var loginEvent = new LoginEvent(userId);
         var cancellationToken = CancellationToken.None;
 

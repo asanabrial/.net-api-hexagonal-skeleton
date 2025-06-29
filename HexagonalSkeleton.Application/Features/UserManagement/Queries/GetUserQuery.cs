@@ -8,13 +8,13 @@ namespace HexagonalSkeleton.Application.Features.UserManagement.Queries
         /// <summary>
         /// Gets or sets the user id.
         /// </summary>
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         // Constructor for compatibility (optional)
         public GetUserQuery() { }
 
         // Constructor with parameters for direct instantiation
-        public GetUserQuery(int id)
+        public GetUserQuery(Guid id)
         {
             Id = id;
         }

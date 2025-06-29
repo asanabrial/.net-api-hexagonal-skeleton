@@ -15,8 +15,8 @@ namespace HexagonalSkeleton.Application.Features.UserRegistration.Commands
         IUserReadRepository userReadRepository,
         IAuthenticationService authenticationService,
         IMapper mapper)
-        : IRequestHandler<RegisterUserCommand, RegisterUserDto>
-    {        public async Task<RegisterUserDto> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+        : IRequestHandler<RegisterUserCommand, RegisterDto>
+    {        public async Task<RegisterDto> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
             if (!validationResult.IsValid)
@@ -53,8 +53,8 @@ namespace HexagonalSkeleton.Application.Features.UserRegistration.Commands
             await publisher.Publish(new LoginEvent(userId), cancellationToken);
               
             // Map user data to DTO and create authentication response
-            var userDto = mapper.Map<AuthenticatedUserDto>(createdUser);
-            return new RegisterUserDto
+            var userDto = mapper.Map<RegisterUserInfoDto>(createdUser);
+            return new RegisterDto
             {
                 AccessToken = tokenInfo.Token,
                 ExpiresIn = tokenInfo.ExpiresIn,

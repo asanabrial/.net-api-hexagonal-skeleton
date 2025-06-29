@@ -6,7 +6,8 @@ namespace HexagonalSkeleton.Application.Features.UserManagement.Commands
     {        public HardDeleteUserCommandValidator()
         {
             RuleFor(r => r.Id)
-                .GreaterThan(0);
+                .NotEqual(Guid.Empty)
+                .WithMessage("Id cannot be empty");
         }
     }
 }

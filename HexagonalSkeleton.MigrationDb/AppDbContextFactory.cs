@@ -27,9 +27,8 @@ namespace HexagonalSkeleton.MigrationDb
             {
                 throw new InvalidOperationException("Connection string 'HexagonalSkeleton' not found.");
             }            var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            var serverVersion = ServerVersion.AutoDetect(connectionString);
             
-            optionsBuilder.UseMySql(connectionString, serverVersion, options =>
+            optionsBuilder.UseNpgsql(connectionString, options =>
                 options.MigrationsAssembly("HexagonalSkeleton.MigrationDb"));
 
             return new AppDbContext(optionsBuilder.Options);

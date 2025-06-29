@@ -14,6 +14,18 @@ namespace HexagonalSkeleton.Infrastructure.Mapping
     {
         public InfrastructureMappingProfile()
         {
+            // DateTime converters - explicit UTC handling for PostgreSQL
+            CreateMap<DateTime, DateTime>()
+                .ConvertUsing(src => src.Kind == DateTimeKind.Utc ? src : 
+                    src.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(src, DateTimeKind.Utc) : 
+                    src.ToUniversalTime());
+            
+            CreateMap<DateTime?, DateTime?>()
+                .ConvertUsing(src => !src.HasValue ? null : 
+                    src.Value.Kind == DateTimeKind.Utc ? src.Value : 
+                    src.Value.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(src.Value, DateTimeKind.Utc) : 
+                    src.Value.ToUniversalTime());
+
             // Email Value Object mappings
             CreateMap<Email, string>().ConvertUsing(vo => vo != null ? vo.Value : default!);
             CreateMap<string, Email>().ConvertUsing(value => !string.IsNullOrEmpty(value) ? new Email(value) : default!);
@@ -23,8 +35,8 @@ namespace HexagonalSkeleton.Infrastructure.Mapping
             CreateMap<string, PhoneNumber>().ConvertUsing(value => !string.IsNullOrEmpty(value) ? new PhoneNumber(value) : default!);
             
             // UserId Value Object mappings
-            CreateMap<UserId, int>().ConvertUsing(vo => vo != null ? vo.Value : 0);
-            CreateMap<int, UserId>().ConvertUsing(value => value > 0 ? new UserId(value) : default!);
+            CreateMap<UserId, Guid>().ConvertUsing(vo => vo != null ? vo.Value : Guid.Empty);
+            CreateMap<Guid, UserId>().ConvertUsing(value => value != Guid.Empty ? new UserId(value) : default!);
             
             // User <-> UserEntity mappings with complex value objects
             CreateMap<User, UserEntity>()

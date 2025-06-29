@@ -114,8 +114,8 @@ public class UserDomainServiceTest
     public void CanUserUpdateProfile_DifferentUsers_ShouldReturnFalse()
     {
         // Arrange
-        var user1 = TestHelper.CreateTestUser(id: 1);
-        var user2 = TestHelper.CreateTestUser(id: 2);
+        var user1 = TestHelper.CreateTestUser(id: Guid.NewGuid());
+        var user2 = TestHelper.CreateTestUser(id: Guid.NewGuid());
 
         // Act
         var result = UserDomainService.CanUserUpdateProfile(user1, user2);
@@ -148,7 +148,7 @@ public class UserDomainServiceTest
         // Arrange
         var user1 = TestHelper.CreateTestUser();
         var user2 = HexagonalSkeleton.Domain.User.Reconstitute(
-            id: 2, email: "other@example.com", firstName: "Jane", lastName: "Smith",
+            id: Guid.NewGuid(), email: "other@example.com", firstName: "Jane", lastName: "Smith",
             birthdate: DateTime.UtcNow.AddYears(-30), phoneNumber: "+9876543210",
             latitude: 41.0, longitude: -75.0, aboutMe: "Other user",
             passwordSalt: "salt2", passwordHash: "hash2", lastLogin: DateTime.UtcNow,
@@ -167,7 +167,7 @@ public class UserDomainServiceTest
         // Arrange
         var activeUser = TestHelper.CreateTestUser();
         var deletedUser = HexagonalSkeleton.Domain.User.Reconstitute(
-            id: 2, email: "deleted@example.com", firstName: "Jane", lastName: "Smith",
+            id: Guid.NewGuid(), email: "deleted@example.com", firstName: "Jane", lastName: "Smith",
             birthdate: DateTime.UtcNow.AddYears(-30), phoneNumber: "+9876543210",
             latitude: 41.0, longitude: -75.0, aboutMe: "Deleted user",
             passwordSalt: "salt2", passwordHash: "hash2", lastLogin: DateTime.UtcNow,
@@ -187,7 +187,7 @@ public class UserDomainServiceTest
         // Arrange
         var adultUser = TestHelper.CreateTestUser();
         var minorUser = HexagonalSkeleton.Domain.User.Reconstitute(
-            id: 2, email: "minor@example.com", firstName: "Teen", lastName: "User",
+            id: Guid.NewGuid(), email: "minor@example.com", firstName: "Teen", lastName: "User",
             birthdate: DateTime.UtcNow.AddYears(-16), phoneNumber: "+9876543210",
             latitude: 41.0, longitude: -75.0, aboutMe: "Minor user",
             passwordSalt: "salt2", passwordHash: "hash2", lastLogin: DateTime.UtcNow,
@@ -329,7 +329,7 @@ public class UserDomainServiceTest
         var user = TestHelper.CreateTestUser();
         // The test helper creates users with AboutMe set, so we need to create one manually without it
         var incompleteUser = HexagonalSkeleton.Domain.User.Reconstitute(
-            id: 1,
+            id: Guid.NewGuid(),
             email: "test@example.com",
             firstName: "John",
             lastName: "Doe",
@@ -363,14 +363,14 @@ public class UserDomainServiceTest
         // Arrange
         var centerUser = TestHelper.CreateTestUser();
         var nearbyUser = HexagonalSkeleton.Domain.User.Reconstitute(
-            id: 2, email: "nearby@example.com", firstName: "Near", lastName: "User",
+            id: Guid.NewGuid(), email: "nearby@example.com", firstName: "Near", lastName: "User",
             birthdate: DateTime.UtcNow.AddYears(-30), phoneNumber: "+9876543210",
             latitude: 40.7130, longitude: -74.0062, aboutMe: "Nearby user", // Very close coordinates
             passwordSalt: "salt2", passwordHash: "hash2", lastLogin: DateTime.UtcNow,
             createdAt: DateTime.UtcNow, updatedAt: null, deletedAt: null, isDeleted: false);
         
         var farUser = HexagonalSkeleton.Domain.User.Reconstitute(
-            id: 3, email: "far@example.com", firstName: "Far", lastName: "User",
+            id: Guid.NewGuid(), email: "far@example.com", firstName: "Far", lastName: "User",
             birthdate: DateTime.UtcNow.AddYears(-25), phoneNumber: "+1111111111",
             latitude: 50.0, longitude: -80.0, aboutMe: "Far user", // Far coordinates
             passwordSalt: "salt3", passwordHash: "hash3", lastLogin: DateTime.UtcNow,
@@ -391,7 +391,7 @@ public class UserDomainServiceTest
     {
         // Arrange
         var deletedUser = HexagonalSkeleton.Domain.User.Reconstitute(
-            id: 1, email: "deleted@example.com", firstName: "Deleted", lastName: "User",
+            id: Guid.NewGuid(), email: "deleted@example.com", firstName: "Deleted", lastName: "User",
             birthdate: DateTime.UtcNow.AddYears(-25), phoneNumber: "+1234567890",
             latitude: 40.7128, longitude: -74.0060, aboutMe: "Deleted user",
             passwordSalt: "salt", passwordHash: "hash", lastLogin: DateTime.UtcNow,
@@ -414,7 +414,7 @@ public class UserDomainServiceTest
         // Arrange
         var centerUser = TestHelper.CreateTestUser();
         var deletedNearbyUser = HexagonalSkeleton.Domain.User.Reconstitute(
-            id: 2, email: "deleted@example.com", firstName: "Deleted", lastName: "User",
+            id: Guid.NewGuid(), email: "deleted@example.com", firstName: "Deleted", lastName: "User",
             birthdate: DateTime.UtcNow.AddYears(-30), phoneNumber: "+9876543210",
             latitude: 40.7130, longitude: -74.0062, aboutMe: "Deleted nearby user",
             passwordSalt: "salt2", passwordHash: "hash2", lastLogin: DateTime.UtcNow,
@@ -440,7 +440,7 @@ public class UserDomainServiceTest
         // Arrange
         var adultUser = TestHelper.CreateTestUser();
         var minorUser = HexagonalSkeleton.Domain.User.Reconstitute(
-            id: 2, email: "minor@example.com", firstName: "Teen", lastName: "User",
+            id: Guid.NewGuid(), email: "minor@example.com", firstName: "Teen", lastName: "User",
             birthdate: DateTime.UtcNow.AddYears(-16), phoneNumber: "+9876543210",
             latitude: 40.7130, longitude: -74.0062, aboutMe: "Minor user",
             passwordSalt: "salt2", passwordHash: "hash2", lastLogin: DateTime.UtcNow,
@@ -459,7 +459,7 @@ public class UserDomainServiceTest
         // Arrange
         var user1 = TestHelper.CreateTestUser();
         var user2 = HexagonalSkeleton.Domain.User.Reconstitute(
-            id: 2, email: "match@example.com", firstName: "Perfect", lastName: "Match",
+            id: Guid.NewGuid(), email: "match@example.com", firstName: "Perfect", lastName: "Match",
             birthdate: user1.Birthdate!.Value.AddYears(2), // Within 5 years
             phoneNumber: "+9876543210",
             latitude: 40.7130, longitude: -74.0062, // Very close coordinates (within 10km)
@@ -479,14 +479,14 @@ public class UserDomainServiceTest
     {
         // Arrange
         var youngUser = HexagonalSkeleton.Domain.User.Reconstitute(
-            id: 1, email: "young@example.com", firstName: "Young", lastName: "User",
+            id: Guid.NewGuid(), email: "young@example.com", firstName: "Young", lastName: "User",
             birthdate: DateTime.UtcNow.AddYears(-20), phoneNumber: "+1234567890",
             latitude: 40.7128, longitude: -74.0060, aboutMe: "", // No AboutMe
             passwordSalt: "salt", passwordHash: "hash", lastLogin: DateTime.UtcNow,
             createdAt: DateTime.UtcNow, updatedAt: null, deletedAt: null, isDeleted: false);
         
         var oldUser = HexagonalSkeleton.Domain.User.Reconstitute(
-            id: 2, email: "old@example.com", firstName: "Old", lastName: "User",
+            id: Guid.NewGuid(), email: "old@example.com", firstName: "Old", lastName: "User",
             birthdate: DateTime.UtcNow.AddYears(-60), phoneNumber: "+9876543210", // Large age gap
             latitude: 50.0, longitude: -80.0, aboutMe: "", // Far away, no AboutMe
             passwordSalt: "salt2", passwordHash: "hash2", lastLogin: DateTime.UtcNow,
@@ -509,7 +509,7 @@ public class UserDomainServiceTest
         // We can't test with the same user due to ID check in CanUsersInteract
         // So we create a duplicate with different ID
         var duplicateUser = HexagonalSkeleton.Domain.User.Reconstitute(
-            id: 2, email: user.Email.Value, firstName: user.FullName.FirstName, 
+            id: Guid.NewGuid(), email: user.Email.Value, firstName: user.FullName.FirstName, 
             lastName: user.FullName.LastName, birthdate: user.Birthdate!.Value,
             phoneNumber: "+9876543210", latitude: user.Location.Latitude, 
             longitude: user.Location.Longitude, aboutMe: user.AboutMe,
@@ -532,7 +532,7 @@ public class UserDomainServiceTest
         // Arrange
         var user1 = TestHelper.CreateTestUser();
         var user2 = HexagonalSkeleton.Domain.User.Reconstitute(
-            id: 2, email: "other@example.com", firstName: "Other", lastName: "User",
+            id: Guid.NewGuid(), email: "other@example.com", firstName: "Other", lastName: "User",
             birthdate: DateTime.UtcNow.AddYears(-30), phoneNumber: "+9876543210",
             latitude: 41.0, longitude: -75.0, aboutMe: "Other user",
             passwordSalt: "salt2", passwordHash: "hash2", lastLogin: DateTime.UtcNow,
@@ -562,7 +562,7 @@ public class UserDomainServiceTest
         // Arrange - Create users very close to each other
         var user1 = TestHelper.CreateTestUser();
         var user2 = HexagonalSkeleton.Domain.User.Reconstitute(
-            id: 2, email: "nearby@example.com", firstName: "Near", lastName: "User",
+            id: Guid.NewGuid(), email: "nearby@example.com", firstName: "Near", lastName: "User",
             birthdate: DateTime.UtcNow.AddYears(-30), phoneNumber: "+9876543210",
             latitude: 40.7130, longitude: -74.0062, aboutMe: "Nearby user", // Very close
             passwordSalt: "salt2", passwordHash: "hash2", lastLogin: DateTime.UtcNow,
@@ -581,7 +581,7 @@ public class UserDomainServiceTest
         // Arrange
         var user1 = TestHelper.CreateTestUser();
         var user2 = HexagonalSkeleton.Domain.User.Reconstitute(
-            id: 2, email: "far@example.com", firstName: "Far", lastName: "User",
+            id: Guid.NewGuid(), email: "far@example.com", firstName: "Far", lastName: "User",
             birthdate: DateTime.UtcNow.AddYears(-30), phoneNumber: "+9876543210",
             latitude: 50.0, longitude: -80.0, aboutMe: "Far user", // Far coordinates
             passwordSalt: "salt2", passwordHash: "hash2", lastLogin: DateTime.UtcNow,
