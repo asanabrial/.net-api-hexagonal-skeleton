@@ -1,233 +1,162 @@
 <p align="center"><img src="https://github.com/user-attachments/assets/5d55f501-ed98-4245-a0ef-b620991c35df" alt="dotnet-icon" width="150" /></p>
 
-# 🏗️ Enterprise .NET 9 API Template
-
-## Clean Architecture | Hexagonal Design | DDD & CQRS
+# 🏗️ Enterprise .NET API with Hexagonal Architecture
 
 <p align="center">
-  <strong>Production-ready template implementing enterprise-grade patterns and best practices</strong><br/>
-  Perfect for scaling teams and complex business domains
+  <strong>Production-ready API implementing Clean Architecture, DDD, and CQRS patterns</strong><br/>
+  Built with modern .NET technologies and enterprise best practices
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/.NET-9.0-purple?style=flat-square&logo=dotnet" alt=".NET 9"/>
-  <img src="https://img.shields.io/badge/Architecture-Hexagonal-blue?style=flat-square" alt="Hexagonal"/>
-  <img src="https://img.shields.io/badge/Pattern-DDD%20%2B%20CQRS-green?style=flat-square" alt="DDD + CQRS"/>
-  <img src="https://img.shields.io/badge/Database-MariaDB-orange?style=flat-square&logo=mariadb" alt="MariaDB"/>
-  <img src="https://img.shields.io/badge/Tests-Unit%20%2B%20Integration-red?style=flat-square" alt="Tests"/>
+  <img src="https://img.shields.io/badge/EF%20Core-9.0.6-blue?style=flat-square" alt="EF Core"/>
+  <img src="https://img.shields.io/badge/PostgreSQL-17-336791?style=flat-square&logo=postgresql" alt="PostgreSQL"/>
+  <img src="https://img.shields.io/badge/Architecture-Hexagonal-green?style=flat-square" alt="Hexagonal"/>
+  <img src="https://img.shields.io/badge/Tests-365%20passing-brightgreen?style=flat-square" alt="Tests"/>
 </p>
 
----
+## 🎯 Key Features
 
-## 🎯 Why This Template?
-
-This isn't just another API template. It's a **battle-tested foundation** that solves real enterprise challenges:
-
--   **🏢 Enterprise Patterns**: Implements architectural patterns proven at scale (Clean Architecture, DDD, CQRS)
--   **📏 Scalable Architecture**: Clean separation of concerns for large teams
--   **🧪 Test-Driven**: Comprehensive testing strategy (Unit + Integration)
--   **🚀 Developer Experience**: F5 debugging with Docker dependencies
--   **📋 Production Patterns**: Error handling, logging, validation, security
-
-### 💼 Business Value
-
--   **Faster Time-to-Market**: Jump-start projects with proven patterns
--   **Reduced Technical Debt**: Clean architecture prevents common pitfalls
--   **Team Productivity**: Clear boundaries enable parallel development
--   **Maintainability**: SOLID principles ensure long-term code health
-
----
+-   **🏢 Clean Architecture**: Hexagonal pattern with clear separation of concerns
+-   **📋 CQRS + MediatR**: Command/Query separation for scalable applications
+-   **🎯 Domain-Driven Design**: Rich domain models with business rules
+-   **🧪 Comprehensive Testing**: 365+ unit and integration tests
+-   **🔐 JWT Authentication**: Secure API with role-based authorization
+-   **📊 PostgreSQL + EF Core**: Modern database with latest Entity Framework
+-   **🐋 Docker Ready**: One-command setup with containerized database
+-   **📝 API Documentation**: Interactive Swagger/OpenAPI documentation
 
 ## 🚀 Quick Start
 
-### Prerequisites
-
--   [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0) 🔧
--   [Docker](https://www.docker.com/get-started) 🐋
-
-### Get Running in 3 Steps
-
 ```bash
-# 1. Clone and navigate
+# 1. Clone the repository
 git clone https://github.com/asanabrialopez/.net-api-hexagonal-skeleton.git
 cd net-api-hexagonal-skeleton
 
-# 2. Start dependencies
+# 2. Start PostgreSQL database
 docker-compose up -d
 
-# 3. Run API (with automatic migrations)
+# 3. Run the API
 dotnet run --project HexagonalSkeleton.API
 ```
 
-**🎉 That's it!** API available at: http://localhost:5000/swagger
+**🎉 API ready at:** http://localhost:5000/swagger
 
-### 🛠️ Development Setup
+## 🏗️ Architecture
 
-**Visual Studio / VS Code:**
-
--   Press **F5** to debug
--   Dependencies start automatically
--   Swagger opens in browser
--   Full debugging capabilities
-
-**Docker-First Development:**
-
-```bash
-# Database in container, API local = Best of both worlds
-docker-compose up -d              # Start MariaDB
-dotnet watch --project HexagonalSkeleton.API  # Hot reload API
-```
-
----
-
-## 🏗️ Architecture Overview
-
-### Clean Architecture Layers
+### Hexagonal Architecture Overview
 
 ```mermaid
 graph TB
-    A[🌐 API Layer] --> B[📋 Application Layer]
-    B --> C[🎯 Domain Layer]
-    B --> D[🔧 Infrastructure Layer]
-    D --> C
+    subgraph "🌐 Presentation Layer"
+        API[Controllers]
+        Auth[Authentication]
+        Swagger[API Documentation]
+    end
 
-    A -.-> |"Controllers, Models, DI"| A
-    B -.-> |"CQRS, Use Cases, DTOs"| B
-    C -.-> |"Entities, Business Rules"| C
-    D -.-> |"Database, External APIs"| D
+    subgraph "📋 Application Layer"
+        CQRS[Commands & Queries]
+        Handlers[MediatR Handlers]
+        DTOs[Data Transfer Objects]
+        AppServices[Application Services]
+    end
+
+    subgraph "🎯 Domain Layer"
+        Entities[Domain Entities]
+        ValueObjects[Value Objects]
+        DomainServices[Domain Services]
+        BusinessRules[Business Rules]
+        Ports[Ports/Interfaces]
+    end
+
+    subgraph "🔧 Infrastructure Layer"
+        Database[(PostgreSQL)]
+        Repositories[Repository Implementation]
+        ExternalAPIs[External Services]
+        EmailService[Email Service]
+    end
+
+    %% Dependencies
+    API --> CQRS
+    Auth --> Handlers
+    Swagger --> API
+
+    CQRS --> Handlers
+    Handlers --> AppServices
+    DTOs --> Entities
+
+    AppServices --> DomainServices
+    DomainServices --> BusinessRules
+    Handlers --> Ports
+
+    Repositories --> Database
+    Repositories -.-> Ports
+    ExternalAPIs -.-> Ports
+    EmailService -.-> Ports
+
+    %% Styling
+    classDef presentation fill:#e1f5fe
+    classDef application fill:#f3e5f5
+    classDef domain fill:#e8f5e8
+    classDef infrastructure fill:#fff3e0
+
+    class API,Auth,Swagger presentation
+    class CQRS,Handlers,DTOs,AppServices application
+    class Entities,ValueObjects,DomainServices,BusinessRules,Ports domain
+    class Database,Repositories,ExternalAPIs,EmailService infrastructure
 ```
 
-### 📁 Project Structure
+### Core Patterns Implemented
+
+-   **Hexagonal Architecture**: Ports & Adapters for dependency inversion
+-   **CQRS**: Separate read/write models with MediatR
+-   **Repository Pattern**: Clean data access abstraction
+-   **Specification Pattern**: Reusable business rules
+-   **Domain Events**: Decoupled business logic
+-   **Exception Handling**: Global error management with custom exceptions
+
+## �️ Technology Stack
+
+| Category           | Technology             | Version |
+| ------------------ | ---------------------- | ------- |
+| **Framework**      | .NET                   | 9.0     |
+| **ORM**            | Entity Framework Core  | 9.0.6   |
+| **Database**       | PostgreSQL             | 17      |
+| **Authentication** | JWT Bearer             | Latest  |
+| **Validation**     | FluentValidation       | 12.0.0  |
+| **Mediator**       | MediatR                | 12.5.0  |
+| **Mapping**        | AutoMapper             | 14.0.0  |
+| **Logging**        | Serilog                | 4.3.0   |
+| **Testing**        | xUnit + Testcontainers | Latest  |
+
+## 📁 Project Structure
 
 ```
-🏗️ HexagonalSkeleton.API          # 🌐 Presentation Layer
-├── Controllers/                   # REST endpoints
-├── Models/                        # Request/Response DTOs
-├── Config/                        # Dependency injection
-└── Extensions/                    # API-specific utilities
-
-📋 HexagonalSkeleton.Application   # 📋 Use Cases Layer
-├── Commands/                      # Write operations (CQRS)
-├── Queries/                       # Read operations (CQRS)
-├── Services/                      # Application services
-└── Dto/                          # Internal data contracts
-
-🎯 HexagonalSkeleton.Domain        # 🎯 Business Logic Layer
-├── User.cs                        # Aggregate roots
-├── ValueObjects/                  # Domain primitives
-├── Services/                      # Domain services
-├── Specifications/                # Business rules
-└── Events/                        # Domain events
-
-🔧 HexagonalSkeleton.Infrastructure # 🔧 External Concerns
-├── Persistence/                   # Data access
-├── Adapters/                      # External integrations
-└── Auth/                          # Security implementations
-
-🧪 HexagonalSkeleton.Test          # 🧪 Testing Strategy
-├── Unit/                          # Isolated tests
-├── Integration/                   # End-to-end tests
-└── TestWebApplicationFactory.cs   # Test infrastructure
+├── HexagonalSkeleton.API/          # 🌐 Presentation Layer
+│   ├── Controllers/                # REST API endpoints
+│   ├── Models/                     # API request/response models
+│   └── Config/                     # DI container configuration
+├── HexagonalSkeleton.Application/  # 📋 Application Layer
+│   ├── Features/                   # CQRS commands & queries
+│   ├── Services/                   # Application services
+│   └── Events/                     # Domain event handlers
+├── HexagonalSkeleton.Domain/       # 🎯 Domain Layer
+│   ├── Entities/                   # Domain entities
+│   ├── Services/                   # Domain services
+│   ├── Specifications/             # Business rules
+│   └── Ports/                      # Interface contracts
+├── HexagonalSkeleton.Infrastructure/ # � Infrastructure Layer
+│   ├── Persistence/                # Database context & repositories
+│   ├── Auth/                       # JWT implementation
+│   └── Services/                   # External service adapters
+└── HexagonalSkeleton.Test/         # 🧪 Testing
+    ├── Unit/                       # Unit tests
+    └── Integration/                # Integration tests
 ```
 
----
+## 🧪 Testing
 
-## 🔧 Technical Excellence
-
-### 🏛️ Architecture Patterns
-
-> These patterns are widely adopted by large-scale applications and enterprise software companies to handle complexity, maintainability, and team scalability.
-
-| Pattern                    | Implementation                   | Business Value                                |
-| -------------------------- | -------------------------------- | --------------------------------------------- |
-| **Hexagonal Architecture** | Clean separation of concerns     | Testable, maintainable, technology-agnostic   |
-| **CQRS**                   | Separate read/write models       | Optimized performance, clear responsibilities |
-| **DDD**                    | Rich domain model, value objects | Business logic protection, expressive code    |
-| **SOLID Principles**       | Dependency inversion, SRP        | Easy to extend, modify, and test              |
-| **Specification Pattern**  | Composable business rules        | Reusable queries, testable logic              |
-
-### 🛡️ Enterprise Features
-
-#### **Security & Validation**
-
--   **JWT Authentication** with refresh tokens
--   **FluentValidation** for input validation
--   **Global Exception Handling** with proper HTTP status codes
--   **CORS** configuration for cross-origin requests
-
-#### **Data & Performance**
-
--   **Entity Framework Core** with optimized queries
--   **Repository Pattern** with specification support
--   **Connection Pooling** for database efficiency
--   **Pagination** with metadata for large datasets
-
-#### **Developer Experience**
-
--   **Comprehensive Testing** (Unit + Integration)
--   **AutoMapper** for clean object mapping
--   **Swagger/OpenAPI** documentation
--   **Structured Logging** with Serilog
--   **Docker-first** development workflow
-
-#### **Code Quality**
-
--   **Clean Code** principles throughout
--   **Consistent Naming** conventions
--   **Extension Methods** for readability
--   **Immutable Value Objects** for data integrity
-
-### 📊 API Features
-
-#### **User Management**
-
-```bash
-# Complete CRUD operations
-POST   /api/users              # Create user
-GET    /api/users              # Get paginated users
-GET    /api/users/{id}         # Get user by ID
-PUT    /api/users/{id}         # Update user
-DELETE /api/users/{id}         # Soft delete user
-
-# Advanced filtering
-GET /api/users?searchTerm=john&onlyAdults=true&pageSize=20
-```
-
-#### **Smart Search & Filtering**
-
--   **Unified search** across name, email, phone with `searchTerm`
--   **Specification Pattern** for composable, testable business rules
--   **Advanced filtering** (age ranges, location-based, business rules)
--   **Sorting** by any field with direction control
--   **Pagination** with total count metadata
-
-```bash
-# Examples of advanced filtering
-GET /api/users?searchTerm=john                    # Text search
-GET /api/users?onlyAdults=true&minAge=25          # Business rules
-GET /api/users?latitude=40.7&longitude=-74&radiusInKm=10  # Location
-GET /api/users?searchTerm=@company.com&onlyCompleteProfiles=true  # Combined
-```
-
-#### **Error Handling**
-
-```json
-{
-    "type": "ValidationError",
-    "title": "Invalid user data",
-    "status": 400,
-    "errors": {
-        "Email": ["Email format is invalid"],
-        "Age": ["Age must be greater than 0"]
-    }
-}
-```
-
----
-
-## 🧪 Testing Strategy
-
-### Comprehensive Test Coverage
+**365+ Tests** covering all layers:
 
 ```bash
 # Run all tests
@@ -235,214 +164,68 @@ dotnet test
 
 # Run with coverage
 dotnet test --collect:"XPlat Code Coverage"
-
-# Watch mode for TDD
-dotnet watch test
 ```
 
-#### **Test Architecture**
+-   **Unit Tests**: Domain logic and business rules
+-   **Integration Tests**: End-to-end API workflows with test database
+-   **Test Containers**: Isolated database for integration testing
 
--   **Unit Tests**: Fast, isolated, business logic validation
--   **Integration Tests**: End-to-end API testing with real database
--   **Test Fixtures**: Reusable test data and configurations
--   **In-Memory Database**: Isolated test environment
+## 🔐 Security Features
 
-#### **Testing Philosophy**
+-   **JWT Authentication** with role-based authorization
+-   **Password Hashing** with secure salt generation
+-   **Input Validation** with FluentValidation
+-   **Exception Handling** without sensitive data exposure
+-   **CORS** configuration for cross-origin requests
 
-```csharp
-// Example: Clean, readable tests
-[Fact]
-public async Task Handle_ValidUser_ShouldCreateUser()
-{
-    // Arrange
-    var command = new RegisterUserCommand("john@example.com", "John", "Doe");
+## � Development Experience
 
-    // Act
-    var result = await _handler.Handle(command, CancellationToken.None);
+### Visual Studio / VS Code
 
-    // Assert
-    Assert.NotNull(result);
-    Assert.Equal("john@example.com", result.Email);
-}
+-   **F5 Debugging**: Full debugging with automatic Docker setup
+-   **Hot Reload**: Real-time code changes with `dotnet watch`
+-   **IntelliSense**: Full code completion and error detection
+
+### Database Management
+
+```bash
+# Create new migration
+dotnet ef migrations add MigrationName --project HexagonalSkeleton.MigrationDb
+
+# Update database
+dotnet ef database update --project HexagonalSkeleton.MigrationDb
 ```
+
+## 📊 API Endpoints
+
+| Endpoint             | Method | Description         |
+| -------------------- | ------ | ------------------- |
+| `/api/user/register` | POST   | User registration   |
+| `/api/user/login`    | POST   | User authentication |
+| `/api/user`          | GET    | Get paginated users |
+| `/api/user/{id}`     | GET    | Get user by ID      |
+| `/api/user/{id}`     | PUT    | Update user profile |
+
+**📖 Full API documentation available at `/swagger`**
+
+## 🎯 Why This Architecture?
+
+This template demonstrates **enterprise-grade** software development practices:
+
+-   **Scalability**: Clean separation allows teams to work in parallel
+-   **Maintainability**: SOLID principles ensure long-term code health
+-   **Testability**: Dependency injection enables comprehensive testing
+-   **Flexibility**: Hexagonal architecture makes changing dependencies easy
+-   **Performance**: CQRS optimizes read/write operations separately
+
+Perfect for demonstrating knowledge of **modern .NET development**, **architectural patterns**, and **best practices** in a professional environment.
 
 ---
 
-## 🛠️ Technology Stack
+<p align="center">
+  <strong>Built with ❤️ for enterprise software development</strong>
+</p>
 
-### Core Technologies
-
-| Technology                | Version | Purpose               |
-| ------------------------- | ------- | --------------------- |
-| **.NET**                  | 9.0     | Runtime and framework |
-| **ASP.NET Core**          | 9.0     | Web API framework     |
-| **Entity Framework Core** | 9.0     | ORM and data access   |
-| **MariaDB**               | 11.0    | Primary database      |
-| **Docker**                | Latest  | Containerization      |
-
-### Libraries & Packages
-
-| Package              | Purpose             | Why This Choice                   |
-| -------------------- | ------------------- | --------------------------------- |
-| **MediatR**          | CQRS implementation | Decoupled request handling        |
-| **FluentValidation** | Input validation    | Expressive, testable validation   |
-| **AutoMapper**       | Object mapping      | Consistent DTO mapping            |
-| **Serilog**          | Structured logging  | Rich logging capabilities         |
-| **Swashbuckle**      | API documentation   | Interactive API docs              |
-| **xUnit**            | Unit testing        | Modern, extensible test framework |
-
-### Development Tools
-
--   **VS Code Tasks** for streamlined development
--   **Docker Compose** for dependency management
--   **EF Core Migrations** for database versioning
--   **Global Exception Handling** for consistent error responses
-
----
-
-## 🎯 Business Use Cases
-
-### Real-World Applications
-
-This template solves common enterprise challenges:
-
-#### **📋 User Management System**
-
--   Employee directories
--   Customer databases
--   Member management
--   Access control systems
-
-#### **🏢 Enterprise APIs**
-
--   Microservice foundations
--   Domain service APIs
--   Integration platforms
--   Data service layers
-
-#### **🚀 Scalable Solutions**
-
--   Multi-tenant applications
--   High-traffic APIs
--   Complex business domains
--   Team collaboration platforms
-
-### 💡 Implementation Examples
-
-```csharp
-// Example: Adding a new feature (Product Management)
-
-// 1. Domain Entity
-public class Product : AggregateRoot<int>
-{
-    public ProductName Name { get; private set; }
-    public Money Price { get; private set; }
-    // Business rules encapsulated
-}
-
-// 2. CQRS Command
-public record CreateProductCommand(string Name, decimal Price)
-    : IRequest<ProductDto>;
-
-// 3. Handler with validation
-public class CreateProductHandler : IRequestHandler<CreateProductCommand, ProductDto>
-{
-    // Clean, testable implementation
-}
-
-// 4. API Controller
-[ApiController]
-public class ProductController : ControllerBase
-{
-    // Thin controller, delegates to MediatR
-}
-```
-
----
-
-## 📈 Performance & Scalability
-
-### Optimization Strategies
-
--   **Connection Pooling**: Efficient database connections
--   **Async/Await**: Non-blocking operations throughout
--   **Specification Pattern**: Optimized, reusable queries
--   **Pagination**: Memory-efficient large dataset handling
--   **Lazy Loading**: On-demand data retrieval
-
-### Monitoring & Observability
-
--   **Structured Logging**: Searchable, correlatable logs
--   **Exception Tracking**: Centralized error handling
--   **API Documentation**: Always up-to-date Swagger
--   **Health Checks**: Application status monitoring
-
----
-
-## 🚀 Production Readiness
-
-### Deployment Considerations
-
-#### **Environment Configuration**
-
-```json
-{
-    "ConnectionStrings": {
-        "HexagonalSkeleton": "Server=prod-db;Database=app;..."
-    },
-    "Logging": {
-        "LogLevel": { "Default": "Information" }
-    },
-    "JWT": {
-        "Key": "production-secret-key",
-        "Issuer": "your-company.com"
-    }
-}
-```
-
-#### **Docker Production**
-
-```dockerfile
-# Multi-stage build for optimization
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
-COPY . .
-RUN dotnet publish -c Release -o /app
-
-FROM mcr.microsoft.com/dotnet/aspnet:9.0
-COPY --from=build /app .
-ENTRYPOINT ["dotnet", "HexagonalSkeleton.API.dll"]
-```
-
-#### **Security Checklist**
-
--   ✅ JWT token validation
--   ✅ Input validation and sanitization
--   ✅ SQL injection prevention (EF Core)
--   ✅ CORS configuration
--   ✅ HTTPS enforcement
--   ✅ Sensitive data protection
-
----
-
-## 👨‍💻 For Developers
-
-### 🎯 What You Get
-
-✅ **Immediate Productivity**: Start building features, not infrastructure  
-✅ **Best Practices**: Enterprise patterns proven in production  
-✅ **Full Testing Suite**: Unit + Integration tests included  
-✅ **Developer Experience**: F5 debugging with Docker dependencies  
-✅ **Documentation**: Self-documenting code and comprehensive README
-
-### 🧠 Learning Opportunities
-
-This template demonstrates:
-
--   **Clean Architecture** implementation in .NET
--   **Domain-Driven Design** patterns and practices
--   **CQRS** with MediatR for scalable applications
--   **Specification Pattern** for flexible querying
--   **Test-Driven Development** with comprehensive coverage
 -   **Docker** integration for modern development workflows
 
 ### 🎨 Customization Guide
