@@ -48,7 +48,7 @@ dotnet run --project HexagonalSkeleton.API
 
 ```mermaid
 graph TB
-    subgraph "🌐 Presentation Layer"
+    subgraph "🌐 API Layer"
         API[Controllers]
         Auth[Authentication]
         Swagger[API Documentation]
@@ -94,16 +94,16 @@ graph TB
     ExternalAPIs -.-> Ports
     EmailService -.-> Ports
 
-    %% Styling
-    classDef presentation fill:#e1f5fe
-    classDef application fill:#f3e5f5
-    classDef domain fill:#e8f5e8
-    classDef infrastructure fill:#fff3e0
+    %% Styling with better contrast
+    classDef apiLayer fill:#2196F3,stroke:#1976D2,stroke-width:2px,color:#fff
+    classDef appLayer fill:#9C27B0,stroke:#7B1FA2,stroke-width:2px,color:#fff
+    classDef domainLayer fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
+    classDef infraLayer fill:#FF9800,stroke:#F57C00,stroke-width:2px,color:#fff
 
-    class API,Auth,Swagger presentation
-    class CQRS,Handlers,DTOs,AppServices application
-    class Entities,ValueObjects,DomainServices,BusinessRules,Ports domain
-    class Database,Repositories,ExternalAPIs,EmailService infrastructure
+    class API,Auth,Swagger apiLayer
+    class CQRS,Handlers,DTOs,AppServices appLayer
+    class Entities,ValueObjects,DomainServices,BusinessRules,Ports domainLayer
+    class Database,Repositories,ExternalAPIs,EmailService infraLayer
 ```
 
 ### Core Patterns Implemented
