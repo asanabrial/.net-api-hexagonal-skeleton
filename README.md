@@ -49,61 +49,60 @@ dotnet run --project HexagonalSkeleton.API
 ```mermaid
 graph TB
     subgraph "🌐 API Layer"
-        API[Controllers]
+        Controllers[Controllers]
+        DTOs[Request/Response DTOs]
         Auth[Authentication]
-        Swagger[API Documentation]
     end
 
     subgraph "📋 Application Layer"
-        CQRS[Commands & Queries]
-        Handlers[MediatR Handlers]
-        DTOs[Data Transfer Objects]
+        Commands[Commands]
+        Queries[Queries]
+        Handlers[Command/Query Handlers]
         AppServices[Application Services]
     end
 
     subgraph "🎯 Domain Layer"
         Entities[Domain Entities]
-        ValueObjects[Value Objects]
         DomainServices[Domain Services]
-        BusinessRules[Business Rules]
         Ports[Ports/Interfaces]
     end
 
     subgraph "🔧 Infrastructure Layer"
+        Repositories[Repository Adapters]
         Database[(PostgreSQL)]
-        Repositories[Repository Implementation]
-        ExternalAPIs[External Services]
-        EmailService[Email Service]
+        ExternalServices[External Services]
     end
 
-    %% Dependencies
-    API --> CQRS
-    API --> Auth
-    API --> Swagger
+    %% Clean flow following dependency inversion
+    Controllers --> Commands
+    Controllers --> Queries
+    Controllers --> DTOs
+    Controllers --> Auth
 
-    CQRS --> Handlers
+    Commands --> Handlers
+    Queries --> Handlers
     Handlers --> AppServices
-    DTOs --> Entities
-
     AppServices --> DomainServices
-    DomainServices --> BusinessRules
-    Handlers --> Ports
+    AppServices --> Ports
 
-    Repositories --> Database
+    %% Infrastructure implements domain ports (dependency inversion)
     Repositories -.-> Ports
-    ExternalAPIs -.-> Ports
-    EmailService -.-> Ports
+    ExternalServices -.-> Ports
+    Repositories --> Database
 
-    %% Styling with better contrast
+    %% DTOs map to/from domain entities (not direct dependency)
+    DTOs -.-> Entities
+
+    %% Styling with professional colors
     classDef apiLayer fill:#2196F3,stroke:#1976D2,stroke-width:2px,color:#fff
     classDef appLayer fill:#9C27B0,stroke:#7B1FA2,stroke-width:2px,color:#fff
     classDef domainLayer fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
     classDef infraLayer fill:#FF9800,stroke:#F57C00,stroke-width:2px,color:#fff
 
-    class API,Auth,Swagger apiLayer
-    class CQRS,Handlers,DTOs,AppServices appLayer
-    class Entities,ValueObjects,DomainServices,BusinessRules,Ports domainLayer
-    class Database,Repositories,ExternalAPIs,EmailService infraLayer
+    class Controllers,DTOs,Auth apiLayer
+    class Commands,Queries,Handlers,AppServices appLayer
+    class Entities,DomainServices,Ports domainLayer
+    class Repositories,Database,ExternalServices infraLayer
 ```
 
 ### Core Patterns Implemented
