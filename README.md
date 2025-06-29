@@ -78,8 +78,8 @@ graph TB
 
     %% Dependencies
     API --> CQRS
-    Auth --> Handlers
-    Swagger --> API
+    API --> Auth
+    API --> Swagger
 
     CQRS --> Handlers
     Handlers --> AppServices
@@ -132,7 +132,7 @@ graph TB
 ## 📁 Project Structure
 
 ```
-├── HexagonalSkeleton.API/          # 🌐 Presentation Layer
+├── HexagonalSkeleton.API/          # 🌐 API Layer
 │   ├── Controllers/                # REST API endpoints
 │   ├── Models/                     # API request/response models
 │   └── Config/                     # DI container configuration
