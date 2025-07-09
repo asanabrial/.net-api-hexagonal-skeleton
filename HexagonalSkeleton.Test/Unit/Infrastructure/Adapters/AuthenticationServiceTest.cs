@@ -1,6 +1,7 @@
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain.ValueObjects;
 using HexagonalSkeleton.Infrastructure.Adapters;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 using DomainUser = HexagonalSkeleton.Domain.User;
@@ -11,13 +12,21 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
     {
         private readonly Mock<IApplicationSettings> _mockAppSettings;
         private readonly Mock<IUserReadRepository> _mockUserReadRepository;
+        private readonly Mock<IUserWriteRepository> _mockUserWriteRepository;
+        private readonly Mock<ILogger<AuthenticationService>> _mockLogger;
         private readonly AuthenticationService _authenticationService;
 
         public AuthenticationServiceTest()
         {
             _mockAppSettings = new Mock<IApplicationSettings>();
             _mockUserReadRepository = new Mock<IUserReadRepository>();
-            _authenticationService = new AuthenticationService(_mockAppSettings.Object, _mockUserReadRepository.Object);
+            _mockUserWriteRepository = new Mock<IUserWriteRepository>();
+            _mockLogger = new Mock<ILogger<AuthenticationService>>();
+            _authenticationService = new AuthenticationService(
+                _mockAppSettings.Object, 
+                _mockUserReadRepository.Object,
+                _mockUserWriteRepository.Object,
+                _mockLogger.Object);
 
             // Setup common app settings
             _mockAppSettings.Setup(x => x.Secret).Returns("MyVeryLongSecretKeyThatIsAtLeast32Characters");
@@ -31,7 +40,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
         {
             // Act & Assert
             var exception = Assert.Throws<ArgumentNullException>(() => 
-                new AuthenticationService(null!, _mockUserReadRepository.Object));
+                new AuthenticationService(null!, _mockUserReadRepository.Object, _mockUserWriteRepository.Object, _mockLogger.Object));
             
             Assert.Equal("appSettings", exception.ParamName);
         }
@@ -41,9 +50,29 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
         {
             // Act & Assert
             var exception = Assert.Throws<ArgumentNullException>(() => 
-                new AuthenticationService(_mockAppSettings.Object, null!));
+                new AuthenticationService(_mockAppSettings.Object, null!, _mockUserWriteRepository.Object, _mockLogger.Object));
             
             Assert.Equal("userReadRepository", exception.ParamName);
+        }
+        
+        [Fact]
+        public void Constructor_WithNullUserWriteRepository_ShouldThrowArgumentNullException()
+        {
+            // Act & Assert
+            var exception = Assert.Throws<ArgumentNullException>(() => 
+                new AuthenticationService(_mockAppSettings.Object, _mockUserReadRepository.Object, null!, _mockLogger.Object));
+            
+            Assert.Equal("userWriteRepository", exception.ParamName);
+        }
+
+        [Fact]
+        public void Constructor_WithNullLogger_ShouldThrowArgumentNullException()
+        {
+            // Act & Assert
+            var exception = Assert.Throws<ArgumentNullException>(() => 
+                new AuthenticationService(_mockAppSettings.Object, _mockUserReadRepository.Object, _mockUserWriteRepository.Object, null!));
+            
+            Assert.Equal("logger", exception.ParamName);
         }
 
         [Fact]        public async Task GenerateJwtTokenAsync_WithValidUserId_ShouldReturnToken()
@@ -124,7 +153,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             passwordHashProperty?.SetValue(user, hashedPassword);
             passwordSaltProperty?.SetValue(user, salt);
 
-            _mockUserReadRepository.Setup(x => x.GetByEmailAsync(email, It.IsAny<CancellationToken>()))
+            _mockUserWriteRepository.Setup(x => x.GetUserByEmailAsync(email, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);
 
             // Act
@@ -147,7 +176,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             passwordHashProperty?.SetValue(user, hashedPassword);
             passwordSaltProperty?.SetValue(user, salt);
 
-            _mockUserReadRepository.Setup(x => x.GetByEmailAsync(email, It.IsAny<CancellationToken>()))
+            _mockUserWriteRepository.Setup(x => x.GetUserByEmailAsync(email, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);
 
             // Act
@@ -162,7 +191,9 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
         {
             // Arrange
             var email = "nonexistent@example.com";
-            var password = "password123";            _mockUserReadRepository.Setup(x => x.GetByEmailAsync(email, It.IsAny<CancellationToken>()))
+            var password = "password123";            
+            
+            _mockUserWriteRepository.Setup(x => x.GetUserByEmailAsync(email, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((DomainUser?)null);
 
             // Act
@@ -182,7 +213,7 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             var user = CreateTestUser(Guid.NewGuid());
             user.Delete(); // Mark as deleted
 
-            _mockUserReadRepository.Setup(x => x.GetByEmailAsync(email, It.IsAny<CancellationToken>()))
+            _mockUserWriteRepository.Setup(x => x.GetUserByEmailAsync(email, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);
 
             // Act

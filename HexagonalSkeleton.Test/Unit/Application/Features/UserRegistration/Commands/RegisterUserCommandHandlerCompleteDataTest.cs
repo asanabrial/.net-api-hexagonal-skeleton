@@ -1,28 +1,31 @@
 using Xunit;
 using Moq;
 using FluentValidation;
-using MediatR;
+using HexagonalSkeleton.Application.Services;
+using HexagonalSkeleton.Application.IntegrationEvents;
 using HexagonalSkeleton.Application.Features.UserRegistration.Dto;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.ValueObjects;
 using AutoMapper;
 using HexagonalSkeleton.Application.Features.UserRegistration.Commands;
-using HexagonalSkeleton.Application.Events;
 
 namespace HexagonalSkeleton.Test.Application.Features.UserRegistration.Commands
-{    public class RegisterUserCommandHandlerCompleteDataTest
+{    
+    public class RegisterUserCommandHandlerCompleteDataTest
     {
         private readonly Mock<IValidator<RegisterUserCommand>> _mockValidator;
-        private readonly Mock<IPublisher> _mockPublisher;
+        private readonly Mock<IIntegrationEventService> _mockIntegrationEventService;
         private readonly Mock<IUserWriteRepository> _mockUserWriteRepository;
         private readonly Mock<IUserReadRepository> _mockUserReadRepository;
         private readonly Mock<IAuthenticationService> _mockAuthenticationService;
         private readonly Mock<IMapper> _mockMapper;
-        private readonly RegisterUserCommandHandler _handler;        public RegisterUserCommandHandlerCompleteDataTest()
+        private readonly RegisterUserCommandHandler _handler;
+        
+        public RegisterUserCommandHandlerCompleteDataTest()
         {
             _mockValidator = new Mock<IValidator<RegisterUserCommand>>();
-            _mockPublisher = new Mock<IPublisher>();
+            _mockIntegrationEventService = new Mock<IIntegrationEventService>();
             _mockUserWriteRepository = new Mock<IUserWriteRepository>();
             _mockUserReadRepository = new Mock<IUserReadRepository>();
             _mockAuthenticationService = new Mock<IAuthenticationService>();
@@ -30,7 +33,7 @@ namespace HexagonalSkeleton.Test.Application.Features.UserRegistration.Commands
 
             _handler = new RegisterUserCommandHandler(
                 _mockValidator.Object,
-                _mockPublisher.Object,
+                _mockIntegrationEventService.Object,
                 _mockUserWriteRepository.Object,
                 _mockUserReadRepository.Object,
                 _mockAuthenticationService.Object,
@@ -92,11 +95,15 @@ namespace HexagonalSkeleton.Test.Application.Features.UserRegistration.Commands
                 birthdate: command.Birthdate
             );
 
-            _mockUserReadRepository                .Setup(r => r.GetByIdAsync(userId, cancellationToken))
-                .ReturnsAsync(createdUser);            
-                  _mockAuthenticationService
+            _mockUserReadRepository
+                .Setup(r => r.GetByIdAsync(userId, cancellationToken))
+                .ReturnsAsync(createdUser);
+            
+            _mockAuthenticationService
                 .Setup(a => a.GenerateJwtTokenAsync(userId, cancellationToken))
-                .ReturnsAsync(new TokenInfo(jwtToken, DateTime.UtcNow.AddDays(7)));            // Setup AutoMapper mock to return a properly mapped result with nested structure
+                .ReturnsAsync(new TokenInfo(jwtToken, DateTime.UtcNow.AddDays(7)));
+            
+            // Setup AutoMapper mock to return a properly mapped result with nested structure
             _mockMapper
                 .Setup(m => m.Map<RegisterUserInfoDto>(It.IsAny<User>()))
                 .Returns((User user) => new RegisterUserInfoDto
@@ -115,7 +122,9 @@ namespace HexagonalSkeleton.Test.Application.Features.UserRegistration.Commands
                 });
 
             // Act
-            var result = await _handler.Handle(command, cancellationToken);            // Assert - Verify ALL user data is returned
+            var result = await _handler.Handle(command, cancellationToken);
+            
+            // Assert - Verify ALL user data is returned
             Assert.NotNull(result);
             Assert.Equal(jwtToken, result.AccessToken);
             Assert.NotNull(result.User);
@@ -134,7 +143,7 @@ namespace HexagonalSkeleton.Test.Application.Features.UserRegistration.Commands
             
             // Verify personal information
             Assert.Equal(command.Birthdate, result.User.Birthdate);
-            Assert.Equal("Test user", result.User.AboutMe);
+            Assert.Equal("Test user", result.User.AboutMe); // Fixed: Matches the value set in TestHelper.CreateTestUser()
             
             // Verify location
             Assert.Equal(40.7128, result.User.Latitude);
@@ -154,9 +163,9 @@ namespace HexagonalSkeleton.Test.Application.Features.UserRegistration.Commands
 
             _mockUserReadRepository.Verify(r => r.GetByIdAsync(userId, cancellationToken), Times.Once);
             
-            _mockPublisher.Verify(p => p.Publish(
-                It.IsAny<LoginEvent>(), 
-                cancellationToken), Times.Once);
+            _mockIntegrationEventService.Verify(s => s.PublishAsync(
+                It.IsAny<IIntegrationEvent>(), 
+                cancellationToken), Times.AtLeastOnce);
         }
     }
 }

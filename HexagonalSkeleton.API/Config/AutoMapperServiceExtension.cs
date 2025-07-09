@@ -5,22 +5,26 @@ using HexagonalSkeleton.Application.Mapping;
 namespace HexagonalSkeleton.API.Config
 {
     /// <summary>
-    /// AutoMapper service registration
+    /// AutoMapper service registration with CQRS support
+    /// Includes mappings for command/query separation
     /// </summary>
     public static class AutoMapperServiceExtension
-    {        /// <summary>
-        /// Registers AutoMapper with all profiles and attribute-based mappings
+    {
+        /// <summary>
+        /// Registers AutoMapper with all profiles including CQRS mappings
         /// </summary>
         public static IServiceCollection AddAutoMapperProfiles(this IServiceCollection services)
-        {            services.AddAutoMapper(config =>
+        {
+            services.AddAutoMapper(config =>
             {
-                // Configuración para mapeo automático más permisivo
+                // Configuration for more permissive automatic mapping
                 config.AllowNullDestinationValues = true;
                 config.AllowNullCollections = true;
-
-            },            // Escanear múltiples assemblies para encontrar perfiles y atributos [AutoMap]
+            },
+            // Scan multiple assemblies for profiles and [AutoMap] attributes
             typeof(ApiMappingProfile).Assembly,                    // API assembly
-            typeof(InfrastructureMappingProfile).Assembly,         // Infrastructure assembly
+            typeof(InfrastructureMappingProfile).Assembly,         // Infrastructure assembly  
+            typeof(CqrsMappingProfile).Assembly,                   // CQRS mapping profile
             typeof(ApplicationMappingProfile).Assembly             // Application assembly (for [AutoMap] attributes)
             );
             

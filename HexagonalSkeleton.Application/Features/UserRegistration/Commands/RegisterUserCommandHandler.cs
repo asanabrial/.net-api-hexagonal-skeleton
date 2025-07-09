@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
 using FluentValidation;
-using HexagonalSkeleton.Application.Events;
+using HexagonalSkeleton.Application.IntegrationEvents;
 using HexagonalSkeleton.Application.Features.UserRegistration.Dto;
 using HexagonalSkeleton.Application.Features.UserAuthentication.Dto;
+using HexagonalSkeleton.Application.Services;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain.Services;
 using MediatR;
@@ -10,7 +11,7 @@ using MediatR;
 namespace HexagonalSkeleton.Application.Features.UserRegistration.Commands
 {    public class RegisterUserCommandHandler(
         IValidator<RegisterUserCommand> validator,
-        IPublisher publisher,
+        IIntegrationEventService integrationEventService,
         IUserWriteRepository userWriteRepository,
         IUserReadRepository userReadRepository,
         IAuthenticationService authenticationService,
@@ -50,7 +51,36 @@ namespace HexagonalSkeleton.Application.Features.UserRegistration.Commands
             if (createdUser == null)
                 throw new InvalidOperationException("Failed to retrieve created user");            // Generate JWT token with expiration info
             var tokenInfo = await authenticationService.GenerateJwtTokenAsync(userId, cancellationToken);
-            await publisher.Publish(new LoginEvent(userId), cancellationToken);
+            
+            // Publish integration event for CQRS synchronization
+            var integrationEvent = new UserCreatedIntegrationEvent(
+                userId,
+                createdUser.Email.Value,
+                createdUser.FullName.GetFullName(),
+                createdUser.FullName.FirstName,
+                createdUser.FullName.LastName,
+                createdUser.PhoneNumber.Value,
+                createdUser.Birthdate,
+                createdUser.AboutMe,
+                string.Empty, // Country - would need to be added to user model
+                string.Empty, // State - would need to be added to user model  
+                string.Empty, // City - would need to be added to user model
+                string.Empty, // FullAddress - would need to be added to user model
+                createdUser.CreatedAt,
+                new[] { createdUser.Email.Value, createdUser.FullName.FirstName, createdUser.FullName.LastName }, // Search terms
+                createdUser.Birthdate?.Year != null ? DateTime.Now.Year - createdUser.Birthdate.Value.Year : null // Age
+            );
+            
+            await integrationEventService.PublishAsync(integrationEvent, cancellationToken);
+            
+            // Also publish login event for activity tracking
+            var loginEvent = new UserLoggedInIntegrationEvent(
+                userId,
+                createdUser.Email.Value,
+                DateTime.UtcNow
+            );
+            
+            await integrationEventService.PublishAsync(loginEvent, cancellationToken);
               
             // Map user data to DTO and create authentication response
             var userDto = mapper.Map<RegisterUserInfoDto>(createdUser);

@@ -3,6 +3,7 @@ using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.Services;
 using HexagonalSkeleton.Infrastructure;
 using HexagonalSkeleton.Infrastructure.Adapters;
+using HexagonalSkeleton.Infrastructure.Services;
 using HexagonalSkeleton.Application.Services;
 
 namespace HexagonalSkeleton.API.Config
@@ -17,19 +18,22 @@ namespace HexagonalSkeleton.API.Config
         /// <returns>Return the service collection for further configuration.</returns>
         public static IServiceCollection AddScopes(this IServiceCollection services)
         {
-            // Hexagonal Architecture Ports (CQRS pattern)
-            services.AddScoped<IUserReadRepository, UserReadRepositoryAdapter>();
-            services.AddScoped<IUserWriteRepository, UserWriteRepositoryAdapter>();
+            // Note: Repository registrations are now handled by AddCqrsServices() 
+            // to properly implement CQRS pattern with separate read/write stores
             
             // Domain Services (DDD)
             services.AddScoped<UserDomainService>();
+            services.AddScoped<IDomainServiceFactory, DomainServiceFactory>();
+            services.AddScoped<IUserDomainService, EnhancedUserDomainService>();
             
             // Application Services (Clean Architecture - Application Layer)
             services.AddScoped<IUserSpecificationService, UserSpecificationService>();
             
-            // Infrastructure Services
+            // Infrastructure Services (following Single Responsibility Principle)
             services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<IApplicationSettings, ApplicationSettingsAdapter>();
+            services.AddScoped<IMongoFilterBuilder, MongoFilterBuilder>();
+            services.AddScoped<IMongoSortBuilder, MongoSortBuilder>();
 
             return services;
         }

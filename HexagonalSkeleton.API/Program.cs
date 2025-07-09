@@ -6,6 +6,7 @@ using HexagonalSkeleton.API.Handler.ExceptionMapping;
 using HexagonalSkeleton.Application.Features.UserRegistration.Commands;
 using MediatR;
 using Serilog;
+using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,8 +35,33 @@ builder.Services.AddProblemDetails();
 
 builder.Services.AddOptions();
 
-// Configure production database with MySQL
-builder.Services.AddDatabase(builder.Configuration);
+// Configure CQRS databases - Using updated extension method
+builder.Services.AddCqrsDatabases(builder.Configuration);
+
+// CQRS services configuration
+builder.Services.AddCqrsServices();
+
+// Configure MassTransit with RabbitMQ
+builder.Services.AddMassTransit(x =>
+{
+    // Add consumers from Infrastructure assembly
+    x.AddConsumersFromNamespaceContaining<HexagonalSkeleton.Infrastructure.Consumers.UserCreatedConsumer>();
+    
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host("localhost", "hexagonal_vhost", h =>
+        {
+            h.Username("hexagonal_user");
+            h.Password("hexagonal_password");
+        });
+        
+        cfg.ConfigureEndpoints(context);
+    });
+});
+
+// Register Integration Event Service
+builder.Services.AddScoped<HexagonalSkeleton.Application.Services.IIntegrationEventService, 
+    HexagonalSkeleton.Application.Services.MassTransitIntegrationEventService>();
 
 builder.Services.AddRouting(opt =>
 {

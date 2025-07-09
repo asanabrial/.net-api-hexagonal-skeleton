@@ -1,7 +1,8 @@
 using Xunit;
 using Moq;
 using FluentValidation;
-using MediatR;
+using HexagonalSkeleton.Application.Services;
+using HexagonalSkeleton.Application.IntegrationEvents;
 using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 using HexagonalSkeleton.Application.Features.UserAuthentication.Dto;
 using HexagonalSkeleton.Application.Features.UserRegistration.Dto;
@@ -23,7 +24,7 @@ public class UserWorkflowIntegrationTest
     public async Task UserRegistrationAndRetrieval_EndToEndFlow_ShouldWorkCorrectly()
     {        // Arrange - Set up all the dependencies
         var mockValidator = new Mock<IValidator<RegisterUserCommand>>();
-        var mockPublisher = new Mock<IPublisher>();
+        var mockIntegrationEventService = new Mock<IIntegrationEventService>();
         var mockUserWriteRepository = new Mock<IUserWriteRepository>();
         var mockUserReadRepository = new Mock<IUserReadRepository>();
         var mockAuthenticationService = new Mock<IAuthenticationService>();
@@ -31,7 +32,7 @@ public class UserWorkflowIntegrationTest
 
         var registerHandler = new RegisterUserCommandHandler(
             mockValidator.Object,
-            mockPublisher.Object,
+            mockIntegrationEventService.Object,
             mockUserWriteRepository.Object,
             mockUserReadRepository.Object,
             mockAuthenticationService.Object,

@@ -7,7 +7,7 @@ using HexagonalSkeleton.API;
 using HexagonalSkeleton.API.Models.Users;
 using HexagonalSkeleton.API.Models.Auth;
 using Microsoft.EntityFrameworkCore;
-using HexagonalSkeleton.Infrastructure.Persistence;
+using HexagonalSkeleton.Infrastructure.Persistence.Command;
 
 namespace HexagonalSkeleton.Test.Integration
 {    
@@ -89,8 +89,8 @@ namespace HexagonalSkeleton.Test.Integration
                 {
                     // Remove all DbContext related registrations
                     var descriptors = services.Where(d => 
-                        d.ServiceType == typeof(DbContextOptions<AppDbContext>) ||
-                        d.ServiceType == typeof(AppDbContext) ||
+                        d.ServiceType == typeof(DbContextOptions<CommandDbContext>) ||
+                        d.ServiceType == typeof(CommandDbContext) ||
                         d.ServiceType.IsGenericType && 
                         d.ServiceType.GetGenericTypeDefinition() == typeof(DbContextOptions<>) ||
                         d.ImplementationType?.FullName?.Contains("DbContext") == true ||
@@ -103,7 +103,7 @@ namespace HexagonalSkeleton.Test.Integration
                     }
 
                     // Add in-memory database for testing
-                    services.AddDbContext<AppDbContext>(options =>
+                    services.AddDbContext<CommandDbContext>(options =>
                     {
                         options.UseInMemoryDatabase(testDatabaseName);
                     }, ServiceLifetime.Scoped);

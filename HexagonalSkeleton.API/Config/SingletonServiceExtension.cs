@@ -15,6 +15,9 @@ namespace HexagonalSkeleton.API.Config
             services.AddSingleton<IExceptionMapper, ApplicationExceptionMapper>();
             services.AddSingleton<IExceptionMapper, ValidationExceptionMapper>();
             
+            // Exception mapper factory for Open/Closed Principle compliance
+            services.AddSingleton<IExceptionMapperFactory, ExceptionMapperFactory>();
+            
             return services;
         }
     }

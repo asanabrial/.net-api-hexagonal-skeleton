@@ -1,18 +1,27 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-  </PropertyGroup>  <ItemGroup>
+  </PropertyGroup>
+  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="14.0.0" />
+    <PackageReference Include="MassTransit" Version="8.5.0" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.6" />
+    <PackageReference Include="MongoDB.Driver" Version="3.4.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.12.1" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.12.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.6" />
-  </ItemGroup><ItemGroup>
-    <ProjectReference Include="..\HexagonalSkeleton.Domain\HexagonalSkeleton.Domain.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.6">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
   </ItemGroup>
-
+  <ItemGroup>
+    <ProjectReference Include="..\HexagonalSkeleton.Domain\HexagonalSkeleton.Domain.csproj" />
+    <ProjectReference Include="..\HexagonalSkeleton.Application\HexagonalSkeleton.Application.csproj" />
+  </ItemGroup>
 </Project>

@@ -18,5 +18,46 @@ services:
             start_period: 30s
         restart: unless-stopped
 
+    mongodb:
+        image: mongo:8.0
+        container_name: hexagonal-mongodb
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: hexagonal_user
+            MONGO_INITDB_ROOT_PASSWORD: hexagonal_password
+            MONGO_INITDB_DATABASE: HexagonalSkeletonRead
+        ports:
+            - "27017:27017"
+        volumes:
+            - mongodb_data:/data/db
+        healthcheck:
+            test: ["CMD-SHELL", 'mongosh --eval ''db.adminCommand("ping")''']
+            interval: 10s
+            timeout: 5s
+            retries: 3
+            start_period: 30s
+        restart: unless-stopped
+
+    rabbitmq:
+        image: rabbitmq:4.0-management
+        container_name: hexagonal-rabbitmq
+        environment:
+            RABBITMQ_DEFAULT_USER: hexagonal_user
+            RABBITMQ_DEFAULT_PASS: hexagonal_password
+            RABBITMQ_DEFAULT_VHOST: hexagonal_vhost
+        ports:
+            - "5672:5672" # AMQP port
+            - "15672:15672" # Management UI port
+        volumes:
+            - rabbitmq_data:/var/lib/rabbitmq
+        healthcheck:
+            test: ["CMD-SHELL", "rabbitmq-diagnostics check_port_connectivity"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 60s
+        restart: unless-stopped
+
 volumes:
     postgresql_data:
+    mongodb_data:
+    rabbitmq_data:

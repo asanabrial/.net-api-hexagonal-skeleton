@@ -1,7 +1,8 @@
 using Xunit;
 using Moq;
 using FluentValidation;
-using MediatR;
+using HexagonalSkeleton.Application.Services;
+using HexagonalSkeleton.Application.IntegrationEvents;
 using HexagonalSkeleton.Application.Features.UserAuthentication.Dto;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
@@ -9,13 +10,12 @@ using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.ValueObjects;
 using AutoMapper;
 using HexagonalSkeleton.Application.Features.UserRegistration.Commands;
-using HexagonalSkeleton.Application.Events;
 
 namespace HexagonalSkeleton.Test.Application.Features.UserRegistration.Commands;
 
 public class RegisterUserCommandHandlerTest
 {    private readonly Mock<IValidator<RegisterUserCommand>> _mockValidator;
-    private readonly Mock<IPublisher> _mockPublisher;
+    private readonly Mock<IIntegrationEventService> _mockIntegrationEventService;
     private readonly Mock<IUserWriteRepository> _mockUserWriteRepository;
     private readonly Mock<IUserReadRepository> _mockUserReadRepository;
     private readonly Mock<IAuthenticationService> _mockAuthenticationService;
@@ -23,7 +23,7 @@ public class RegisterUserCommandHandlerTest
     private readonly RegisterUserCommandHandler _handler;    public RegisterUserCommandHandlerTest()
     {
         _mockValidator = new Mock<IValidator<RegisterUserCommand>>();
-        _mockPublisher = new Mock<IPublisher>();
+        _mockIntegrationEventService = new Mock<IIntegrationEventService>();
         _mockUserWriteRepository = new Mock<IUserWriteRepository>();
         _mockUserReadRepository = new Mock<IUserReadRepository>();
         _mockAuthenticationService = new Mock<IAuthenticationService>();
@@ -31,7 +31,7 @@ public class RegisterUserCommandHandlerTest
 
         _handler = new RegisterUserCommandHandler(
             _mockValidator.Object,
-            _mockPublisher.Object,
+            _mockIntegrationEventService.Object,
             _mockUserWriteRepository.Object,
             _mockUserReadRepository.Object,
             _mockAuthenticationService.Object,
@@ -107,9 +107,9 @@ public class RegisterUserCommandHandlerTest
             It.Is<User>(u => u.Email.Value == command.Email), 
             cancellationToken), Times.Once);
 
-        _mockPublisher.Verify(p => p.Publish(
-            It.IsAny<LoginEvent>(), 
-            cancellationToken), Times.Once);
+        _mockIntegrationEventService.Verify(s => s.PublishAsync(
+            It.IsAny<IIntegrationEvent>(), 
+            cancellationToken), Times.AtLeastOnce);
     }    [Fact]
     public async Task Handle_InvalidCommand_ShouldThrowValidationException()
     {

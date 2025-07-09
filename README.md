@@ -246,7 +246,7 @@ cp appsettings.json appsettings.Production.json
 
 # Database provider swap (SQL Server example)
 # Replace in DatabaseServiceExtension.cs:
-services.AddDbContextPool<AppDbContext>(options =>
+services.AddDbContextPool<CommandDbContext>(options =>
     options.UseSqlServer(connectionString));
 ```
 

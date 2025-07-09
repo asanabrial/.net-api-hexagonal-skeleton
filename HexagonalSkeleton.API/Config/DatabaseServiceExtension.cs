@@ -1,23 +1,25 @@
-using HexagonalSkeleton.Infrastructure.Persistence;
+using HexagonalSkeleton.Infrastructure.Persistence.Command;
+using HexagonalSkeleton.Infrastructure.Persistence.Query;
 using Microsoft.EntityFrameworkCore;
 
 namespace HexagonalSkeleton.API.Config
 {
     /// <summary>
-    /// Extension methods for configuring production database services
-    /// Clean separation - only handles production concerns
+    /// Extension methods for configuring CQRS database services
+    /// Supports separate Command (PostgreSQL) and Query (MongoDB) databases
     /// </summary>
     public static class DatabaseServiceExtension
     {
         /// <summary>
-        /// Configures production database services with PostgreSQL and connection pooling
+        /// Configures CQRS database services with PostgreSQL for commands and MongoDB for queries
         /// Optimized for production workloads with proper logging and error handling
         /// </summary>
         public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
         {
             var connectionStr = configuration.GetConnectionString("HexagonalSkeleton");
 
-            services.AddDbContextPool<AppDbContext>(
+            // Configure Command Database (PostgreSQL)
+            services.AddDbContextPool<CommandDbContext>(
                 dbContextOptions =>
                     dbContextOptions.UseNpgsql(connectionStr, options =>
                         options.MigrationsAssembly("HexagonalSkeleton.MigrationDb"))

@@ -14,5 +14,10 @@ namespace HexagonalSkeleton.Domain.Ports
         Task SetLastLoginAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<User?> GetTrackedByIdAsync(Guid id, CancellationToken cancellationToken = default);
         Task SaveChangesAsync(CancellationToken cancellationToken = default);
+        
+        /// <summary>
+        /// Get user by email - Used for authentication where we need password hash and salt
+        /// </summary>
+        Task<User?> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default);
     }
 }

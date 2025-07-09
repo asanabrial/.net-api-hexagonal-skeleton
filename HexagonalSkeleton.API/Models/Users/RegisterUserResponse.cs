@@ -4,10 +4,10 @@ using HexagonalSkeleton.Application.Features.UserRegistration.Dto;
 
 namespace HexagonalSkeleton.API.Models.Auth
 {    /// <summary>
-     /// Response model for successful authentication
+     /// Response model for successful authentication with registration
      /// </summary>
     [AutoMap(typeof(RegisterDto), ReverseMap = true)]
-    public class RegisterUserResponse
+    public class AuthenticatedRegistrationResponse
     {
         /// <summary>
         /// JWT access token for API authentication

@@ -8,11 +8,14 @@ namespace HexagonalSkeleton.Domain
     /// <summary>
     /// User aggregate root - Central entity in the user bounded context
     /// Implements DDD principles with value objects, domain events, and business rules
+    /// Inherits from BaseEntity for common audit properties
     /// </summary>
-    public class User : AggregateRoot
+    public class User : BaseEntity
     {
         // Private constructors force use of factory methods
-        private User() { }        private User(
+        private User() { }
+
+        private User(
             Email email,
             string passwordSalt,
             string passwordHash,
@@ -31,9 +34,7 @@ namespace HexagonalSkeleton.Domain
             Location = location ?? throw new ArgumentNullException(nameof(location));
             AboutMe = aboutMe ?? string.Empty;
             
-            CreatedAt = DateTime.UtcNow;
             LastLogin = DateTime.UtcNow;
-            IsDeleted = false; // Explicitly set to false for new users
             
             // Raise domain event
             AddDomainEvent(new UserCreatedEvent(Id, Email.Value, FullName.FirstName, FullName.LastName, PhoneNumber.Value));
