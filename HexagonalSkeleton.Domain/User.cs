@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using HexagonalSkeleton.Domain.Common;
+﻿using HexagonalSkeleton.Domain.Common;
 using HexagonalSkeleton.Domain.Events;
 using HexagonalSkeleton.Domain.ValueObjects;
 

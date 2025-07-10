@@ -67,8 +67,7 @@ namespace HexagonalSkeleton.API.Config
 
             if (string.IsNullOrEmpty(connectionString) || string.IsNullOrEmpty(databaseName))
             {
-                // For now, just log a warning since we're in transition
-                Console.WriteLine("Warning: MongoDB connection settings are not properly configured.");
+                // Use default values for missing configuration
                 connectionString ??= "mongodb://localhost:27017";
                 databaseName ??= "HexagonalSkeletonRead";
             }

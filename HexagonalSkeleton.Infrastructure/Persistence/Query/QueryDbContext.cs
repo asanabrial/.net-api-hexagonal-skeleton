@@ -136,7 +136,7 @@ namespace HexagonalSkeleton.Infrastructure.Persistence.Query
             catch (MongoCommandException ex) when (ex.CodeName == "IndexOptionsConflict")
             {
                 // Indexes already exist, this is expected during development
-                Console.WriteLine($"Some indexes already exist: {ex.Message}");
+                // Silently continue - no logging needed for this expected scenario
             }
         }
 

@@ -5,7 +5,6 @@ using HexagonalSkeleton.Infrastructure.Persistence.Command.Entities;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MediatR;
 
 namespace HexagonalSkeleton.Infrastructure.Adapters.Command
 {
@@ -19,18 +18,15 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Command
     {
         private readonly CommandDbContext _dbContext;
         private readonly IMapper _mapper;
-        private readonly IMediator _mediator;
         private readonly ILogger<UserCommandRepository> _logger;
 
         public UserCommandRepository(
             CommandDbContext dbContext, 
             IMapper mapper, 
-            IMediator mediator,
             ILogger<UserCommandRepository> logger)
         {
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -44,9 +40,6 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Command
                 _dbContext.Users.Add(userEntity);
                 
                 await _dbContext.SaveChangesAsync(cancellationToken);
-                
-                // Publish domain events after successful persistence
-                await PublishDomainEventsAsync(user, cancellationToken);
                 
                 _logger.LogInformation("User created successfully with ID: {UserId}", userEntity.Id);
                 return userEntity.Id;
@@ -76,9 +69,6 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Command
                 existingEntity.UpdateTimestamp();
 
                 await _dbContext.SaveChangesAsync(cancellationToken);
-                
-                // Publish domain events after successful persistence
-                await PublishDomainEventsAsync(user, cancellationToken);
                 
                 _logger.LogInformation("User updated successfully with ID: {UserId}", user.Id);
             }
@@ -159,17 +149,6 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Command
         public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             await _dbContext.SaveChangesAsync(cancellationToken);
-        }
-
-        private async Task PublishDomainEventsAsync(User user, CancellationToken cancellationToken)
-        {
-            var domainEvents = user.DomainEvents.ToList();
-            user.ClearDomainEvents();
-
-            foreach (var domainEvent in domainEvents)
-            {
-                await _mediator.Publish(domainEvent, cancellationToken);
-            }
         }
     }
 }
