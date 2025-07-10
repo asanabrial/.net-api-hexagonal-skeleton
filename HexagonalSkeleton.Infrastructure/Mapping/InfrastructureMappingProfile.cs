@@ -71,9 +71,6 @@ namespace HexagonalSkeleton.Infrastructure.Mapping
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email.Value))
                 .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
                 .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName))
-                // Also map to the legacy field names
-                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.FullName.FirstName))
-                .ForMember(dest => dest.Surname, opt => opt.MapFrom(src => src.FullName.LastName))
                 .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber.Value))
                 .ForMember(dest => dest.AboutMe, opt => opt.MapFrom(src => src.AboutMe))
                 .ForMember(dest => dest.ProfileImageName, opt => opt.MapFrom(src => src.ProfileImageName))

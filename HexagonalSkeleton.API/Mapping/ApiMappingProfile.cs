@@ -28,7 +28,6 @@ namespace HexagonalSkeleton.API.Mapping
                 .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.User.LastName))
                 .ForMember(dest => dest.Message, opt => opt.MapFrom(src => "User registered successfully"));
 
-            // Mapping for RegisterDto to LoginResponse (for backward compatibility with tests)
             // Maps authentication token and user information
             CreateMap<RegisterDto, LoginResponse>()
                 .ForMember(dest => dest.AccessToken, opt => opt.MapFrom(src => src.AccessToken))

@@ -59,36 +59,5 @@ namespace HexagonalSkeleton.API.Controllers.Features
             var result = await _mediator.Send(command);
             return Ok(_mapper.Map<UserResponse>(result));
         }
-
-        /// <summary>
-        /// Change user password
-        /// Business operation: Password Change
-        /// </summary>
-        /// <param name="currentPassword">Current password</param>
-        /// <param name="newPassword">New password</param>
-        /// <returns>Success confirmation</returns>
-        [HttpPatch("password")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public IActionResult ChangePassword([FromQuery] string currentPassword, [FromQuery] string newPassword)
-        {
-            // Implementation would use a specific command for password changes
-            // This is a placeholder for the business intention
-            return Ok(new { message = "Password changed successfully" });
-        }
-
-        /// <summary>
-        /// Deactivate current user's account (soft delete)
-        /// Business operation: Account Deactivation
-        /// </summary>
-        /// <returns>Deactivation confirmation</returns>
-        [HttpDelete]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult DeactivateMyAccount()
-        {
-            // Implementation would use soft delete command for current user
-            // This is a placeholder for the business intention
-            return Ok(new { message = "Account deactivated successfully" });
-        }
     }
 }

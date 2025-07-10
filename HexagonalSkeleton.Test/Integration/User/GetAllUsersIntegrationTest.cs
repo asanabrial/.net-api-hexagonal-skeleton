@@ -43,7 +43,7 @@ namespace HexagonalSkeleton.Test.Integration.User
             // Create user and get token
             var userJson = JsonSerializer.Serialize(testUserRequest);
             var userContent = new StringContent(userJson, Encoding.UTF8, "application/json");
-            var userResponse = await _client.PostAsync("/api/user", userContent);
+            var userResponse = await _client.PostAsync("/api/registration", userContent);
             
             var userResponseContent = await userResponse.Content.ReadAsStringAsync();
             var loginResponse = JsonSerializer.Deserialize<LoginResponse>(userResponseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -52,7 +52,7 @@ namespace HexagonalSkeleton.Test.Integration.User
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse!.AccessToken);
 
             // Act - Get all users
-            var getAllResponse = await _client.GetAsync("/api/user");
+            var getAllResponse = await _client.GetAsync("/api/users");
 
             // Assert
             getAllResponse.EnsureSuccessStatusCode();

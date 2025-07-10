@@ -44,7 +44,7 @@ namespace HexagonalSkeleton.Test.Integration
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             // Act
-            var response = await _client.PostAsync("/api/user", content);
+            var response = await _client.PostAsync("/api/registration", content);
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -132,11 +132,11 @@ namespace HexagonalSkeleton.Test.Integration
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             });
             var content = new StringContent(json, Encoding.UTF8, "application/json");            // Act - Create user first time (should succeed)
-            var firstResponse = await testClient.PostAsync("/api/user", content);
+            var firstResponse = await testClient.PostAsync("/api/registration", content);
             firstResponse.EnsureSuccessStatusCode();
 
             // Act - Try to create user with same email (should fail)
-            var secondResponse = await testClient.PostAsync("/api/user", content);
+            var secondResponse = await testClient.PostAsync("/api/registration", content);
 
             // Assert
             Assert.Equal(System.Net.HttpStatusCode.Conflict, secondResponse.StatusCode);

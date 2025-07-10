@@ -14,14 +14,4 @@ namespace HexagonalSkeleton.API.Models
         public string LastName { get; set; } = string.Empty;
         public string Message { get; set; } = "User registered successfully";
     }
-
-    /// <summary>
-    /// Response model for user uniqueness checks
-    /// </summary>
-    public class UserAvailabilityResponse
-    {
-        public bool IsAvailable { get; set; }
-        public string PropertyName { get; set; } = string.Empty;
-        public string Value { get; set; } = string.Empty;
-    }
 }

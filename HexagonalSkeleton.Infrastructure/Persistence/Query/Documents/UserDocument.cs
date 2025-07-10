@@ -18,20 +18,13 @@ namespace HexagonalSkeleton.Infrastructure.Persistence.Query.Documents
         [BsonRequired]
         public string Email { get; set; } = null!;
         
-        // For backward compatibility - Both naming formats
         [BsonElement("firstName")]
         [BsonRequired]
         public string FirstName { get; set; } = null!;
         
-        [BsonElement("name")] // Legacy property name
-        public string Name { get; set; } = null!;
-        
         [BsonElement("lastName")]
         [BsonRequired]
         public string LastName { get; set; } = null!;
-        
-        [BsonElement("surname")] // Legacy property name
-        public string Surname { get; set; } = null!;
         
         [BsonElement("phoneNumber")]
         public string PhoneNumber { get; set; } = null!;
@@ -75,9 +68,8 @@ namespace HexagonalSkeleton.Infrastructure.Persistence.Query.Documents
         public string FullName { get; set; } = null!; // Denormalized for text search
         
         [BsonElement("tags")]
-        public List<string> Tags { get; set; } = new(); // For easier filtering
+        public List<string> Tags { get; set; } = new();
         
-        // Additional properties for backward compatibility
         [BsonElement("isActive")]
         public bool IsActive { get; set; }
         

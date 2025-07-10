@@ -43,35 +43,5 @@ namespace HexagonalSkeleton.API.Controllers.Features
             var result = await _mediator.Send(command);
             return Ok(_mapper.Map<LoginResponse>(result));
         }
-
-        /// <summary>
-        /// Refresh an existing authentication token
-        /// Business operation: Token Renewal
-        /// </summary>
-        /// <param name="refreshToken">Refresh token</param>
-        /// <returns>New authentication tokens</returns>
-        [HttpPost("refresh")]
-        [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public IActionResult RefreshToken([FromBody] string refreshToken)
-        {
-            // Implementation would depend on your refresh token strategy
-            // This is a placeholder for the business intention
-            throw new NotImplementedException("Refresh token functionality not implemented yet");
-        }
-
-        /// <summary>
-        /// Logout user and invalidate session
-        /// Business operation: User Logout
-        /// </summary>
-        /// <returns>Logout confirmation</returns>
-        [HttpPost("logout")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult Logout()
-        {
-            // Implementation would depend on your logout strategy
-            // This is a placeholder for the business intention
-            return Ok(new { message = "Logged out successfully" });
-        }
     }
 }

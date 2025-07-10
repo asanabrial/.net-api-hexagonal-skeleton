@@ -16,7 +16,6 @@ namespace HexagonalSkeleton.API.Controllers.Features
     /// </summary>
     [ApiController]
     [Route("api/registration")]
-    [Route("api/user")] // Backward compatibility route
     [Produces("application/json")]
     public class UserRegistrationController : ControllerBase
     {
@@ -33,7 +32,6 @@ namespace HexagonalSkeleton.API.Controllers.Features
         /// Register a new user with immediate authentication (default endpoint)
         /// Core business operation: User Registration + Authentication
         /// Returns authentication token for immediate use
-        /// This is the default POST behavior for /api/user route for backward compatibility
         /// </summary>
         /// <param name="request">User registration data</param>
         /// <returns>Created user information with authentication token</returns>
@@ -46,50 +44,9 @@ namespace HexagonalSkeleton.API.Controllers.Features
             var command = _mapper.Map<RegisterUserCommand>(request);
             var result = await _mediator.Send(command);
             
-            // Map from RegisterDto to LoginResponse for backward compatibility with tests
             var response = _mapper.Map<LoginResponse>(result);
             
             return Created($"/api/users/{result.User.Id}", response);
-        }
-
-        /// <summary>
-        /// Check if a user with the given email already exists
-        /// Business operation: User Uniqueness Validation
-        /// </summary>
-        /// <param name="email">Email to check</param>
-        /// <returns>Availability status</returns>
-        [HttpGet("check-email-availability")]
-        [ProducesResponseType(typeof(UserAvailabilityResponse), StatusCodes.Status200OK)]
-        public IActionResult CheckEmailAvailability([FromQuery] string email)
-        {
-            // Implementation would use a specific query for email checking
-            // This is a placeholder for the business intention
-            return Ok(new UserAvailabilityResponse 
-            { 
-                IsAvailable = true, 
-                PropertyName = "email", 
-                Value = email 
-            });
-        }
-
-        /// <summary>
-        /// Check if a username is available
-        /// Business operation: Username Uniqueness Validation
-        /// </summary>
-        /// <param name="username">Username to check</param>
-        /// <returns>Availability status</returns>
-        [HttpGet("check-username-availability")]
-        [ProducesResponseType(typeof(UserAvailabilityResponse), StatusCodes.Status200OK)]
-        public IActionResult CheckUsernameAvailability([FromQuery] string username)
-        {
-            // Implementation would use a specific query for username checking
-            // This is a placeholder for the business intention
-            return Ok(new UserAvailabilityResponse 
-            { 
-                IsAvailable = true, 
-                PropertyName = "username", 
-                Value = username 
-            });
         }
     }
 }
