@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using FluentValidation;
+﻿using FluentValidation;
 using HexagonalSkeleton.Application.IntegrationEvents;
 using HexagonalSkeleton.Application.Features.UserRegistration.Dto;
 using HexagonalSkeleton.Application.Features.UserAuthentication.Dto;
@@ -14,8 +13,7 @@ namespace HexagonalSkeleton.Application.Features.UserRegistration.Commands
         IIntegrationEventService integrationEventService,
         IUserWriteRepository userWriteRepository,
         IUserReadRepository userReadRepository,
-        IAuthenticationService authenticationService,
-        IMapper mapper)
+        IAuthenticationService authenticationService)
         : IRequestHandler<RegisterUserCommand, RegisterDto>
     {        public async Task<RegisterDto> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
@@ -46,20 +44,19 @@ namespace HexagonalSkeleton.Application.Features.UserRegistration.Commands
                 request.AboutMe);
 
             // 4. Persist and complete workflow
-            var userId = await userWriteRepository.CreateAsync(user, cancellationToken);            // Get the complete user data with generated values (ID, timestamps, etc.)
-            var createdUser = await userReadRepository.GetByIdAsync(userId, cancellationToken);
-            if (createdUser == null)
-                throw new InvalidOperationException("Failed to retrieve created user");            // Generate JWT token with expiration info
+            var userId = await userWriteRepository.CreateAsync(user, cancellationToken);
+            
+            // Generate JWT token with expiration info
             var tokenInfo = await authenticationService.GenerateJwtTokenAsync(userId, cancellationToken);
             
             // Publish simple integration event for CQRS synchronization
             var integrationEvent = new UserCreatedIntegrationEvent(
                 userId,
-                createdUser.Email.Value,
-                createdUser.FullName.FirstName,
-                createdUser.FullName.LastName,
-                createdUser.PhoneNumber.Value,
-                createdUser.CreatedAt
+                user.Email.Value,
+                user.FullName.FirstName,
+                user.FullName.LastName,
+                user.PhoneNumber.Value,
+                user.CreatedAt
             );
             
             await integrationEventService.PublishAsync(integrationEvent, cancellationToken);
@@ -68,8 +65,23 @@ namespace HexagonalSkeleton.Application.Features.UserRegistration.Commands
             var loginEvent = new UserLoggedInIntegrationEvent(userId, DateTime.UtcNow);
             await integrationEventService.PublishAsync(loginEvent, cancellationToken);
               
-            // Map user data to DTO and create authentication response
-            var userDto = mapper.Map<RegisterUserInfoDto>(createdUser);
+            // Map user data to DTO using the correct userId from the repository
+            var userDto = new RegisterUserInfoDto
+            {
+                Id = userId, // Use the ID returned by the repository
+                FirstName = user.FullName.FirstName,
+                LastName = user.FullName.LastName,
+                FullName = user.FullName.GetFullName(),
+                Email = user.Email.Value,
+                PhoneNumber = user.PhoneNumber.Value,
+                Birthdate = user.Birthdate,
+                Latitude = user.Location.Latitude,
+                Longitude = user.Location.Longitude,
+                AboutMe = user.AboutMe,
+                ProfileImageName = user.ProfileImageName,
+                LastLogin = user.LastLogin,
+                CreatedAt = user.CreatedAt
+            };
             return new RegisterDto
             {
                 AccessToken = tokenInfo.Token,

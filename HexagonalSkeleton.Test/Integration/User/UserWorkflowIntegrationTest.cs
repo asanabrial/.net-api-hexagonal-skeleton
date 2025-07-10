@@ -35,8 +35,7 @@ public class UserWorkflowIntegrationTest
             mockIntegrationEventService.Object,
             mockUserWriteRepository.Object,
             mockUserReadRepository.Object,
-            mockAuthenticationService.Object,
-            mockMapper.Object);        var getUserValidator = new Mock<IValidator<GetUserQuery>>();
+            mockAuthenticationService.Object);        var getUserValidator = new Mock<IValidator<GetUserQuery>>();
         var getUserHandler = new GetUserQueryHandler(
             getUserValidator.Object,
             mockUserReadRepository.Object,
@@ -74,7 +73,9 @@ public class UserWorkflowIntegrationTest
             .ReturnsAsync(userId);        
               mockAuthenticationService
             .Setup(a => a.GenerateJwtTokenAsync(userId, cancellationToken))
-            .ReturnsAsync(new TokenInfo(jwtToken, DateTime.UtcNow.AddDays(7)));        // Setup AutoMapper mock to return a properly mapped result with nested structure
+            .ReturnsAsync(new TokenInfo(jwtToken, DateTime.UtcNow.AddDays(7)));
+
+        // Setup AutoMapper mock to return a properly mapped result with nested structure
         mockMapper
             .Setup(m => m.Map<AuthenticatedUserDto>(It.IsAny<HexagonalSkeleton.Domain.User>()))
             .Returns((HexagonalSkeleton.Domain.User user) => new AuthenticatedUserDto
@@ -92,13 +93,7 @@ public class UserWorkflowIntegrationTest
                 CreatedAt = user.CreatedAt
             });
 
-        // Setup AutoMapper mock for RegisterUserInfoDto
-        mockMapper
-            .Setup(m => m.Map<RegisterUserInfoDto>(It.IsAny<HexagonalSkeleton.Domain.User>()))
-            .Returns((HexagonalSkeleton.Domain.User user) => new RegisterUserInfoDto
-            {
-                Id = user.Id,
-                FirstName = user.FullName.FirstName,
+        // Act - Register user first
                 LastName = user.FullName.LastName,
                 FullName = user.FullName.GetFullName(),
                 Email = user.Email.Value,
@@ -165,7 +160,7 @@ public class UserWorkflowIntegrationTest
         Assert.Equal(command.LastName, getUserResult.LastName);        // Verify all repository interactions
         mockUserReadRepository.Verify(r => r.ExistsByEmailAsync(command.Email, cancellationToken), Times.Once);
         mockUserReadRepository.Verify(r => r.ExistsByPhoneNumberAsync(command.PhoneNumber, cancellationToken), Times.Once);
-        mockUserReadRepository.Verify(r => r.GetByIdAsync(userId, cancellationToken), Times.AtLeast(2)); // Called by both registration and retrieval
+        mockUserReadRepository.Verify(r => r.GetByIdAsync(userId, cancellationToken), Times.Once); // Called only by GetUserQueryHandler
     }
 
     [Fact]

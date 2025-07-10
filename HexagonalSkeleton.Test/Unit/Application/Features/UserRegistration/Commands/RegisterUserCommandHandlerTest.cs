@@ -19,7 +19,6 @@ public class RegisterUserCommandHandlerTest
     private readonly Mock<IUserWriteRepository> _mockUserWriteRepository;
     private readonly Mock<IUserReadRepository> _mockUserReadRepository;
     private readonly Mock<IAuthenticationService> _mockAuthenticationService;
-    private readonly Mock<IMapper> _mockMapper;
     private readonly RegisterUserCommandHandler _handler;    public RegisterUserCommandHandlerTest()
     {
         _mockValidator = new Mock<IValidator<RegisterUserCommand>>();
@@ -27,15 +26,13 @@ public class RegisterUserCommandHandlerTest
         _mockUserWriteRepository = new Mock<IUserWriteRepository>();
         _mockUserReadRepository = new Mock<IUserReadRepository>();
         _mockAuthenticationService = new Mock<IAuthenticationService>();
-        _mockMapper = new Mock<IMapper>();
 
         _handler = new RegisterUserCommandHandler(
             _mockValidator.Object,
             _mockIntegrationEventService.Object,
             _mockUserWriteRepository.Object,
             _mockUserReadRepository.Object,
-            _mockAuthenticationService.Object,
-            _mockMapper.Object);
+            _mockAuthenticationService.Object);
     }
 
     [Fact]
@@ -70,31 +67,10 @@ public class RegisterUserCommandHandlerTest
             .Returns(hash);        _mockUserWriteRepository
             .Setup(r => r.CreateAsync(It.IsAny<User>(), cancellationToken))
             .ReturnsAsync(userId);
-
-        // Mock the GetByIdAsync to return the created user
-        var createdUser = TestHelper.CreateTestUser(userId);        _mockUserReadRepository
-            .Setup(r => r.GetByIdAsync(userId, cancellationToken))
-            .ReturnsAsync(createdUser);        
-          _mockAuthenticationService
+        
+        _mockAuthenticationService
             .Setup(a => a.GenerateJwtTokenAsync(userId, cancellationToken))
             .ReturnsAsync(new TokenInfo(jwtToken, DateTime.UtcNow.AddDays(7)));
-
-        // Setup AutoMapper mock to return a properly mapped result with nested structure
-        _mockMapper
-            .Setup(m => m.Map<AuthenticatedUserDto>(It.IsAny<User>()))
-            .Returns((User user) => new AuthenticatedUserDto
-            {
-                Id = user.Id,
-                FirstName = user.FullName.FirstName,
-                LastName = user.FullName.LastName,
-                Email = user.Email.Value,
-                PhoneNumber = user.PhoneNumber?.Value,
-                Birthdate = user.Birthdate,
-                Latitude = user.Location?.Latitude,
-                Longitude = user.Location?.Longitude,
-                AboutMe = user.AboutMe,
-                CreatedAt = user.CreatedAt
-            });
 
         // Act
         var result = await _handler.Handle(command, cancellationToken);
