@@ -52,34 +52,20 @@ namespace HexagonalSkeleton.Application.Features.UserRegistration.Commands
                 throw new InvalidOperationException("Failed to retrieve created user");            // Generate JWT token with expiration info
             var tokenInfo = await authenticationService.GenerateJwtTokenAsync(userId, cancellationToken);
             
-            // Publish integration event for CQRS synchronization
+            // Publish simple integration event for CQRS synchronization
             var integrationEvent = new UserCreatedIntegrationEvent(
                 userId,
                 createdUser.Email.Value,
-                createdUser.FullName.GetFullName(),
                 createdUser.FullName.FirstName,
                 createdUser.FullName.LastName,
                 createdUser.PhoneNumber.Value,
-                createdUser.Birthdate,
-                createdUser.AboutMe,
-                string.Empty, // Country - would need to be added to user model
-                string.Empty, // State - would need to be added to user model  
-                string.Empty, // City - would need to be added to user model
-                string.Empty, // FullAddress - would need to be added to user model
-                createdUser.CreatedAt,
-                new[] { createdUser.Email.Value, createdUser.FullName.FirstName, createdUser.FullName.LastName }, // Search terms
-                createdUser.Birthdate?.Year != null ? DateTime.Now.Year - createdUser.Birthdate.Value.Year : null // Age
+                createdUser.CreatedAt
             );
             
             await integrationEventService.PublishAsync(integrationEvent, cancellationToken);
             
             // Also publish login event for activity tracking
-            var loginEvent = new UserLoggedInIntegrationEvent(
-                userId,
-                createdUser.Email.Value,
-                DateTime.UtcNow
-            );
-            
+            var loginEvent = new UserLoggedInIntegrationEvent(userId, DateTime.UtcNow);
             await integrationEventService.PublishAsync(loginEvent, cancellationToken);
               
             // Map user data to DTO and create authentication response

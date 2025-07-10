@@ -41,34 +41,8 @@ builder.Services.AddCqrsDatabases(builder.Configuration);
 // CQRS services configuration
 builder.Services.AddCqrsServices();
 
-// Add CQRS sync handlers only if query database is enabled
-var queryConnectionString = builder.Configuration.GetConnectionString("DefaultQueryConnection");
-if (!string.IsNullOrEmpty(queryConnectionString))
-{
-    builder.Services.AddCqrsSyncHandlers();
-}
-
-// Configure MassTransit with RabbitMQ
-builder.Services.AddMassTransit(x =>
-{
-    // Add consumers from Infrastructure assembly
-    x.AddConsumersFromNamespaceContaining<HexagonalSkeleton.Infrastructure.Consumers.UserCreatedConsumer>();
-    
-    x.UsingRabbitMq((context, cfg) =>
-    {
-        cfg.Host("localhost", "hexagonal_vhost", h =>
-        {
-            h.Username("hexagonal_user");
-            h.Password("hexagonal_password");
-        });
-        
-        cfg.ConfigureEndpoints(context);
-    });
-});
-
-// Register Integration Event Service
-builder.Services.AddScoped<HexagonalSkeleton.Application.Services.IIntegrationEventService, 
-    HexagonalSkeleton.Application.Services.MassTransitIntegrationEventService>();
+// Simple MassTransit configuration
+builder.Services.AddMassTransitWithRabbitMQ(builder.Configuration);
 
 builder.Services.AddRouting(opt =>
 {

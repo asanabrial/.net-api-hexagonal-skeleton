@@ -38,18 +38,18 @@ namespace HexagonalSkeleton.Application.Services
             try
             {
                 _logger.LogInformation("Publishing integration event {EventType} with ID {EventId} via MassTransit", 
-                    integrationEvent.EventType, integrationEvent.Id);
+                    integrationEvent.EventType, integrationEvent.EventId);
 
                 // MassTransit handles serialization, routing, retries, and error handling
                 await _publishEndpoint.Publish(integrationEvent, cancellationToken);
 
                 _logger.LogInformation("Successfully published integration event {EventType} with ID {EventId}", 
-                    integrationEvent.EventType, integrationEvent.Id);
+                    integrationEvent.EventType, integrationEvent.EventId);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to publish integration event {EventType} with ID {EventId}", 
-                    integrationEvent.EventType, integrationEvent.Id);
+                    integrationEvent.EventType, integrationEvent.EventId);
                 throw;
             }
         }

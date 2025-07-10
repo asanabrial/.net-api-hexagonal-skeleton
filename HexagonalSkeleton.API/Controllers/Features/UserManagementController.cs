@@ -17,6 +17,7 @@ namespace HexagonalSkeleton.API.Controllers.Features
     /// </summary>
     [ApiController]
     [Route("api/users")]
+    [Route("api/user")] // Backward compatibility route
     [Produces("application/json")]
     [Authorize]
     public class UserManagementController : ControllerBase

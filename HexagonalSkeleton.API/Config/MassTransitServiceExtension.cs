@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 namespace HexagonalSkeleton.API.Config
 {
     /// <summary>
-    /// Extension methods for configuring MassTransit with RabbitMQ
+    /// Simple MassTransit configuration with RabbitMQ
     /// </summary>
     public static class MassTransitServiceExtension
     {
@@ -15,11 +15,9 @@ namespace HexagonalSkeleton.API.Config
         {
             services.AddMassTransit(x =>
             {
-                // Register all consumers
+                // Register only essential consumers
                 x.AddConsumer<UserCreatedConsumer>();
-                x.AddConsumer<UserProfileUpdatedConsumer>();
                 x.AddConsumer<UserLoggedInConsumer>();
-                x.AddConsumer<UserDeletedConsumer>();
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
@@ -31,15 +29,13 @@ namespace HexagonalSkeleton.API.Config
                         h.Password("hexagonal_password");
                     });
 
-                    // Configure retry policy
+                    // Simple retry policy
                     cfg.UseMessageRetry(r => r.Intervals(
-                        TimeSpan.FromSeconds(1),
-                        TimeSpan.FromSeconds(5),
-                        TimeSpan.FromSeconds(15),
-                        TimeSpan.FromMinutes(1)
+                        TimeSpan.FromSeconds(2),
+                        TimeSpan.FromSeconds(10),
+                        TimeSpan.FromSeconds(30)
                     ));
 
-                    // Configure endpoints for consumers
                     cfg.ConfigureEndpoints(context);
                 });
             });

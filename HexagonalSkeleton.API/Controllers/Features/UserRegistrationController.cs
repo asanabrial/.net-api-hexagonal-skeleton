@@ -16,6 +16,7 @@ namespace HexagonalSkeleton.API.Controllers.Features
     /// </summary>
     [ApiController]
     [Route("api/registration")]
+    [Route("api/user")] // Backward compatibility route
     [Produces("application/json")]
     public class UserRegistrationController : ControllerBase
     {
