@@ -28,11 +28,10 @@ namespace HexagonalSkeleton.Test
                 typeof(HexagonalSkeleton.Infrastructure.Mapping.InfrastructureMappingProfile)
             );
 
-            // Configure MediatR
+            // Configure MediatR (only for Commands/Queries, not for domain events)
             services.AddMediatR(cfg => {
                 cfg.RegisterServicesFromAssembly(typeof(HexagonalSkeleton.API.Config.ApplicationServiceExtension).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(HexagonalSkeleton.Application.Features.UserRegistration.Commands.RegisterUserCommand).Assembly);
-                cfg.RegisterServicesFromAssembly(typeof(HexagonalSkeleton.Infrastructure.EventHandlers.UserCreatedEventHandler).Assembly);
             });
 
             // Configure CQRS databases

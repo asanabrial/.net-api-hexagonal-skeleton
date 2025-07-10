@@ -1,5 +1,4 @@
 using FluentValidation;
-using HexagonalSkeleton.Application.Events;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
 using MediatR;
@@ -80,12 +79,10 @@ namespace HexagonalSkeleton.Application.Features.UserAuthentication.Commands
 
             // Record login using the dedicated method - this will raise UserLoggedInEvent (domain event)
             await _userWriteRepository.SetLastLoginAsync(user.Id, cancellationToken);
-            // Note: UserLoggedInEvent is automatically published by the repository after save            // Generate token with expiration info
+            // Note: UserLoggedInEvent is automatically published by the repository after save            
+            
+            // Generate token with expiration info
             var tokenInfo = await _authenticationService.GenerateJwtTokenAsync(user.Id, cancellationToken);
-
-            // Publish application event for immediate coordination (e.g., update session, cache)
-            // This is separate from the domain event and handles application-level concerns
-            await _publisher.Publish(new LoginEvent(user.Id), cancellationToken);
             
             // Map user data to DTO and create authentication response
             var userDto = _mapper.Map<AuthenticatedUserDto>(user);

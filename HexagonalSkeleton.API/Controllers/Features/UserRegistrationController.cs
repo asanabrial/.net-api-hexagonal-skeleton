@@ -1,5 +1,6 @@
 using HexagonalSkeleton.API.Models;
 using HexagonalSkeleton.API.Models.Users;
+using HexagonalSkeleton.API.Models.Auth;
 using HexagonalSkeleton.Application.Services.Features;
 using AutoMapper;
 using MediatR;
@@ -28,14 +29,15 @@ namespace HexagonalSkeleton.API.Controllers.Features
         }
 
         /// <summary>
-        /// Register a new user in the system (simple registration)
-        /// Core business operation: User Registration
-        /// Returns basic confirmation without authentication token
+        /// Register a new user with immediate authentication (default endpoint)
+        /// Core business operation: User Registration + Authentication
+        /// Returns authentication token for immediate use
+        /// This is the default POST behavior for /api/user route for backward compatibility
         /// </summary>
         /// <param name="request">User registration data</param>
-        /// <returns>Created user information</returns>
+        /// <returns>Created user information with authentication token</returns>
         [HttpPost]
-        [ProducesResponseType(typeof(UserRegistrationResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> RegisterUser(CreateUserRequest request)
@@ -43,9 +45,8 @@ namespace HexagonalSkeleton.API.Controllers.Features
             var command = _mapper.Map<RegisterUserCommand>(request);
             var result = await _mediator.Send(command);
             
-            // Map from RegisterDto to UserRegistrationResponse using AutoMapper
-            // Extract only the essential user info, ignoring the authentication token
-            var response = _mapper.Map<UserRegistrationResponse>(result);
+            // Map from RegisterDto to LoginResponse for backward compatibility with tests
+            var response = _mapper.Map<LoginResponse>(result);
             
             return Created($"/api/users/{result.User.Id}", response);
         }

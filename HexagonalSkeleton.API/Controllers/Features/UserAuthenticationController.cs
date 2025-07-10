@@ -45,26 +45,6 @@ namespace HexagonalSkeleton.API.Controllers.Features
         }
 
         /// <summary>
-        /// Register a new user with immediate authentication
-        /// Business operation: Authenticated Registration
-        /// Returns JWT token for immediate use after registration
-        /// </summary>
-        /// <param name="request">User registration data</param>
-        /// <returns>Created user information with authentication token</returns>
-        [HttpPost("register")]
-        [ProducesResponseType(typeof(AuthenticatedRegistrationResponse), StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<IActionResult> RegisterWithAuthentication(CreateUserRequest request)
-        {
-            var command = _mapper.Map<RegisterUserCommand>(request);
-            var result = await _mediator.Send(command);
-            
-            var response = _mapper.Map<AuthenticatedRegistrationResponse>(result);
-            return Created($"/api/users/{result.User.Id}", response);
-        }
-
-        /// <summary>
         /// Refresh an existing authentication token
         /// Business operation: Token Renewal
         /// </summary>

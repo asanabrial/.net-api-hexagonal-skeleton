@@ -41,6 +41,13 @@ builder.Services.AddCqrsDatabases(builder.Configuration);
 // CQRS services configuration
 builder.Services.AddCqrsServices();
 
+// Add CQRS sync handlers only if query database is enabled
+var queryConnectionString = builder.Configuration.GetConnectionString("DefaultQueryConnection");
+if (!string.IsNullOrEmpty(queryConnectionString))
+{
+    builder.Services.AddCqrsSyncHandlers();
+}
+
 // Configure MassTransit with RabbitMQ
 builder.Services.AddMassTransit(x =>
 {

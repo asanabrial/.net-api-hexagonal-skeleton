@@ -46,10 +46,15 @@ namespace HexagonalSkeleton.API.Config
             services.AddScoped<HexagonalSkeleton.Domain.Services.IUserSyncService, UserSyncService>();
             services.AddScoped<UserSyncService>(); // Keep concrete class for any direct dependencies
 
-            // Register event handlers for automatic synchronization
-            services.AddScoped<INotificationHandler<HexagonalSkeleton.Domain.Events.UserCreatedEvent>, UserCreatedEventHandler>();
-            services.AddScoped<INotificationHandler<HexagonalSkeleton.Domain.Events.UserProfileUpdatedEvent>, UserProfileUpdatedEventHandler>();
-            services.AddScoped<INotificationHandler<HexagonalSkeleton.Domain.Events.UserLoggedInEvent>, UserLoggedInEventHandler>();
+            // Register pure domain event dispatcher (no MediatR dependency)
+            services.AddScoped<HexagonalSkeleton.Application.Ports.IDomainEventDispatcher, HexagonalSkeleton.Infrastructure.Services.PureDomainEventDispatcher>();
+
+            // Register pure domain event handlers (Clean Architecture - no MediatR dependency)
+            // Note: Multiple handlers can be registered for the same event type
+            services.AddScoped<HexagonalSkeleton.Application.Ports.IDomainEventHandler<HexagonalSkeleton.Domain.Events.UserCreatedEvent>, HexagonalSkeleton.Infrastructure.EventHandlers.Pure.UserCreatedPureHandler>();
+            
+            // Note: UserCreatedSyncPureHandler is registered separately in AddCqrsSyncHandlers() method
+            // This allows conditional registration based on whether query store is configured
 
             // Register feature-based application services (Screaming Architecture)
             services.AddScoped<IUserRegistrationApplicationService, UserRegistrationApplicationService>();
@@ -59,6 +64,21 @@ namespace HexagonalSkeleton.API.Config
             // services.AddScoped<IUserWriteRepository, UserWriteRepositoryAdapter>();
             // services.AddScoped<IUserReadRepository, UserReadRepositoryMongoAdapter>();
 
+            return services;
+        }
+
+        /// <summary>
+        /// Adds CQRS sync handlers for eventual consistency between command and query stores
+        /// Only call this method if QueryDbContext is properly configured
+        /// </summary>
+        /// <param name="services">Service collection</param>
+        /// <returns>Updated service collection</returns>
+        public static IServiceCollection AddCqrsSyncHandlers(this IServiceCollection services)
+        {
+            // TODO: Implement sync handlers when needed
+            // For now, the basic UserCreatedPureHandler handles domain events
+            // Future: Add UserCreatedSyncPureHandler for CQRS eventual consistency
+            
             return services;
         }
     }

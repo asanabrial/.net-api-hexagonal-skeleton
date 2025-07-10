@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using HexagonalSkeleton.Application.Features.UserManagement.Queries;
 using HexagonalSkeleton.Application.Features.UserManagement.Commands;
-using HexagonalSkeleton.Application.Features.SocialNetwork.Queries;
 
 namespace HexagonalSkeleton.API.Controllers.Features
 {
@@ -68,37 +67,6 @@ namespace HexagonalSkeleton.API.Controllers.Features
         public async Task<IActionResult> GetAll([FromQuery] GetAllUsersRequest request)
         {
             var query = _mapper.Map<GetAllUsersQuery>(request);
-            var result = await _mediator.Send(query);
-            return Ok(_mapper.Map<PagedResponse<UserResponse>>(result));
-        }
-
-        /// <summary>
-        /// Find nearby adult users with complete profiles
-        /// Business operation: Location-based User Discovery
-        /// Demonstrates advanced filtering using Specification pattern
-        /// </summary>
-        /// <param name="latitude">Center latitude for search</param>
-        /// <param name="longitude">Center longitude for search</param>
-        /// <param name="radiusInKm">Search radius in kilometers (default: 50)</param>
-        /// <param name="pageNumber">Page number (default: 1)</param>
-        /// <param name="pageSize">Page size (default: 10)</param>
-        /// <returns>Paginated list of nearby adult users with complete profiles</returns>
-        [HttpGet("nearby-adults")]
-        [ProducesResponseType(typeof(PagedResponse<UserResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetNearbyAdultUsers(
-            [FromQuery] double latitude,
-            [FromQuery] double longitude,
-            [FromQuery] double radiusInKm = 50,
-            [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 10)
-        {
-            var query = new FindNearbyAdultUsersQuery(latitude, longitude, radiusInKm)
-            {
-                PageNumber = pageNumber,
-                PageSize = pageSize
-            };
-            
             var result = await _mediator.Send(query);
             return Ok(_mapper.Map<PagedResponse<UserResponse>>(result));
         }
