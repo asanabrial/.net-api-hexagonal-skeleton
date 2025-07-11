@@ -6,7 +6,7 @@ namespace HexagonalSkeleton.API.Models.Auth
 {    /// <summary>
      /// Response model for successful user authentication with registration
      /// </summary>
-    [AutoMap(typeof(RegisterDto), ReverseMap = true)]
+    [AutoMap(typeof(RegisterUserDto), ReverseMap = true)]
     public class UserAuthenticationResponse
     {
         /// <summary>

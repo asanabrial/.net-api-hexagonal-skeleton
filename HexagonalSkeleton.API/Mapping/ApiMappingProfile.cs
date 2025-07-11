@@ -21,7 +21,7 @@ namespace HexagonalSkeleton.API.Mapping
 
             // Mapping for RegisterDto to UserRegistrationResponse
             // Maps only the user information, ignoring authentication token
-            CreateMap<RegisterDto, UserRegistrationResponse>()
+            CreateMap<RegisterUserDto, UserRegistrationResponse>()
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.User.Id))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email))
                 .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.User.FirstName))
@@ -29,7 +29,7 @@ namespace HexagonalSkeleton.API.Mapping
                 .ForMember(dest => dest.Message, opt => opt.MapFrom(src => "User registered successfully"));
 
             // Maps authentication token and user information
-            CreateMap<RegisterDto, LoginResponse>()
+            CreateMap<RegisterUserDto, LoginResponse>()
                 .ForMember(dest => dest.AccessToken, opt => opt.MapFrom(src => src.AccessToken))
                 .ForMember(dest => dest.TokenType, opt => opt.MapFrom(src => src.TokenType))
                 .ForMember(dest => dest.ExpiresIn, opt => opt.MapFrom(src => src.ExpiresIn))

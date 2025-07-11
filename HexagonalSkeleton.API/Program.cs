@@ -1,12 +1,6 @@
-using System.Reflection;
-using FluentValidation;
 using HexagonalSkeleton.API.Config;
 using HexagonalSkeleton.API.Handler;
-using HexagonalSkeleton.API.Handler.ExceptionMapping;
-using HexagonalSkeleton.Application.Features.UserRegistration.Commands;
-using MediatR;
 using Serilog;
-using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 

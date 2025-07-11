@@ -10,6 +10,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Unit\Application\Features\SocialNetwork\**" />
+    <Compile Remove="Unit\Application\Features\UserAuthentication\**" />
+    <EmbeddedResource Remove="Unit\Application\Features\SocialNetwork\**" />
+    <EmbeddedResource Remove="Unit\Application\Features\UserAuthentication\**" />
+    <None Remove="Unit\Application\Features\SocialNetwork\**" />
+    <None Remove="Unit\Application\Features\UserAuthentication\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoFixture" Version="4.18.1" />
     <PackageReference Include="AutoFixture.Xunit2" Version="4.18.1" />
     <PackageReference Include="coverlet.collector" Version="6.0.4">
@@ -42,10 +51,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HexagonalSkeleton.API\HexagonalSkeleton.API.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Unit\Application\Features\SocialNetwork\Queries\" />
-    <Folder Include="Unit\Application\Features\UserAuthentication\Commands\" />
   </ItemGroup>
 
 </Project>

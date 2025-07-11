@@ -203,93 +203,6 @@ namespace HexagonalSkeleton.Infrastructure.Mapping
         }
 
         /// <summary>
-        /// Calculate age from birthdate
-        /// </summary>
-        private static int CalculateAge(DateTime birthdate)
-        {
-            var today = DateTime.Today;
-            var age = today.Year - birthdate.Year;
-            if (birthdate.Date > today.AddYears(-age)) age--;
-            return age;
-        }
-
-        /// <summary>
-        /// Create search terms array for full-text search optimization
-        /// </summary>
-        private static string[] CreateSearchTerms(string? firstName, string? lastName, string? email, string? phoneNumber)
-        {
-            var terms = new List<string>();
-
-            if (!string.IsNullOrWhiteSpace(firstName))
-            {
-                terms.Add(firstName.ToLowerInvariant());
-                // Add partial matches
-                if (firstName.Length > 2)
-                {
-                    terms.AddRange(CreatePartialMatches(firstName.ToLowerInvariant()));
-                }
-            }
-
-            if (!string.IsNullOrWhiteSpace(lastName))
-            {
-                terms.Add(lastName.ToLowerInvariant());
-                // Add partial matches
-                if (lastName.Length > 2)
-                {
-                    terms.AddRange(CreatePartialMatches(lastName.ToLowerInvariant()));
-                }
-            }
-
-            if (!string.IsNullOrWhiteSpace(email))
-            {
-                terms.Add(email.ToLowerInvariant());
-                // Add email domain for searching
-                var emailParts = email.Split('@');
-                if (emailParts.Length == 2)
-                {
-                    terms.Add(emailParts[0].ToLowerInvariant());
-                    terms.Add(emailParts[1].ToLowerInvariant());
-                }
-            }
-
-            if (!string.IsNullOrWhiteSpace(phoneNumber))
-            {
-                terms.Add(phoneNumber);
-                // Add phone number without formatting
-                var cleanPhone = phoneNumber.Replace("-", "").Replace("(", "").Replace(")", "").Replace(" ", "");
-                if (cleanPhone != phoneNumber)
-                {
-                    terms.Add(cleanPhone);
-                }
-            }
-
-            // Add full name combination
-            if (!string.IsNullOrWhiteSpace(firstName) && !string.IsNullOrWhiteSpace(lastName))
-            {
-                terms.Add($"{firstName} {lastName}".ToLowerInvariant());
-                terms.Add($"{lastName} {firstName}".ToLowerInvariant());
-            }
-
-            return terms.Distinct().ToArray();
-        }
-
-        /// <summary>
-        /// Create partial matches for better search experience
-        /// </summary>
-        private static IEnumerable<string> CreatePartialMatches(string term)
-        {
-            var partials = new List<string>();
-            
-            // Add prefixes (minimum 3 characters)
-            for (int i = 3; i <= term.Length; i++)
-            {
-                partials.Add(term.Substring(0, i));
-            }
-
-            return partials;
-        }
-
-        /// <summary>
         /// Helper method to create FullName from string
         /// </summary>
         private static FullName CreateFullNameFromString(string value)
@@ -304,25 +217,6 @@ namespace HexagonalSkeleton.Infrastructure.Mapping
                 1 => new FullName(parts[0], ""),
                 _ => new FullName(parts[0], string.Join(" ", parts.Skip(1)))
             };
-        }
-        /// <summary>
-        /// Helper method to get longitude from UserDocument location
-        /// </summary>
-        private static double GetLongitude(UserDocument src)
-        {
-            if (src.Location == null || src.Location.Coordinates == null)
-                return 0.0;
-            return src.Location.Coordinates.Longitude;
-        }
-        
-        /// <summary>
-        /// Helper method to get latitude from UserDocument location
-        /// </summary>
-        private static double GetLatitude(UserDocument src)
-        {
-            if (src.Location == null || src.Location.Coordinates == null)
-                return 0.0;
-            return src.Location.Coordinates.Latitude;
         }
     }
 }

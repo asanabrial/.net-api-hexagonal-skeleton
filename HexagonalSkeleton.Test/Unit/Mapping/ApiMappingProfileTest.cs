@@ -23,7 +23,7 @@ namespace HexagonalSkeleton.Test.Unit.Mapping
         public void Should_Map_RegisterDto_To_UserRegistrationResponse()
         {
             // Arrange
-            var registerDto = new RegisterDto
+            var registerDto = new RegisterUserDto
             {
                 AccessToken = "test-token",
                 TokenType = "Bearer",

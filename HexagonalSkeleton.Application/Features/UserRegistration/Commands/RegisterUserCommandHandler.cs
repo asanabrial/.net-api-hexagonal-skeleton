@@ -14,8 +14,8 @@ namespace HexagonalSkeleton.Application.Features.UserRegistration.Commands
         IUserWriteRepository userWriteRepository,
         IUserReadRepository userReadRepository,
         IAuthenticationService authenticationService)
-        : IRequestHandler<RegisterUserCommand, RegisterDto>
-    {        public async Task<RegisterDto> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+        : IRequestHandler<RegisterUserCommand, RegisterUserDto>
+    {        public async Task<RegisterUserDto> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
             if (!validationResult.IsValid)
@@ -82,7 +82,7 @@ namespace HexagonalSkeleton.Application.Features.UserRegistration.Commands
                 LastLogin = user.LastLogin,
                 CreatedAt = user.CreatedAt
             };
-            return new RegisterDto
+            return new RegisterUserDto
             {
                 AccessToken = tokenInfo.Token,
                 ExpiresIn = tokenInfo.ExpiresIn,

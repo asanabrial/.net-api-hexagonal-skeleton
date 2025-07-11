@@ -501,7 +501,7 @@ namespace HexagonalSkeleton.Test
         public TestMappingProfile()
         {
             // Mapping para el registro de usuarios que falta en producción
-            CreateMap<RegisterDto, LoginResponse>()
+            CreateMap<RegisterUserDto, LoginResponse>()
                 .ForMember(dest => dest.AccessToken, opt => opt.MapFrom(src => src.AccessToken))
                 .ForMember(dest => dest.TokenType, opt => opt.MapFrom(src => src.TokenType))
                 .ForMember(dest => dest.ExpiresIn, opt => opt.MapFrom(src => src.ExpiresIn))
