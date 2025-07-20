@@ -11,7 +11,7 @@ namespace HexagonalSkeleton.Domain.Exceptions
         public string Resource { get; }
 
         public InsufficientPermissionException(string userId, string action, string resource) 
-            : base($"User '{userId}' does not have permission to '{action}' on resource '{resource}'")
+            : base("User", "InsufficientPermission", $"User '{userId}' does not have permission to '{action}' on resource '{resource}'")
         {
             UserId = userId;
             Action = action;

@@ -8,34 +8,44 @@ using Microsoft.Extensions.DependencyInjection;
 namespace HexagonalSkeleton.API.Config
 {
     /// <summary>
-    /// CQRS service configuration
-    /// Command: PostgreSQL, Query: MongoDB
+    /// CQRS service configuration following Hexagonal Architecture principles.
+    /// Separates Command (Write) and Query (Read) responsibilities with optimized data stores.
+    /// Implements Interface Segregation Principle with specialized service contracts.
+    /// Command: PostgreSQL for transactional consistency, Query: MongoDB for read performance
     /// </summary>
     public static class CqrsServiceExtension
     {
         public static IServiceCollection AddCqrsServices(this IServiceCollection services)
         {
-            // Command side (Write operations)
+            // === COMMAND SIDE (Write Operations) ===
+            // PostgreSQL for ACID transactions and data consistency
             services.AddScoped<IUserWriteRepository, UserCommandRepository>();
             
-            // Query side (Read operations)
+            // === QUERY SIDE (Read Operations) ===
+            // MongoDB for optimized read performance and denormalized data
             services.AddScoped<IUserReadRepository, UserReadRepositoryMongoAdapter>();
+            services.AddScoped<IUserQueryRepository, UserQueryRepository>();
             
-            // Interface Segregation Principle - Specialized interfaces
+            // === INTERFACE SEGREGATION PRINCIPLE ===
+            // Specialized interfaces for specific read operations (ISP compliance)
             services.AddScoped<IUserExistenceChecker>(provider => 
                 provider.GetRequiredService<IUserReadRepository>() as UserReadRepositoryMongoAdapter 
-                ?? throw new InvalidOperationException("UserReadRepositoryMongoAdapter not found"));
+                ?? throw new InvalidOperationException("UserReadRepositoryMongoAdapter not registered"));
+            
             services.AddScoped<IUserSearchService>(provider => 
                 provider.GetRequiredService<IUserReadRepository>() as UserReadRepositoryMongoAdapter 
-                ?? throw new InvalidOperationException("UserReadRepositoryMongoAdapter not found"));
+                ?? throw new InvalidOperationException("UserReadRepositoryMongoAdapter not registered"));
+            
             services.AddScoped<IUserBasicReader>(provider => 
                 provider.GetRequiredService<IUserReadRepository>() as UserReadRepositoryMongoAdapter 
-                ?? throw new InvalidOperationException("UserReadRepositoryMongoAdapter not found"));
+                ?? throw new InvalidOperationException("UserReadRepositoryMongoAdapter not registered"));
 
-            // Sync service for read model consistency
+            // === EVENTUAL CONSISTENCY ===
+            // Sync service for maintaining read model consistency via domain events
             services.AddScoped<HexagonalSkeleton.Domain.Services.IUserSyncService, UserSyncService>();
 
-            // Application services (Screaming Architecture)
+            // === APPLICATION SERVICES (Screaming Architecture) ===
+            // Business feature-focused services that orchestrate domain operations
             services.AddScoped<IUserRegistrationApplicationService, UserRegistrationApplicationService>();
             services.AddScoped<IUserProfileApplicationService, UserProfileApplicationService>();
 

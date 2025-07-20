@@ -9,7 +9,7 @@ namespace HexagonalSkeleton.Domain.Exceptions
         public string? PhoneNumber { get; }
 
         public UserDataNotUniqueException(string email, string? phoneNumber = null) 
-            : base(BuildMessage(email, phoneNumber))
+            : base("User", "UniqueDataConstraint", BuildMessage(email, phoneNumber))
         {
             Email = email;
             PhoneNumber = phoneNumber;

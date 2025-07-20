@@ -4,14 +4,21 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure services
-builder.Services.AddScopes();
+// === Hexagonal Architecture Configuration ===
+// Following clean architecture principles with explicit service registration
+
+// Core Domain Services (Inner Layer)
+builder.Services.AddDomainServices();
+
+// Infrastructure Services (Outer Layer) 
 builder.Services.AddSingletons();
 builder.Services.AddTransients();
+
+// API Layer Configuration
 builder.Services.AddSwagger();
 builder.Services.AddAuthentication(builder.Configuration);
 
-// Register MediatR and FluentValidation
+// CQRS Architecture Configuration
 builder.Services.AddCqrsLayer();
 
 // AutoMapper with API profiles

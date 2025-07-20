@@ -11,12 +11,13 @@ namespace HexagonalSkeleton.API.Config
     public static class ScopeServiceExtension
     {
         /// <summary>
-        /// Extension method for IServiceCollection to register application services for dependency injection.
-        /// Follows Hexagonal Architecture principles by registering ports and adapters
+        /// Configures domain and application services following Hexagonal Architecture principles.
+        /// Registers ports and adapters with proper separation of concerns and dependency inversion.
+        /// Follows naming convention focused on business domain rather than technical concerns.
         /// </summary>
         /// <param name="services">Service collection</param>
         /// <returns>Return the service collection for further configuration.</returns>
-        public static IServiceCollection AddScopes(this IServiceCollection services)
+        public static IServiceCollection AddDomainServices(this IServiceCollection services)
         {
             // Note: Repository registrations are now handled by AddCqrsServices() 
             // to properly implement CQRS pattern with separate read/write stores

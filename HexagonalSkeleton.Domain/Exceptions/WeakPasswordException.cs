@@ -6,7 +6,7 @@ namespace HexagonalSkeleton.Domain.Exceptions
     public class WeakPasswordException : DomainException
     {
         public WeakPasswordException() 
-            : base("Password does not meet strength requirements")
+            : base("User", "PasswordStrength", "Password does not meet strength requirements")
         {
         }
     }

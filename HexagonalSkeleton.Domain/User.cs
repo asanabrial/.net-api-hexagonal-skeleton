@@ -1,6 +1,7 @@
 ﻿using HexagonalSkeleton.Domain.Common;
 using HexagonalSkeleton.Domain.Events;
 using HexagonalSkeleton.Domain.ValueObjects;
+using HexagonalSkeleton.Domain.Exceptions;
 
 namespace HexagonalSkeleton.Domain
 {
@@ -69,8 +70,9 @@ namespace HexagonalSkeleton.Domain
             string aboutMe = "")
         {
             // Business rule: User must be at least 13 years old
-            if (CalculateAge(birthdate) < 13)
-                throw new InvalidOperationException("User must be at least 13 years old");
+            var age = CalculateAge(birthdate);
+            if (age < 13)
+                throw UserDomainException.InvalidAge(age, 13);
 
             var emailVO = new Email(email);
             var fullNameVO = new FullName(firstName, lastName);
@@ -124,14 +126,15 @@ namespace HexagonalSkeleton.Domain
         public void UpdateProfile(string firstName, string lastName, DateTime birthdate, string aboutMe)
         {
             if (IsDeleted)
-                throw new InvalidOperationException("Cannot update profile of deleted user");
+                throw UserDomainException.OperationOnDeletedUser("UpdateProfile");
 
             var previousName = FullName.FirstName;
             var newFullName = new FullName(firstName, lastName);
             
             // Business rule: User must be at least 13 years old
-            if (CalculateAge(birthdate) < 13)
-                throw new InvalidOperationException("User must be at least 13 years old");
+            var age = CalculateAge(birthdate);
+            if (age < 13)
+                throw UserDomainException.InvalidAge(age, 13);
 
             FullName = newFullName;
             Birthdate = birthdate;
