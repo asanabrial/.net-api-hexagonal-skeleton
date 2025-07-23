@@ -23,6 +23,13 @@ namespace HexagonalSkeleton.Application.Features.UserProfile.Commands
             var user = await userReadRepository.GetByIdAsync(id: request.Id, cancellationToken: cancellationToken);
             if (user is null) 
                 throw new NotFoundException("User", request.Id);            user.UpdateProfile(request.FirstName, request.LastName, request.Birthdate, request.AboutMe);
+            
+            // Update phone number separately if provided
+            if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
+            {
+                user.UpdatePhoneNumber(request.PhoneNumber);
+            }
+            
             await userWriteRepository.UpdateAsync(user, cancellationToken);
             
             // Map user data to DTO using AutoMapper

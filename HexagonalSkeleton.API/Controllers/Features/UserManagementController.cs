@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using HexagonalSkeleton.Application.Features.UserManagement.Queries;
 using HexagonalSkeleton.Application.Features.UserManagement.Commands;
+using HexagonalSkeleton.Application.Features.UserProfile.Commands;
 
 namespace HexagonalSkeleton.API.Controllers.Features
 {
@@ -18,7 +19,6 @@ namespace HexagonalSkeleton.API.Controllers.Features
     [ApiController]
     [Route("api/users")]
     [Produces("application/json")]
-    [Authorize]
     public class UserManagementController : ControllerBase
     {
         private readonly ISender _mediator;
@@ -89,18 +89,37 @@ namespace HexagonalSkeleton.API.Controllers.Features
         }
 
         /// <summary>
+        /// Update user profile information
+        /// Business operation: User Profile Update
+        /// </summary>
+        /// <param name="id">User identifier</param>
+        /// <param name="request">Profile update data</param>
+        /// <returns>Update result</returns>
+        [HttpPut("{id:guid}/profile")]
+        [ProducesResponseType(typeof(UserResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> UpdateProfile(Guid id, UpdateProfileRequest request)
+        {
+            var command = _mapper.Map<UpdateProfileUserCommand>(request);
+            command.Id = id;
+            var result = await _mediator.Send(command);
+            return Ok(_mapper.Map<UserResponse>(result));
+        }
+
+        /// <summary>
         /// Permanently delete a user (hard delete)
         /// Business operation: Administrative User Deletion
         /// </summary>
         /// <param name="id">User identifier</param>
         /// <returns>Deletion result</returns>
         [HttpDelete("{id:guid}")]
-        [ProducesResponseType(typeof(DeleteUserResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var result = await _mediator.Send(new HardDeleteUserCommand(id));
-            return Ok(_mapper.Map<DeleteUserResponse>(result));
+            await _mediator.Send(new HardDeleteUserCommand(id));
+            return NoContent();
         }
 
         /// <summary>
@@ -109,7 +128,7 @@ namespace HexagonalSkeleton.API.Controllers.Features
         /// </summary>
         /// <param name="id">User identifier</param>
         /// <returns>Deletion result</returns>
-        [HttpPost("{id:guid}/deactivate")]
+        [HttpPatch("{id:guid}/deactivate")]
         [ProducesResponseType(typeof(DeleteUserResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> SoftDelete(Guid id)

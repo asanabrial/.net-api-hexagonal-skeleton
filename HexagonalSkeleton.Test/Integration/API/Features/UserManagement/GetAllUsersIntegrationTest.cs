@@ -8,32 +8,31 @@ using HexagonalSkeleton.API.Models.Common;
 using System.Text.Json;
 using System.Text;
 using System.Net.Http.Headers;
+using HexagonalSkeleton.Test.TestInfrastructure.Factories;
+using HexagonalSkeleton.Test.TestInfrastructure.Base;
 
 namespace HexagonalSkeleton.Test.Integration.User
 {
-    public class GetAllUsersIntegrationTest : IClassFixture<TestWebApplicationFactory>
+    public class GetAllUsersIntegrationTest : BaseIntegrationTest, IClassFixture<ConfiguredTestWebApplicationFactory>
     {
-        private readonly TestWebApplicationFactory _factory;
-        private readonly HttpClient _client;
-
-        public GetAllUsersIntegrationTest(TestWebApplicationFactory factory)
+        public GetAllUsersIntegrationTest(ConfiguredTestWebApplicationFactory factory) : base(factory)
         {
-            _factory = factory;
-            _client = _factory.CreateClient();
         }
 
         [Fact]
         public async Task GetAllUsers_WithExistingUsers_ShouldReturnUsers()
         {
             // Arrange - Create test user first to get token
+            var uniqueEmail = $"getalltest{Guid.NewGuid():N}@example.com";
+            var uniquePhone = $"+1{DateTime.UtcNow.Ticks % 9000000000 + 1000000000}";
             var testUserRequest = new CreateUserRequest
             {
                 FirstName = "Test",
                 LastName = "User",
-                Email = "getalltest@example.com",
+                Email = uniqueEmail,
                 Password = "TestPassword123!",
                 PasswordConfirmation = "TestPassword123!",
-                PhoneNumber = "+1234567801",
+                PhoneNumber = uniquePhone,
                 Birthdate = new DateTime(1990, 1, 1),
                 Latitude = 40.7128,
                 Longitude = -74.0060,
@@ -50,6 +49,9 @@ namespace HexagonalSkeleton.Test.Integration.User
             
             // Set authorization header
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse!.AccessToken);
+
+            // Wait a moment for CQRS event propagation to complete
+            await Task.Delay(100);
 
             // Act - Get all users
             var getAllResponse = await _client.GetAsync("/api/users");

@@ -1,6 +1,7 @@
 using AutoMapper;
 using HexagonalSkeleton.Application.Features.UserAuthentication.Dto;
 using HexagonalSkeleton.Application.Features.UserManagement.Dto;
+using HexagonalSkeleton.Application.Features.UserProfile.Dto;
 using HexagonalSkeleton.Application.Features.UserRegistration.Dto;
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.ValueObjects;
@@ -69,6 +70,15 @@ namespace HexagonalSkeleton.Application.Mapping
                 .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
                 .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName))
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName.GetFullName()))
+                .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Latitude : (double?)null))
+                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Longitude : (double?)null));
+
+            // User to UserProfileDto mapping (for profile update responses)
+            CreateMap<User, UserProfileDto>()
+                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName))
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName.GetFullName()))
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber.Value))
                 .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Latitude : (double?)null))
                 .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Longitude : (double?)null));
 

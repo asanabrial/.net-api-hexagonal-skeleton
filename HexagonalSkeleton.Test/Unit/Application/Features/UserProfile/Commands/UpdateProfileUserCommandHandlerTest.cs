@@ -9,6 +9,7 @@ using Xunit;
 using AutoMapper;
 using DomainUser = HexagonalSkeleton.Domain.User;
 using HexagonalSkeleton.Application.Features.UserProfile.Commands;
+using HexagonalSkeleton.Test.TestInfrastructure.Helpers;
 
 namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
 {    public class UpdateProfileUserCommandHandlerTest
@@ -41,9 +42,10 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
                 aboutMe: "Updated about me",
                 firstName: "Jane",
                 lastName: "Smith",
+                phoneNumber: "+1234567890",
                 birthdate: new DateTime(1985, 5, 15));
             
-            var user = TestHelper.CreateTestUser(Guid.NewGuid());
+            var user = TestHelper.CreateTestUser();
 
             _mockValidator.Setup(x => x.ValidateAsync(command, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResult());
@@ -89,6 +91,7 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
                 aboutMe: "",
                 firstName: "",
                 lastName: "",
+                phoneNumber: "",
                 birthdate: DateTime.Now.AddYears(-5)); // Too young
             
             var validationErrors = new List<ValidationFailure>
@@ -119,6 +122,7 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
                 aboutMe: "Updated about me",
                 firstName: "Jane",
                 lastName: "Smith",
+                phoneNumber: "+1234567890",
                 birthdate: new DateTime(1985, 5, 15));
 
             _mockValidator.Setup(x => x.ValidateAsync(command, It.IsAny<CancellationToken>()))
@@ -149,9 +153,10 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
                 aboutMe: "Test bio",
                 firstName: firstName,
                 lastName: lastName,
+                phoneNumber: "+1234567890",
                 birthdate: new DateTime(1990, 1, 1));
             
-            var user = TestHelper.CreateTestUser(Guid.NewGuid());
+            var user = TestHelper.CreateTestUser();
 
             _mockValidator.Setup(x => x.ValidateAsync(command, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResult());
@@ -189,9 +194,10 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
                 aboutMe: "Updated about me",
                 firstName: "Jane",
                 lastName: "Smith",
+                phoneNumber: "+1234567890",
                 birthdate: new DateTime(1985, 5, 15));
             
-            var user = TestHelper.CreateTestUser(Guid.NewGuid());
+            var user = TestHelper.CreateTestUser();
 
             _mockValidator.Setup(x => x.ValidateAsync(command, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResult());
@@ -218,9 +224,10 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
                 aboutMe: "Updated about me",
                 firstName: "Jane",
                 lastName: "Smith",
+                phoneNumber: "+1234567890",
                 birthdate: new DateTime(1985, 5, 15));
             
-            var user = TestHelper.CreateTestUser(Guid.NewGuid());
+            var user = TestHelper.CreateTestUser();
             var initialUpdatedAt = user.UpdatedAt;
 
             _mockValidator.Setup(x => x.ValidateAsync(command, It.IsAny<CancellationToken>()))

@@ -1,22 +1,22 @@
 using Xunit;
+using HexagonalSkeleton.Test.TestInfrastructure.Factories;
 using Microsoft.Extensions.DependencyInjection;
 using HexagonalSkeleton.Domain.Specifications.Users;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain.ValueObjects;
-using HexagonalSkeleton.Test;
 using DomainUser = HexagonalSkeleton.Domain.User;
 
-namespace HexagonalSkeleton.Test.Integration.Specifications
+namespace HexagonalSkeleton.Test.Integration.API.Features.UserManagement
 {
     /// <summary>
     /// Integration tests for Specification pattern
     /// Demonstrates end-to-end functionality with real repository implementation
     /// </summary>
-    public class SpecificationIntegrationTest : IClassFixture<TestWebApplicationFactory>
+    public class SpecificationIntegrationTest : IClassFixture<ConfiguredTestWebApplicationFactory>
     {
-        private readonly TestWebApplicationFactory _factory;
+        private readonly ConfiguredTestWebApplicationFactory _factory;
 
-        public SpecificationIntegrationTest(TestWebApplicationFactory factory)
+        public SpecificationIntegrationTest(ConfiguredTestWebApplicationFactory factory)
         {
             _factory = factory;
         }

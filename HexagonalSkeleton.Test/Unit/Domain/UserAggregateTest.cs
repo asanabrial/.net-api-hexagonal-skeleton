@@ -1,6 +1,7 @@
 using Xunit;
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.Events;
+using HexagonalSkeleton.Test.TestInfrastructure.Helpers;
 
 namespace HexagonalSkeleton.Test.Unit.User.Domain;
 
@@ -122,7 +123,7 @@ public class UserAggregateTest
         user.Delete();
 
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => 
+        Assert.Throws<HexagonalSkeleton.Domain.Exceptions.UserDomainException>(() => 
             user.UpdateProfile("Jane", "Smith", DateTime.UtcNow.AddYears(-30), "Updated about me"));
     }
 
@@ -235,7 +236,7 @@ public class UserAggregateTest
         var birthdate = DateTime.UtcNow.AddYears(-10);
 
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => 
+        Assert.Throws<HexagonalSkeleton.Domain.Exceptions.UserDomainException>(() => 
             HexagonalSkeleton.Domain.User.Create(
                 "test@example.com", "salt", "hash", "John", "Doe", 
                 birthdate, "+1234567890", 40.7128, -74.0060, "About me"));

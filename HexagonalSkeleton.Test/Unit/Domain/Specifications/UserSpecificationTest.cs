@@ -1,6 +1,7 @@
 using Xunit;
 using HexagonalSkeleton.Domain.Specifications.Users;
 using HexagonalSkeleton.Test;
+using HexagonalSkeleton.Test.TestInfrastructure.Helpers;
 using DomainUser = HexagonalSkeleton.Domain.User;
 
 namespace HexagonalSkeleton.Test.Unit.Domain.Specifications

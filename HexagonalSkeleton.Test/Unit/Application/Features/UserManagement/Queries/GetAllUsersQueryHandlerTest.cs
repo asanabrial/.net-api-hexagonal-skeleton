@@ -10,6 +10,7 @@ using AutoMapper;
 using FluentValidation;
 using FluentValidation.Results;
 using HexagonalSkeleton.Application.Features.UserManagement.Queries;
+using HexagonalSkeleton.Test.TestInfrastructure.Helpers;
 
 namespace HexagonalSkeleton.Test.Application.Features.UserManagement.Queries;
 

@@ -36,7 +36,8 @@ namespace HexagonalSkeleton.Infrastructure.Persistence.Query
             _database = client.GetDatabase(databaseName);
             
             // Only configure indexes if not in test environment
-            if (!IsTestEnvironment())
+            // Check database name directly to avoid NullReferenceException
+            if (!databaseName.Contains("Test", StringComparison.OrdinalIgnoreCase))
             {
                 ConfigureIndexes();
             }
@@ -48,20 +49,26 @@ namespace HexagonalSkeleton.Infrastructure.Persistence.Query
         private bool IsTestEnvironment()
         {
             // Check if we're in a test environment (database name contains "Test" or we're using in-memory)
-            return _database.DatabaseNamespace.DatabaseName.Contains("Test", StringComparison.OrdinalIgnoreCase);
+            return _database?.DatabaseNamespace?.DatabaseName?.Contains("Test", StringComparison.OrdinalIgnoreCase) ?? false;
         }
 
         /// <summary>
         /// Users collection optimized for read operations
         /// </summary>
-        public IMongoCollection<UserQueryDocument> Users => _database.GetCollection<UserQueryDocument>("users");
+        public IMongoCollection<UserQueryDocument>? Users => _database?.GetCollection<UserQueryDocument>("users");
 
         /// <summary>
         /// Configure MongoDB indexes for optimal query performance
         /// </summary>
         private void ConfigureIndexes()
         {
+            // Skip index creation if database is not properly initialized (test environment)
+            if (_database?.DatabaseNamespace?.DatabaseName == null)
+                return;
+
             var usersCollection = Users;
+            if (usersCollection == null)
+                return;
 
             // Create indexes for common query patterns
             var indexKeysDefinition = Builders<UserQueryDocument>.IndexKeys;

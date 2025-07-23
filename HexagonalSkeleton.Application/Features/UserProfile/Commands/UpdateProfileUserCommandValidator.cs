@@ -7,7 +7,9 @@ namespace HexagonalSkeleton.Application.Features.UserProfile.Commands
         public UpdateProfileUserCommandValidator()
         {
             RuleFor(r => r.AboutMe)
-                .NotEmpty();            RuleFor(r => r.FirstName)
+                .NotEmpty();
+
+            RuleFor(r => r.FirstName)
                 .NotEmpty();
 
             RuleFor(r => r.LastName)
@@ -15,6 +17,10 @@ namespace HexagonalSkeleton.Application.Features.UserProfile.Commands
 
             RuleFor(r => r.Birthdate)
                 .NotEmpty();
+
+            RuleFor(r => r.PhoneNumber)
+                .NotEmpty()
+                .When(r => !string.IsNullOrWhiteSpace(r.PhoneNumber));
         }
     }
 }

@@ -8,15 +8,16 @@ using HexagonalSkeleton.API.Models.Users;
 using HexagonalSkeleton.API.Models.Auth;
 using Microsoft.EntityFrameworkCore;
 using HexagonalSkeleton.Infrastructure.Persistence.Command;
+using HexagonalSkeleton.Test.TestInfrastructure.Factories;
 
 namespace HexagonalSkeleton.Test.Integration
 {    
-    public class RegisterUserIntegrationTest : IClassFixture<TestWebApplicationFactory>
+    public class RegisterUserIntegrationTest : IClassFixture<ComprehensiveUserTestWebApplicationFactory>
     {
-        private readonly TestWebApplicationFactory _factory;
+        private readonly ComprehensiveUserTestWebApplicationFactory _factory;
         private readonly HttpClient _client;
 
-        public RegisterUserIntegrationTest(TestWebApplicationFactory factory)
+        public RegisterUserIntegrationTest(ComprehensiveUserTestWebApplicationFactory factory)
         {
             _factory = factory;
             _client = _factory.CreateClient();
@@ -44,7 +45,7 @@ namespace HexagonalSkeleton.Test.Integration
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             // Act
-            var response = await _client.PostAsync("/api/registration", content);
+            var response = await _client.PostAsync("/api/auth/register", content);
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -113,15 +114,17 @@ namespace HexagonalSkeleton.Test.Integration
             using var testClient = testFactory.CreateClient();
             
             // Arrange
+            var uniqueEmail = $"duplicate{Guid.NewGuid():N}@example.com";
+            var uniquePhone = $"+1{DateTime.UtcNow.Ticks % 9000000000 + 1000000000}";
             var request = new CreateUserRequest
             {
-                Email = "duplicate@example.com",
+                Email = uniqueEmail,
                 Password = "Password123!",
                 PasswordConfirmation = "Password123!",
                 FirstName = "John",
                 LastName = "Doe",
                 Birthdate = DateTime.UtcNow.AddYears(-25),
-                PhoneNumber = "+1234567890",
+                PhoneNumber = uniquePhone,
                 Latitude = 40.7128,
                 Longitude = -74.0060,
                 AboutMe = "Test about me"
@@ -132,11 +135,11 @@ namespace HexagonalSkeleton.Test.Integration
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             });
             var content = new StringContent(json, Encoding.UTF8, "application/json");            // Act - Create user first time (should succeed)
-            var firstResponse = await testClient.PostAsync("/api/registration", content);
+            var firstResponse = await testClient.PostAsync("/api/auth/register", content);
             firstResponse.EnsureSuccessStatusCode();
 
             // Act - Try to create user with same email (should fail)
-            var secondResponse = await testClient.PostAsync("/api/registration", content);
+            var secondResponse = await testClient.PostAsync("/api/auth/register", content);
 
             // Assert
             Assert.Equal(System.Net.HttpStatusCode.Conflict, secondResponse.StatusCode);
@@ -157,11 +160,11 @@ namespace HexagonalSkeleton.Test.Integration
             Assert.Equal(409, statusElement.GetInt32());
             
             Assert.True(root.TryGetProperty("detail", out var detailElement));
-            Assert.Contains("duplicate@example.com", detailElement.GetString());
+            Assert.Contains(uniqueEmail, detailElement.GetString());
             
             // Check that email is included in extensions
             Assert.True(root.TryGetProperty("email", out var emailElement));
-            Assert.Equal("duplicate@example.com", emailElement.GetString());
+            Assert.Equal(uniqueEmail, emailElement.GetString());
         }
     }
 }

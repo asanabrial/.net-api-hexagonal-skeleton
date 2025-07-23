@@ -10,6 +10,7 @@ using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.ValueObjects;
 using AutoMapper;
 using HexagonalSkeleton.Application.Features.UserRegistration.Commands;
+using HexagonalSkeleton.Test.TestInfrastructure.Helpers;
 
 namespace HexagonalSkeleton.Test.Application.Features.UserRegistration.Commands;
 
@@ -123,8 +124,8 @@ public class RegisterUserCommandHandlerTest
         var exception = await Assert.ThrowsAsync<Domain.Exceptions.UserDataNotUniqueException>(() => 
             _handler.Handle(command, cancellationToken));
         
-        Assert.Equal("test@example.com", exception.Email);
-        Assert.Equal("+1234567890", exception.PhoneNumber);
+        Assert.Equal(command.Email, exception.Email);
+        Assert.Equal(command.PhoneNumber, exception.PhoneNumber);
 
         _mockUserWriteRepository.Verify(r => r.CreateAsync(
             It.IsAny<User>(), 
@@ -150,8 +151,8 @@ public class RegisterUserCommandHandlerTest
         var exception = await Assert.ThrowsAsync<Domain.Exceptions.UserDataNotUniqueException>(() => 
             _handler.Handle(command, cancellationToken));
         
-        Assert.Equal("test@example.com", exception.Email);
-        Assert.Equal("+1234567890", exception.PhoneNumber);
+        Assert.Equal(command.Email, exception.Email);
+        Assert.Equal(command.PhoneNumber, exception.PhoneNumber);
 
         _mockUserWriteRepository.Verify(r => r.CreateAsync(
             It.IsAny<User>(), 

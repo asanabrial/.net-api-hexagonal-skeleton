@@ -1,6 +1,7 @@
 using Xunit;
 using FluentValidation.TestHelper;
 using HexagonalSkeleton.Application.Features.UserProfile.Commands;
+using HexagonalSkeleton.Test.TestInfrastructure.Helpers;
 
 namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands;
 

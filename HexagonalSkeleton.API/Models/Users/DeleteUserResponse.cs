@@ -12,6 +12,6 @@ namespace HexagonalSkeleton.API.Models.Users
         /// <summary>
         /// ID of the deleted user
         /// </summary>
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
     }
 }

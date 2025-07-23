@@ -16,6 +16,14 @@ namespace HexagonalSkeleton.Domain.Common
         public bool IsDeleted { get; protected set; }
 
         /// <summary>
+        /// Constructor that initializes CreatedAt with current UTC time
+        /// </summary>
+        protected AggregateRoot()
+        {
+            CreatedAt = DateTime.UtcNow;
+        }
+
+        /// <summary>
         /// Get domain events for this aggregate
         /// </summary>
         public IReadOnlyCollection<DomainEvent> DomainEvents => _domainEvents.AsReadOnly();

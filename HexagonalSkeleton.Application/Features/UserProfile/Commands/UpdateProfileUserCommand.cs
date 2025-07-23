@@ -8,6 +8,7 @@ namespace HexagonalSkeleton.Application.Features.UserProfile.Commands
         public Guid Id { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
         public DateTime Birthdate { get; set; }
         public string AboutMe { get; set; } = string.Empty;
 
@@ -15,12 +16,13 @@ namespace HexagonalSkeleton.Application.Features.UserProfile.Commands
         public UpdateProfileUserCommand() { }
 
         // Constructor with parameters for direct instantiation if needed
-        public UpdateProfileUserCommand(Guid id, string aboutMe, string firstName, string lastName, DateTime birthdate)
+        public UpdateProfileUserCommand(Guid id, string aboutMe, string firstName, string lastName, string phoneNumber, DateTime birthdate)
         {
             Id = id;
             AboutMe = aboutMe;
             FirstName = firstName;
             LastName = lastName;
+            PhoneNumber = phoneNumber;
             Birthdate = birthdate;
         }
     }

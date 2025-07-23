@@ -9,6 +9,7 @@ using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.ValueObjects;
 using AutoMapper;
 using HexagonalSkeleton.Application.Features.UserRegistration.Commands;
+using HexagonalSkeleton.Test.TestInfrastructure.Helpers;
 
 namespace HexagonalSkeleton.Test.Application.Features.UserRegistration.Commands
 {    
@@ -122,7 +123,7 @@ namespace HexagonalSkeleton.Test.Application.Features.UserRegistration.Commands
             
             // Verify personal information
             Assert.Equal(command.Birthdate, result.User.Birthdate);
-            Assert.Equal("Test user", result.User.AboutMe); // Fixed: Matches the value set in TestHelper.CreateTestUser()
+            Assert.Equal("Test about me", result.User.AboutMe); // Fixed: Matches the actual value from command
             
             // Verify location
             Assert.Equal(40.7128, result.User.Latitude);
@@ -140,7 +141,8 @@ namespace HexagonalSkeleton.Test.Application.Features.UserRegistration.Commands
                 ), 
                 cancellationToken), Times.Once);
 
-            _mockUserReadRepository.Verify(r => r.GetByIdAsync(userId, cancellationToken), Times.Once);
+            _mockUserReadRepository.Verify(r => r.ExistsByEmailAsync(command.Email, cancellationToken), Times.Once);
+            _mockUserReadRepository.Verify(r => r.ExistsByPhoneNumberAsync(command.PhoneNumber, cancellationToken), Times.Once);
             
             _mockIntegrationEventService.Verify(s => s.PublishAsync(
                 It.IsAny<IIntegrationEvent>(), 
