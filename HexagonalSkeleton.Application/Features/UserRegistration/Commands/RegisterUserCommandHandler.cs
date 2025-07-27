@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using HexagonalSkeleton.Application.IntegrationEvents;
 using HexagonalSkeleton.Application.Features.UserRegistration.Dto;
 using HexagonalSkeleton.Application.Features.UserAuthentication.Dto;

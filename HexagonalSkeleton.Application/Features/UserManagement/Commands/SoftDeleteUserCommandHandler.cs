@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Application.Extensions;
 using HexagonalSkeleton.Application.Features.UserManagement.Dto;

@@ -1,4 +1,4 @@
-﻿using HexagonalSkeleton.Domain.Common;
+using HexagonalSkeleton.Domain.Common;
 using HexagonalSkeleton.Domain.Events;
 using HexagonalSkeleton.Domain.ValueObjects;
 using HexagonalSkeleton.Domain.Exceptions;

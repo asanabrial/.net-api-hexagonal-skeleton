@@ -29,7 +29,7 @@ namespace HexagonalSkeleton.Test.Integration.UseCases
             // === ARRANGE ===
             // First register a user
             var registrationRequest = CreateValidUserRegistrationRequest();
-            var registrationResponse = await _client.PostAsJsonAsync("/api/registration", registrationRequest);
+            var registrationResponse = await _client.PostAsJsonAsync("/api/auth/register", registrationRequest);
             registrationResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
             var loginRequest = new LoginRequest
@@ -84,7 +84,7 @@ namespace HexagonalSkeleton.Test.Integration.UseCases
             // === ARRANGE ===
             // First register a user
             var registrationRequest = CreateValidUserRegistrationRequest();
-            var registrationResponse = await _client.PostAsJsonAsync("/api/registration", registrationRequest);
+            var registrationResponse = await _client.PostAsJsonAsync("/api/auth/register", registrationRequest);
             registrationResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
             var loginRequest = new LoginRequest
@@ -125,7 +125,7 @@ namespace HexagonalSkeleton.Test.Integration.UseCases
             // === ARRANGE ===
             // First register a user
             var registrationRequest = CreateValidUserRegistrationRequest();
-            var registrationResponse = await _client.PostAsJsonAsync("/api/registration", registrationRequest);
+            var registrationResponse = await _client.PostAsJsonAsync("/api/auth/register", registrationRequest);
             registrationResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
             var loginRequest = new LoginRequest

@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FluentValidation;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Application.Features.UserManagement.Dto;

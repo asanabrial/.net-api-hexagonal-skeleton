@@ -42,7 +42,7 @@ namespace HexagonalSkeleton.Test.Integration.User
             // Create user and get token
             var userJson = JsonSerializer.Serialize(testUserRequest);
             var userContent = new StringContent(userJson, Encoding.UTF8, "application/json");
-            var userResponse = await _client.PostAsync("/api/registration", userContent);
+            var userResponse = await _client.PostAsync("/api/auth/register", userContent);
             
             var userResponseContent = await userResponse.Content.ReadAsStringAsync();
             var loginResponse = JsonSerializer.Deserialize<LoginResponse>(userResponseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });

@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace HexagonalSkeleton.Application.Features.UserProfile.Commands
 {

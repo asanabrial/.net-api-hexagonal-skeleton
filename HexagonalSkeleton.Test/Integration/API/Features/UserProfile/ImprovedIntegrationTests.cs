@@ -33,7 +33,7 @@ namespace HexagonalSkeleton.Test.Integration.User
             var registrationRequest = CreateValidUserRegistrationRequest();
 
             // === ACT ===
-            var response = await _client.PostAsJsonAsync("/api/registration", registrationRequest);
+            var response = await _client.PostAsJsonAsync("/api/auth/register", registrationRequest);
 
             // === ASSERT ===
             response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -90,11 +90,11 @@ namespace HexagonalSkeleton.Test.Integration.User
 
             // === ACT ===
             // Register first user
-            var firstResponse = await _client.PostAsJsonAsync("/api/registration", firstRequest);
+            var firstResponse = await _client.PostAsJsonAsync("/api/auth/register", firstRequest);
             firstResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
             // Try to register second user with same email
-            var secondResponse = await _client.PostAsJsonAsync("/api/registration", secondRequest);
+            var secondResponse = await _client.PostAsJsonAsync("/api/auth/register", secondRequest);
 
             // === ASSERT ===
             secondResponse.StatusCode.Should().Be(HttpStatusCode.Conflict);
@@ -130,7 +130,7 @@ namespace HexagonalSkeleton.Test.Integration.User
             request.Email = invalidEmail;
 
             // === ACT ===
-            var response = await _client.PostAsJsonAsync("/api/registration", request);
+            var response = await _client.PostAsJsonAsync("/api/auth/register", request);
 
             // === ASSERT ===
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -149,7 +149,7 @@ namespace HexagonalSkeleton.Test.Integration.User
             request.PasswordConfirmation = weakPassword;
 
             // === ACT ===
-            var response = await _client.PostAsJsonAsync("/api/registration", request);
+            var response = await _client.PostAsJsonAsync("/api/auth/register", request);
 
             // === ASSERT ===
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -163,7 +163,7 @@ namespace HexagonalSkeleton.Test.Integration.User
             request.PasswordConfirmation = "DifferentPassword123!";
 
             // === ACT ===
-            var response = await _client.PostAsJsonAsync("/api/registration", request);
+            var response = await _client.PostAsJsonAsync("/api/auth/register", request);
 
             // === ASSERT ===
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -177,7 +177,7 @@ namespace HexagonalSkeleton.Test.Integration.User
             request.Birthdate = DateTime.Today.AddYears(-12); // 12 years old (under minimum)
 
             // === ACT ===
-            var response = await _client.PostAsJsonAsync("/api/registration", request);
+            var response = await _client.PostAsJsonAsync("/api/auth/register", request);
 
             // === ASSERT ===
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -190,17 +190,17 @@ namespace HexagonalSkeleton.Test.Integration.User
             
             // Test email uniqueness business rule
             var validRequest = CreateValidUserRegistrationRequest();
-            var firstResponse = await _client.PostAsJsonAsync("/api/registration", validRequest);
+            var firstResponse = await _client.PostAsJsonAsync("/api/auth/register", validRequest);
             firstResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
-            var duplicateResponse = await _client.PostAsJsonAsync("/api/registration", validRequest);
+            var duplicateResponse = await _client.PostAsJsonAsync("/api/auth/register", validRequest);
             duplicateResponse.StatusCode.Should().Be(HttpStatusCode.Conflict);
 
             // Test minimum age business rule
             var underageRequest = CreateValidUserRegistrationRequest();
             underageRequest.Birthdate = DateTime.Today.AddYears(-10);
             
-            var underageResponse = await _client.PostAsJsonAsync("/api/registration", underageRequest);
+            var underageResponse = await _client.PostAsJsonAsync("/api/auth/register", underageRequest);
             underageResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         }
 
@@ -212,7 +212,7 @@ namespace HexagonalSkeleton.Test.Integration.User
 
             // === ACT ===
             // Command side: Create user
-            var commandResponse = await _client.PostAsJsonAsync("/api/registration", registrationRequest);
+            var commandResponse = await _client.PostAsJsonAsync("/api/auth/register", registrationRequest);
             commandResponse.StatusCode.Should().Be(HttpStatusCode.Created);
             
             var registrationResult = await commandResponse.Content.ReadFromJsonAsync<LoginResponse>();
@@ -247,7 +247,7 @@ namespace HexagonalSkeleton.Test.Integration.User
             var registrationRequest = CreateValidUserRegistrationRequest();
 
             // === ACT ===
-            var registrationResponse = await _client.PostAsJsonAsync("/api/registration", registrationRequest);
+            var registrationResponse = await _client.PostAsJsonAsync("/api/auth/register", registrationRequest);
             registrationResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
             // Try to login with correct password
@@ -291,21 +291,21 @@ namespace HexagonalSkeleton.Test.Integration.User
                 PhoneNumber = ""
             };
             
-            var emptyResponse = await _client.PostAsJsonAsync("/api/registration", emptyRequest);
+            var emptyResponse = await _client.PostAsJsonAsync("/api/auth/register", emptyRequest);
             emptyResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
             // Test field length limits
             var tooLongRequest = CreateValidUserRegistrationRequest();
             tooLongRequest.FirstName = new string('A', 51); // Exceeds 50 char limit
             
-            var tooLongResponse = await _client.PostAsJsonAsync("/api/registration", tooLongRequest);
+            var tooLongResponse = await _client.PostAsJsonAsync("/api/auth/register", tooLongRequest);
             tooLongResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
             // Test phone number validation
             var invalidPhoneRequest = CreateValidUserRegistrationRequest();
             invalidPhoneRequest.PhoneNumber = "invalid-phone";
             
-            var invalidPhoneResponse = await _client.PostAsJsonAsync("/api/registration", invalidPhoneRequest);
+            var invalidPhoneResponse = await _client.PostAsJsonAsync("/api/auth/register", invalidPhoneRequest);
             invalidPhoneResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         }
 
@@ -318,7 +318,7 @@ namespace HexagonalSkeleton.Test.Integration.User
             request.Longitude = -122.4194;
 
             // === ACT ===
-            var response = await _client.PostAsJsonAsync("/api/registration", request);
+            var response = await _client.PostAsJsonAsync("/api/auth/register", request);
 
             // === ASSERT ===
             response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -341,7 +341,7 @@ namespace HexagonalSkeleton.Test.Integration.User
             request.Longitude = lng;
 
             // === ACT ===
-            var response = await _client.PostAsJsonAsync("/api/registration", request);
+            var response = await _client.PostAsJsonAsync("/api/auth/register", request);
 
             // === ASSERT ===
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -359,11 +359,11 @@ namespace HexagonalSkeleton.Test.Integration.User
 
             // === ACT ===
             // First registration should succeed
-            var firstResponse = await _client.PostAsJsonAsync("/api/registration", validRequest);
+            var firstResponse = await _client.PostAsJsonAsync("/api/auth/register", validRequest);
             firstResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
             // Second registration should fail and not affect database state
-            var secondResponse = await _client.PostAsJsonAsync("/api/registration", invalidRequest);
+            var secondResponse = await _client.PostAsJsonAsync("/api/auth/register", invalidRequest);
             secondResponse.StatusCode.Should().Be(HttpStatusCode.Conflict);
 
             // Original user should still be able to login
@@ -405,7 +405,7 @@ namespace HexagonalSkeleton.Test.Integration.User
 
         private async Task<LoginResponse> RegisterUser(CreateUserRequest request)
         {
-            var response = await _client.PostAsJsonAsync("/api/registration", request);
+            var response = await _client.PostAsJsonAsync("/api/auth/register", request);
             response.EnsureSuccessStatusCode();
             
             var result = await response.Content.ReadFromJsonAsync<LoginResponse>();

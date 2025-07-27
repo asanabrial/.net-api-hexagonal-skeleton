@@ -1,4 +1,4 @@
-﻿using HexagonalSkeleton.API.Handler.ExceptionMapping;
+using HexagonalSkeleton.API.Handler.ExceptionMapping;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace HexagonalSkeleton.API.Config

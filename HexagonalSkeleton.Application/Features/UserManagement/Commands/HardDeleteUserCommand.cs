@@ -1,4 +1,4 @@
-﻿using HexagonalSkeleton.Application.Features.UserManagement.Dto;
+using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 using MediatR;
 
 namespace HexagonalSkeleton.Application.Features.UserManagement.Commands

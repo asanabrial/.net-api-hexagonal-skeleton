@@ -1,4 +1,4 @@
-﻿namespace HexagonalSkeleton.API.Config
+namespace HexagonalSkeleton.API.Config
 {
     public static class TransientServiceExtension
     {

@@ -27,7 +27,7 @@ namespace HexagonalSkeleton.Test.Integration.UseCases
             var request = CreateValidUserRegistrationRequest();
 
             // === ACT ===
-            var response = await _client.PostAsJsonAsync("/api/registration", request);
+            var response = await _client.PostAsJsonAsync("/api/auth/register", request);
 
             // === ASSERT ===
             if (response.StatusCode == HttpStatusCode.InternalServerError)
@@ -67,12 +67,12 @@ namespace HexagonalSkeleton.Test.Integration.UseCases
             var request = CreateValidUserRegistrationRequest();
 
             // First registration - should succeed
-            var firstResponse = await _client.PostAsJsonAsync("/api/registration", request);
+            var firstResponse = await _client.PostAsJsonAsync("/api/auth/register", request);
             firstResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
             // === ACT ===
             // Second registration with same email - should fail
-            var secondResponse = await _client.PostAsJsonAsync("/api/registration", request);
+            var secondResponse = await _client.PostAsJsonAsync("/api/auth/register", request);
 
             // === ASSERT ===
             secondResponse.StatusCode.Should().Be(HttpStatusCode.Conflict);
@@ -89,7 +89,7 @@ namespace HexagonalSkeleton.Test.Integration.UseCases
             request.Email = "invalid-email-format";
 
             // === ACT ===
-            var response = await _client.PostAsJsonAsync("/api/registration", request);
+            var response = await _client.PostAsJsonAsync("/api/auth/register", request);
 
             // === ASSERT ===
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -103,7 +103,7 @@ namespace HexagonalSkeleton.Test.Integration.UseCases
             request.PasswordConfirmation = "DifferentPassword123!";
 
             // === ACT ===
-            var response = await _client.PostAsJsonAsync("/api/registration", request);
+            var response = await _client.PostAsJsonAsync("/api/auth/register", request);
 
             // === ASSERT ===
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -117,7 +117,7 @@ namespace HexagonalSkeleton.Test.Integration.UseCases
             request.Birthdate = DateTime.Today.AddYears(-10); // 10 years old
 
             // === ACT ===
-            var response = await _client.PostAsJsonAsync("/api/registration", request);
+            var response = await _client.PostAsJsonAsync("/api/auth/register", request);
 
             // === ASSERT ===
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -140,7 +140,7 @@ namespace HexagonalSkeleton.Test.Integration.UseCases
             request.PasswordConfirmation = weakPassword;
 
             // === ACT ===
-            var response = await _client.PostAsJsonAsync("/api/registration", request);
+            var response = await _client.PostAsJsonAsync("/api/auth/register", request);
 
             // === ASSERT ===
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -159,7 +159,7 @@ namespace HexagonalSkeleton.Test.Integration.UseCases
             request.Longitude = lng;
 
             // === ACT ===
-            var response = await _client.PostAsJsonAsync("/api/registration", request);
+            var response = await _client.PostAsJsonAsync("/api/auth/register", request);
 
             // === ASSERT ===
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

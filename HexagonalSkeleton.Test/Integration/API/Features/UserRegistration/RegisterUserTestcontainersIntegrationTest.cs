@@ -56,7 +56,7 @@ namespace HexagonalSkeleton.Test.Integration
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             // Act
-            var response = await _client.PostAsync("/api/registration", content);
+            var response = await _client.PostAsync("/api/auth/register", content);
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -126,7 +126,7 @@ namespace HexagonalSkeleton.Test.Integration
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             // Act - Create user first time (should succeed)
-            var firstResponse = await _client.PostAsync("/api/registration", content);
+            var firstResponse = await _client.PostAsync("/api/auth/register", content);
             
             // Verify first registration succeeded
             if (firstResponse.StatusCode != System.Net.HttpStatusCode.Created)
@@ -139,7 +139,7 @@ namespace HexagonalSkeleton.Test.Integration
             var secondContent = new StringContent(json, Encoding.UTF8, "application/json");
 
             // Act - Try to create user with same email (should fail)
-            var secondResponse = await _client.PostAsync("/api/registration", secondContent);
+            var secondResponse = await _client.PostAsync("/api/auth/register", secondContent);
 
             // Assert
             Assert.Equal(System.Net.HttpStatusCode.Conflict, secondResponse.StatusCode);
@@ -197,7 +197,7 @@ namespace HexagonalSkeleton.Test.Integration
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             // Act
-            var response = await _client.PostAsync("/api/registration", content);
+            var response = await _client.PostAsync("/api/auth/register", content);
 
             // Debug validation errors if request fails
             if (!response.IsSuccessStatusCode)

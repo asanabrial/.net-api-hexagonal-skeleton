@@ -32,7 +32,7 @@ namespace HexagonalSkeleton.Test.Integration.UseCases
 
             // === ACT ===
             // Command side: Create user (write to PostgreSQL)
-            var commandResponse = await _client.PostAsJsonAsync("/api/registration", registrationRequest);
+            var commandResponse = await _client.PostAsJsonAsync("/api/auth/register", registrationRequest);
             commandResponse.StatusCode.Should().Be(HttpStatusCode.Created);
             
             var registrationResult = await commandResponse.Content.ReadFromJsonAsync<LoginResponse>();
@@ -74,7 +74,7 @@ namespace HexagonalSkeleton.Test.Integration.UseCases
             for (int i = 0; i < 5; i++)
             {
                 var request = CreateValidUserRegistrationRequest($"perf.test.{i}@example.com");
-                var response = await _client.PostAsJsonAsync("/api/registration", request);
+                var response = await _client.PostAsJsonAsync("/api/auth/register", request);
                 response.StatusCode.Should().Be(HttpStatusCode.Created);
                 
                 var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
@@ -120,7 +120,7 @@ namespace HexagonalSkeleton.Test.Integration.UseCases
 
             // === ACT ===
             // Step 1: Execute command (write operation)
-            var commandResponse = await _client.PostAsJsonAsync("/api/registration", registrationRequest);
+            var commandResponse = await _client.PostAsJsonAsync("/api/auth/register", registrationRequest);
             commandResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
             // Step 2: Immediately try to read (might not be synchronized yet)
@@ -153,7 +153,7 @@ namespace HexagonalSkeleton.Test.Integration.UseCases
             // === ARRANGE ===
             // First create a valid user
             var validRequest = CreateValidUserRegistrationRequest();
-            var validResponse = await _client.PostAsJsonAsync("/api/registration", validRequest);
+            var validResponse = await _client.PostAsJsonAsync("/api/auth/register", validRequest);
             validResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
             // Wait for sync
@@ -161,7 +161,7 @@ namespace HexagonalSkeleton.Test.Integration.UseCases
 
             // === ACT ===
             // Try to create duplicate user (command should fail)
-            var duplicateResponse = await _client.PostAsJsonAsync("/api/registration", validRequest);
+            var duplicateResponse = await _client.PostAsJsonAsync("/api/auth/register", validRequest);
             duplicateResponse.StatusCode.Should().Be(HttpStatusCode.Conflict);
 
             // Query side should still work with existing user
@@ -190,7 +190,7 @@ namespace HexagonalSkeleton.Test.Integration.UseCases
             var registrationRequest = CreateValidUserRegistrationRequest();
 
             // === ACT ===
-            var commandResponse = await _client.PostAsJsonAsync("/api/registration", registrationRequest);
+            var commandResponse = await _client.PostAsJsonAsync("/api/auth/register", registrationRequest);
             commandResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
             var registrationResult = await commandResponse.Content.ReadFromJsonAsync<LoginResponse>();
