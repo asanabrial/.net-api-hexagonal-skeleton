@@ -76,6 +76,49 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
         }
 
         /// <summary>
+        /// Generates a JWT token using provided user data without database lookup
+        /// Used during registration when user data is available but may not be synced to read database yet
+        /// </summary>
+        public TokenInfo GenerateJwtTokenFromUserData(Guid userId, string email, string fullName, string phoneNumber)
+        {
+            if (userId == Guid.Empty)
+                throw new ArgumentException("User ID cannot be empty", nameof(userId));
+            
+            if (string.IsNullOrWhiteSpace(email))
+                throw new ArgumentException("Email cannot be null or empty", nameof(email));
+            
+            if (string.IsNullOrWhiteSpace(fullName))
+                throw new ArgumentException("Full name cannot be null or empty", nameof(fullName));
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_appSettings.Secret);
+            
+            var expiresAt = DateTime.UtcNow.AddDays(7);
+            
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+                    new Claim(ClaimTypes.Email, email),
+                    new Claim(ClaimTypes.Name, fullName),
+                    new Claim("phone", phoneNumber ?? string.Empty)
+                }),
+                Expires = expiresAt,
+                Issuer = _appSettings.Issuer,
+                Audience = _appSettings.Audience,
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+            
+            _logger.LogInformation("Generated JWT token from user data for user {UserId}", userId);
+            
+            return new TokenInfo(tokenString, expiresAt);
+        }
+
+        /// <summary>
         /// Validates user credentials against stored hash
         /// Accesses command-side repository for consistent authentication data
         /// </summary>

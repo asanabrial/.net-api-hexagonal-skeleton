@@ -46,8 +46,12 @@ namespace HexagonalSkeleton.Application.Features.UserRegistration.Commands
             // 4. Persist and complete workflow
             var userId = await userWriteRepository.CreateAsync(user, cancellationToken);
             
-            // Generate JWT token with expiration info
-            var tokenInfo = await authenticationService.GenerateJwtTokenAsync(userId, cancellationToken);
+            // Generate JWT token using user data directly (avoiding CQRS read-side dependency)
+            var tokenInfo = authenticationService.GenerateJwtTokenFromUserData(
+                userId, 
+                user.Email.Value, 
+                user.FullName.GetFullName(), 
+                user.PhoneNumber.Value);
             
             // Publish simple integration event for CQRS synchronization
             var integrationEvent = new UserCreatedIntegrationEvent(

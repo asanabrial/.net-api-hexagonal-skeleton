@@ -81,7 +81,7 @@ namespace HexagonalSkeleton.Application.Features.UserAuthentication.Commands
             await _userWriteRepository.SetLastLoginAsync(user.Id, cancellationToken);
             // Note: UserLoggedInEvent is automatically published by the repository after save            
             
-            // Generate token with expiration info
+            // Generate token with expiration info (user should exist in read database for login)
             var tokenInfo = await _authenticationService.GenerateJwtTokenAsync(user.Id, cancellationToken);
             
             // Map user data to DTO and create authentication response
