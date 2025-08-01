@@ -40,11 +40,10 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
 
             var user = await _userReadRepository.GetByIdAsync(userId, cancellationToken);
             
-            // If user is not found (can happen in test environments), generate a basic test token
             if (user == null)
             {
-                _logger.LogWarning("User {UserId} not found during token generation. Generating test token.", userId);
-                return GenerateTestToken(userId);
+                _logger.LogWarning("User {UserId} not found during token generation.", userId);
+                throw new InvalidOperationException($"User with ID {userId} not found. Cannot generate token for non-existent user.");
             }
 
             if (user.IsDeleted)
@@ -183,35 +182,5 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
             return PasswordHasher.GenerateSalt();
         }
 
-        /// <summary>
-        /// Generates a test token for environments where user lookup is not available
-        /// </summary>
-        private TokenInfo GenerateTestToken(Guid userId)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_appSettings.Secret);
-            
-            var expiresAt = DateTime.UtcNow.AddDays(7);
-            
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                    new Claim(ClaimTypes.Email, $"test.user.{userId}@example.com"),
-                    new Claim(ClaimTypes.Name, $"Test User {userId}"),
-                    new Claim("TestEnvironment", "true")
-                }),
-                Expires = expiresAt,
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var tokenString = tokenHandler.WriteToken(token);
-
-            _logger.LogInformation("Generated test token for user {UserId}", userId);
-
-            return new TokenInfo(tokenString, expiresAt);
-        }
     }
 }

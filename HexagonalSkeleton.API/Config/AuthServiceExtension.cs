@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using System.Text;
 
 namespace HexagonalSkeleton.API.Config
@@ -47,6 +48,34 @@ namespace HexagonalSkeleton.API.Config
                     ClockSkew = TimeSpan.Zero, // Remove default 5 minute clock skew
                     RequireExpirationTime = true,
                     RequireSignedTokens = true
+                };
+
+                // Enable detailed logging for JWT authentication in development
+                o.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = context =>
+                    {
+                        // Log authentication failures with details
+                        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
+                        logger.LogError("JWT Authentication failed: {Exception}", context.Exception.Message);
+                        return Task.CompletedTask;
+                    },
+                    OnTokenValidated = context =>
+                    {
+                        // Log successful token validation
+                        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
+                        logger.LogInformation("JWT Token validated successfully for user: {UserId}", 
+                            context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                        return Task.CompletedTask;
+                    },
+                    OnChallenge = context =>
+                    {
+                        // Log authorization challenges
+                        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
+                        logger.LogWarning("JWT Authentication challenge: {Error} - {ErrorDescription}", 
+                            context.Error, context.ErrorDescription);
+                        return Task.CompletedTask;
+                    }
                 };
             });
 

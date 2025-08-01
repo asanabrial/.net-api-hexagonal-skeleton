@@ -19,6 +19,7 @@ namespace HexagonalSkeleton.API.Controllers.Features
     [ApiController]
     [Route("api/users")]
     [Produces("application/json")]
+    [Authorize]
     public class UserManagementController : ControllerBase
     {
         private readonly ISender _mediator;
