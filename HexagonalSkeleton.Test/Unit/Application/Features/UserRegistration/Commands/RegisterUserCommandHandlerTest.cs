@@ -69,11 +69,13 @@ public class RegisterUserCommandHandlerTest
             .Setup(r => r.CreateAsync(It.IsAny<User>(), cancellationToken))
             .ReturnsAsync(userId);
         
-        _mockAuthenticationService
-            .Setup(a => a.GenerateJwtTokenAsync(userId, cancellationToken))
-            .ReturnsAsync(new TokenInfo(jwtToken, DateTime.UtcNow.AddDays(7)));
-
-        // Act
+            _mockAuthenticationService
+                .Setup(a => a.GenerateJwtTokenFromUserData(
+                    userId, 
+                    command.Email, 
+                    It.IsAny<string>(), 
+                    command.PhoneNumber))
+                .Returns(new TokenInfo(jwtToken, DateTime.UtcNow.AddDays(7)));        // Act
         var result = await _handler.Handle(command, cancellationToken);
 
         // Assert

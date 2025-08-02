@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net.Http.Json;
 using System.Net;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 using Xunit;
 using FluentAssertions;
 using HexagonalSkeleton.API.Models.Users;
@@ -22,6 +25,47 @@ namespace HexagonalSkeleton.Test.Integration.API.Features.UserManagement
     {
         public ComprehensiveUserIntegrationTest(ComprehensiveUserTestWebApplicationFactory factory) : base(factory)
         {
+        }
+
+        /// <summary>
+        /// Configures authentication by registering a test user and setting the Authorization header
+        /// </summary>
+        private async Task SetupAuthenticationAsync()
+        {
+            var uniqueEmail = $"auth{Guid.NewGuid():N}@example.com";
+            var uniquePhone = $"+1{DateTime.UtcNow.Ticks % 9000000000 + 1000000000}";
+            
+            var authUserRequest = new CreateUserRequest
+            {
+                Email = uniqueEmail,
+                FirstName = "Auth",
+                LastName = "User",
+                PhoneNumber = uniquePhone,
+                Password = "TempPass123!",
+                PasswordConfirmation = "TempPass123!",
+                Latitude = 40.7128,
+                Longitude = -74.0060,
+                Birthdate = DateTime.Now.AddYears(-25)
+            };
+
+            // Register user and get token
+            var userResponse = await _client.PostAsJsonAsync("/api/auth/register", authUserRequest);
+            
+            // Ensure registration was successful
+            userResponse.EnsureSuccessStatusCode();
+            
+            var userResponseContent = await userResponse.Content.ReadAsStringAsync();
+            var loginResponse = JsonSerializer.Deserialize<AuthenticatedRegistrationResponse>(userResponseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            
+            // Ensure we got a valid token
+            if (string.IsNullOrWhiteSpace(loginResponse?.AccessToken))
+                throw new InvalidOperationException("Failed to get access token from registration response");
+            
+            // Set authorization header
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", loginResponse.AccessToken);
+
+            // Wait for CQRS event propagation
+            await Task.Delay(100);
         }
 
         [Fact]
@@ -89,6 +133,9 @@ namespace HexagonalSkeleton.Test.Integration.API.Features.UserManagement
         [Fact]
         public async Task GetAllUsers_ShouldReturnPagedResults()
         {
+            // Arrange - Setup authentication
+            await SetupAuthenticationAsync();
+
             // Act
             var response = await _client.GetAsync("/api/users?page=1&pageSize=10");
 
@@ -121,6 +168,9 @@ namespace HexagonalSkeleton.Test.Integration.API.Features.UserManagement
             var createResponse = await _client.PostAsJsonAsync("/api/auth/register", registerRequest);
             var createResult = await createResponse.Content.ReadFromJsonAsync<AuthenticatedRegistrationResponse>();
             var userId = createResult!.User.Id;
+
+            // Setup authorization with the token from registration
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", createResult.AccessToken);
 
             var updateRequest = new UpdateProfileRequest
             {
@@ -166,6 +216,9 @@ namespace HexagonalSkeleton.Test.Integration.API.Features.UserManagement
             var createResult = await createResponse.Content.ReadFromJsonAsync<AuthenticatedRegistrationResponse>();
             var userId = createResult!.User.Id;
 
+            // Setup authorization with the token from registration
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", createResult.AccessToken);
+
             // Act
             var response = await _client.PatchAsync($"/api/users/{userId}/deactivate", null);
 
@@ -199,6 +252,9 @@ namespace HexagonalSkeleton.Test.Integration.API.Features.UserManagement
             var createResult = await createResponse.Content.ReadFromJsonAsync<AuthenticatedRegistrationResponse>();
             var userId = createResult!.User.Id;
 
+            // Setup authorization with the token from registration
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", createResult.AccessToken);
+
             // Act
             var response = await _client.DeleteAsync($"/api/users/{userId}");
 
@@ -229,6 +285,9 @@ namespace HexagonalSkeleton.Test.Integration.API.Features.UserManagement
             var createResult = await createResponse.Content.ReadFromJsonAsync<AuthenticatedRegistrationResponse>();
             var userId = createResult!.User.Id;
 
+            // Setup authorization with the token from registration
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", createResult.AccessToken);
+
             // Wait for CQRS event propagation
             await Task.Delay(50);
 
@@ -247,7 +306,9 @@ namespace HexagonalSkeleton.Test.Integration.API.Features.UserManagement
         [Fact]
         public async Task GetUserById_NonExistentUser_ShouldReturnNotFound()
         {
-            // Arrange
+            // Arrange - Setup authentication
+            await SetupAuthenticationAsync();
+            
             var nonExistentUserId = Guid.NewGuid();
 
             // Act

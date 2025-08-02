@@ -105,20 +105,19 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
             Assert.Equal("userId", exception.ParamName);
             Assert.Contains("User ID cannot be empty", exception.Message);
         }        [Fact]
-        public async Task GenerateJwtTokenAsync_WithNonExistentUser_ShouldGenerateTestToken()
+        public async Task GenerateJwtTokenAsync_WithNonExistentUser_ShouldThrowInvalidOperationException()
         {
             // Arrange
             var userId = Guid.NewGuid();
             _mockUserReadRepository.Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((DomainUser?)null);
 
-            // Act
-            var result = await _authenticationService.GenerateJwtTokenAsync(userId);
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => _authenticationService.GenerateJwtTokenAsync(userId));
 
-            // Assert
-            Assert.NotNull(result);
-            Assert.NotNull(result.Token);
-            Assert.True(result.ExpiresAt > DateTime.UtcNow);
+            Assert.Contains("not found. Cannot generate token for non-existent user", exception.Message);
+            Assert.Contains(userId.ToString(), exception.Message);
         }
 
         [Fact]
