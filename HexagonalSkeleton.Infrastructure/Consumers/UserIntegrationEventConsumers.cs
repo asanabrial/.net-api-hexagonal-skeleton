@@ -1,4 +1,6 @@
 using HexagonalSkeleton.Application.IntegrationEvents;
+using HexagonalSkeleton.Domain.Ports;
+using HexagonalSkeleton.Domain.Services;
 using HexagonalSkeleton.Infrastructure.Persistence.Query;
 using HexagonalSkeleton.Infrastructure.Persistence.Query.Documents;
 using MassTransit;
@@ -8,17 +10,22 @@ using MongoDB.Driver;
 namespace HexagonalSkeleton.Infrastructure.Consumers
 {
     /// <summary>
-    /// Simple consumer for UserCreated events
-    /// Single responsibility: sync user data to read model
+    /// Consumer for UserCreated events
+    /// Uses proper domain services for data synchronization
     /// </summary>
     public class UserCreatedConsumer : IConsumer<UserCreatedIntegrationEvent>
     {
-        private readonly QueryDbContext _queryDbContext;
+        private readonly IUserWriteRepository _userWriteRepository;
+        private readonly IUserSyncService _userSyncService;
         private readonly ILogger<UserCreatedConsumer> _logger;
 
-        public UserCreatedConsumer(QueryDbContext queryDbContext, ILogger<UserCreatedConsumer> logger)
+        public UserCreatedConsumer(
+            IUserWriteRepository userWriteRepository,
+            IUserSyncService userSyncService,
+            ILogger<UserCreatedConsumer> logger)
         {
-            _queryDbContext = queryDbContext;
+            _userWriteRepository = userWriteRepository;
+            _userSyncService = userSyncService;
             _logger = logger;
         }
 
@@ -29,44 +36,16 @@ namespace HexagonalSkeleton.Infrastructure.Consumers
 
             try
             {
-                // Simple check - avoid duplicates
-                var existingUser = await _queryDbContext.Users
-                    .Find(u => u.Id == message.UserId)
-                    .FirstOrDefaultAsync();
-
-                if (existingUser != null)
+                // Get the complete user data from the command store
+                var user = await _userWriteRepository.GetTrackedByIdAsync(message.UserId);
+                if (user == null)
                 {
-                    _logger.LogWarning("User {UserId} already exists in read model", message.UserId);
+                    _logger.LogWarning("User {UserId} not found in command store", message.UserId);
                     return;
                 }
 
-                // Create simple user document with essential data only
-                var userDocument = new UserQueryDocument
-                {
-                    Id = message.UserId,
-                    Email = message.Email,
-                    FullName = new FullNameDocument
-                    {
-                        FirstName = message.FirstName,
-                        LastName = message.LastName
-                    },
-                    PhoneNumber = message.PhoneNumber,
-                    CreatedAt = message.CreatedAt,
-                    LastLogin = null,
-                    Location = new LocationDocument { Latitude = 0, Longitude = 0 }, // Default empty location
-                    SearchTerms = new List<string> 
-                    { 
-                        message.FirstName.ToLowerInvariant(),
-                        message.LastName.ToLowerInvariant(),
-                        message.Email.ToLowerInvariant()
-                    },
-                    Age = null,
-                    IsDeleted = false,
-                    ProfileCompleteness = 0.3, // Basic info
-                    UpdatedAt = null
-                };
-
-                await _queryDbContext.Users.InsertOneAsync(userDocument);
+                // Use the sync service to properly map and sync to query store
+                await _userSyncService.SyncUserAsync(user);
                 _logger.LogInformation("User {UserId} successfully synced to read model", message.UserId);
             }
             catch (Exception ex)
@@ -78,17 +57,22 @@ namespace HexagonalSkeleton.Infrastructure.Consumers
     }
 
     /// <summary>
-    /// Simple consumer for UserLoggedIn events
-    /// Single responsibility: update last login time
+    /// Consumer for UserLoggedIn events
+    /// Updates last login time using proper domain services
     /// </summary>
     public class UserLoggedInConsumer : IConsumer<UserLoggedInIntegrationEvent>
     {
-        private readonly QueryDbContext _queryDbContext;
+        private readonly IUserWriteRepository _userWriteRepository;
+        private readonly IUserSyncService _userSyncService;
         private readonly ILogger<UserLoggedInConsumer> _logger;
 
-        public UserLoggedInConsumer(QueryDbContext queryDbContext, ILogger<UserLoggedInConsumer> logger)
+        public UserLoggedInConsumer(
+            IUserWriteRepository userWriteRepository,
+            IUserSyncService userSyncService,
+            ILogger<UserLoggedInConsumer> logger)
         {
-            _queryDbContext = queryDbContext;
+            _userWriteRepository = userWriteRepository;
+            _userSyncService = userSyncService;
             _logger = logger;
         }
 
@@ -99,10 +83,16 @@ namespace HexagonalSkeleton.Infrastructure.Consumers
 
             try
             {
-                var filter = Builders<UserQueryDocument>.Filter.Eq(u => u.Id, message.UserId);
-                var update = Builders<UserQueryDocument>.Update.Set(u => u.LastLogin, message.LoginTime);
+                // Get the updated user data from command store (already has LastLogin updated)
+                var user = await _userWriteRepository.GetTrackedByIdAsync(message.UserId);
+                if (user == null)
+                {
+                    _logger.LogWarning("User {UserId} not found in command store", message.UserId);
+                    return;
+                }
 
-                await _queryDbContext.Users.UpdateOneAsync(filter, update);
+                // Sync the updated user data to query store
+                await _userSyncService.SyncUserAsync(user);
                 _logger.LogInformation("Last login updated for user {UserId}", message.UserId);
             }
             catch (Exception ex)

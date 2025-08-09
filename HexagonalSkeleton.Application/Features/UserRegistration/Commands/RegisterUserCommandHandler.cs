@@ -82,7 +82,6 @@ namespace HexagonalSkeleton.Application.Features.UserRegistration.Commands
                 Latitude = user.Location.Latitude,
                 Longitude = user.Location.Longitude,
                 AboutMe = user.AboutMe,
-                ProfileImageName = user.ProfileImageName,
                 LastLogin = user.LastLogin,
                 CreatedAt = user.CreatedAt
             };

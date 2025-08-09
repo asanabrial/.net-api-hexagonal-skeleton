@@ -36,8 +36,7 @@ namespace HexagonalSkeleton.Test
             DateTime? createdAt = null,
             DateTime? updatedAt = null,
             DateTime? deletedAt = null,
-            bool isDeleted = false,
-            string? profileImageName = null)
+            bool isDeleted = false)
         {
             return User.Reconstitute(
                 id: id ?? Guid.NewGuid(),
@@ -55,8 +54,7 @@ namespace HexagonalSkeleton.Test
                 createdAt: createdAt ?? DateTime.UtcNow,
                 updatedAt: updatedAt ?? DateTime.UtcNow,
                 deletedAt: deletedAt,
-                isDeleted: isDeleted,
-                profileImageName: profileImageName
+                isDeleted: isDeleted
             );
         }
 

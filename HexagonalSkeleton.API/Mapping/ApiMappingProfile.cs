@@ -4,6 +4,7 @@ using HexagonalSkeleton.API.Models.Auth;
 using HexagonalSkeleton.API.Models.Common;
 using HexagonalSkeleton.API.Models.Users;
 using HexagonalSkeleton.Application.Common.Pagination;
+using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 using HexagonalSkeleton.Application.Features.UserProfile.Dto;
 using HexagonalSkeleton.Application.Features.UserRegistration.Dto;
 
@@ -49,6 +50,9 @@ namespace HexagonalSkeleton.API.Mapping
 
             // Maps UserProfileDto to UserResponse for profile update responses
             CreateMap<UserProfileDto, UserResponse>();
+
+            // Maps UpdateUserDto to UserResponse for user update responses
+            CreateMap<UpdateUserDto, UserResponse>();
 
             // Generic mapping for ALL paginated responses - SUPER REUSABLE!
             // Works for any PagedQueryResult<TDto> to PagedResponse<TResponse>

@@ -18,7 +18,6 @@ namespace HexagonalSkeleton.Application.Features.UserProfile.Dto
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
         public string? AboutMe { get; set; }
-        public string? ProfileImageName { get; set; }
         public DateTime? LastLogin { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }

@@ -14,7 +14,6 @@ namespace HexagonalSkeleton.API.Models.Users
         /// User identifier
         /// </summary>
         [Required(ErrorMessage = "User ID is required")]
-        [Range(1, int.MaxValue, ErrorMessage = "User ID must be greater than 0")]
         public Guid Id { get; set; }
 
         /// <summary>
@@ -32,14 +31,6 @@ namespace HexagonalSkeleton.API.Models.Users
         public required string LastName { get; set; }
 
         /// <summary>
-        /// User email address
-        /// </summary>
-        [Required(ErrorMessage = "Email is required")]
-        [EmailAddress(ErrorMessage = "Invalid email format")]
-        [StringLength(255, ErrorMessage = "Email cannot exceed 255 characters")]
-        public required string Email { get; set; }
-
-        /// <summary>
         /// User's phone number
         /// </summary>
         [Required(ErrorMessage = "Phone number is required")]
@@ -52,5 +43,23 @@ namespace HexagonalSkeleton.API.Models.Users
         /// </summary>
         [DataType(DataType.Date)]
         public DateTime? Birthdate { get; set; }
+
+        /// <summary>
+        /// User's latitude location
+        /// </summary>
+        [Range(-90, 90, ErrorMessage = "Latitude must be between -90 and 90")]
+        public double Latitude { get; set; }
+
+        /// <summary>
+        /// User's longitude location
+        /// </summary>
+        [Range(-180, 180, ErrorMessage = "Longitude must be between -180 and 180")]
+        public double Longitude { get; set; }
+
+        /// <summary>
+        /// User's about me description
+        /// </summary>
+        [StringLength(500, ErrorMessage = "About me cannot exceed 500 characters")]
+        public string AboutMe { get; set; } = string.Empty;
     }
 }

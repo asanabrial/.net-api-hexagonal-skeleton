@@ -241,36 +241,6 @@ public class UserAggregateTest
                 birthdate, "+1234567890", 40.7128, -74.0060, "About me"));
     }
 
-    [Fact]
-    public void SetProfileImage_ValidFileName_ShouldSetImage()
-    {
-        // Arrange
-        var user = TestHelper.CreateTestUser();
-        var fileName = "profile.jpg";
-
-        // Act
-        user.SetProfileImage(fileName);
-
-        // Assert
-        Assert.Equal(fileName, user.ProfileImageName);
-        Assert.NotNull(user.UpdatedAt);
-    }
-
-    [Fact]
-    public void RemoveProfileImage_ShouldClearImage()
-    {
-        // Arrange
-        var user = TestHelper.CreateTestUser();
-        user.SetProfileImage("profile.jpg");
-
-        // Act
-        user.RemoveProfileImage();
-
-        // Assert
-        Assert.Null(user.ProfileImageName);
-        Assert.NotNull(user.UpdatedAt);
-    }
-
     [Fact]  
     public void ChangePassword_ValidCredentials_ShouldUpdatePassword()
     {
@@ -347,17 +317,6 @@ public class UserAggregateTest
     }
 
     [Fact]
-    public void SetProfileImage_EmptyFileName_ShouldThrowException()
-    {
-        // Arrange
-        var user = TestHelper.CreateTestUser();
-
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => user.SetProfileImage(""));
-        Assert.Throws<ArgumentException>(() => user.SetProfileImage("   "));
-    }
-
-    [Fact]
     public void ChangePassword_EmptyCredentials_ShouldThrowException()
     {
         // Arrange
@@ -388,17 +347,6 @@ public class UserAggregateTest
 
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() => user.UpdatePhoneNumber("+1987654321"));
-    }
-
-    [Fact]
-    public void SetProfileImage_DeletedUser_ShouldThrowException()
-    {
-        // Arrange
-        var user = TestHelper.CreateTestUser();
-        user.Delete();
-
-        // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => user.SetProfileImage("profile.jpg"));
     }
 
     [Fact]

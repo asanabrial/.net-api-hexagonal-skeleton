@@ -49,7 +49,6 @@ namespace HexagonalSkeleton.Domain
         // Primitive properties that don't warrant value objects yet
         public DateTime? Birthdate { get; private set; }
         public string AboutMe { get; private set; } = string.Empty;
-        public string? ProfileImageName { get; private set; }
         
         // Authentication related - could be moved to separate aggregate
         public string PasswordSalt { get; private set; } = string.Empty;
@@ -99,8 +98,7 @@ namespace HexagonalSkeleton.Domain
             DateTime createdAt,
             DateTime? updatedAt,
             DateTime? deletedAt,
-            bool isDeleted,
-            string? profileImageName = null)
+            bool isDeleted)
         {
             var user = new User();
             user.Id = id;
@@ -117,7 +115,6 @@ namespace HexagonalSkeleton.Domain
             user.UpdatedAt = updatedAt;
             user.DeletedAt = deletedAt;
             user.IsDeleted = isDeleted;
-            user.ProfileImageName = profileImageName;
 
             return user;
         }
@@ -164,24 +161,6 @@ namespace HexagonalSkeleton.Domain
                 throw new InvalidOperationException("Cannot update phone number of deleted user");
 
             PhoneNumber = new PhoneNumber(phoneNumber);
-            MarkAsUpdated();
-        }
-
-        public void SetProfileImage(string fileName)
-        {
-            if (IsDeleted)
-                throw new InvalidOperationException("Cannot set profile image of deleted user");
-
-            if (string.IsNullOrWhiteSpace(fileName))
-                throw new ArgumentException("File name cannot be null or empty", nameof(fileName));
-
-            ProfileImageName = fileName;
-            MarkAsUpdated();
-        }
-
-        public void RemoveProfileImage()
-        {
-            ProfileImageName = null;
             MarkAsUpdated();
         }
 

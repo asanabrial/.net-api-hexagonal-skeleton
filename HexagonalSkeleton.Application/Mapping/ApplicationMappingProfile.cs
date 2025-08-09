@@ -82,6 +82,17 @@ namespace HexagonalSkeleton.Application.Mapping
                 .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Latitude : (double?)null))
                 .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Location != null ? src.Location.Longitude : (double?)null));
 
+            // User to UpdateUserDto mapping (for user update responses)
+            CreateMap<User, UpdateUserDto>()
+                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FullName.FirstName))
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.FullName.LastName))
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName.GetFullName()))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email.Value))
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber.Value))
+                .ForMember(dest => dest.AboutMe, opt => opt.MapFrom(src => src.AboutMe))
+                .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Location != null ? (double?)src.Location.Latitude : null))
+                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Location != null ? (double?)src.Location.Longitude : null));
+
             // Authentication DTOs mappings (with AccessToken and nested user data)
             CreateMap<User, AuthenticationDto>()
                 .ForMember(dest => dest.AccessToken, opt => opt.Ignore()) // Will be set manually after mapping

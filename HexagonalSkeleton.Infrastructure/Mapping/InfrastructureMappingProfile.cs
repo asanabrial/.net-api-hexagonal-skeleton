@@ -92,8 +92,7 @@ namespace HexagonalSkeleton.Infrastructure.Mapping
                         createdAt: src.CreatedAt,
                         updatedAt: src.UpdatedAt,
                         deletedAt: src.DeletedAt,
-                        isDeleted: src.IsDeleted,
-                        profileImageName: null // Query model may not have this field
+                        isDeleted: src.IsDeleted
                     );
                 })
                 .ForAllMembers(opt => opt.Ignore()); // Ignore all other members since we use ConstructUsing

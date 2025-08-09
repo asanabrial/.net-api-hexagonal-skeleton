@@ -45,11 +45,18 @@ namespace HexagonalSkeleton.Infrastructure.Mapping
                     DisplayName = $"{src.FullName.FirstName} {src.FullName.LastName}"
                 }))
                 .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber.Value))
+                .ForMember(dest => dest.Birthdate, opt => opt.MapFrom(src => src.Birthdate))
                 .ForMember(dest => dest.Location, opt => opt.MapFrom(src => new LocationDocument
                 {
                     Latitude = src.Location.Latitude,
                     Longitude = src.Location.Longitude
                 }))
+                .ForMember(dest => dest.AboutMe, opt => opt.MapFrom(src => src.AboutMe))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
+                .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => src.UpdatedAt))
+                .ForMember(dest => dest.LastLogin, opt => opt.MapFrom(src => src.LastLogin))
+                .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => src.IsDeleted))
+                .ForMember(dest => dest.DeletedAt, opt => opt.MapFrom(src => src.DeletedAt))
                 .ForMember(dest => dest.SearchTerms, opt => opt.MapFrom(src => new List<string>
                 {
                     src.Email.Value.ToLowerInvariant(),
@@ -77,11 +84,18 @@ namespace HexagonalSkeleton.Infrastructure.Mapping
                     LastName = src.LastName,
                     DisplayName = $"{src.FirstName} {src.LastName}"
                 }))
+                .ForMember(dest => dest.Birthdate, opt => opt.MapFrom(src => src.Birthdate))
                 .ForMember(dest => dest.Location, opt => opt.MapFrom(src => new LocationDocument
                 {
                     Latitude = src.Latitude,
                     Longitude = src.Longitude
                 }))
+                .ForMember(dest => dest.AboutMe, opt => opt.MapFrom(src => src.AboutMe))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
+                .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => src.UpdatedAt))
+                .ForMember(dest => dest.LastLogin, opt => opt.MapFrom(src => src.LastLogin))
+                .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => src.IsDeleted))
+                .ForMember(dest => dest.DeletedAt, opt => opt.MapFrom(src => src.DeletedAt))
                 .ForMember(dest => dest.SearchTerms, opt => opt.MapFrom(src => new List<string>
                 {
                     src.Email.ToLowerInvariant(),

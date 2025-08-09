@@ -60,11 +60,6 @@ namespace HexagonalSkeleton.API.Models.Users
         public string? AboutMe { get; set; }
 
         /// <summary>
-        /// User's profile image file name
-        /// </summary>
-        public string? ProfileImageName { get; set; }
-
-        /// <summary>
         /// Last login timestamp
         /// </summary>
         public DateTime? LastLogin { get; set; }
