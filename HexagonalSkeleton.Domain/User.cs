@@ -243,12 +243,7 @@ namespace HexagonalSkeleton.Domain
         // Private helper methods
         private static int CalculateAge(DateTime birthdate)
         {
-            var today = DateTime.Today;
-            var age = today.Year - birthdate.Year;
-            
-            if (birthdate.Date > today.AddYears(-age))
-                age--;
-                  return age;
+            return Common.AgeCalculator.CalculateAge(birthdate);
         }
     }
 }

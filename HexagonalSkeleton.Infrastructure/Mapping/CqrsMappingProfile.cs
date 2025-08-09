@@ -101,13 +101,7 @@ namespace HexagonalSkeleton.Infrastructure.Mapping
         {
             if (!birthdate.HasValue) return null;
 
-            var today = DateTime.UtcNow.Date;
-            var age = today.Year - birthdate.Value.Year;
-            
-            if (birthdate.Value.Date > today.AddYears(-age))
-                age--;
-                
-            return age;
+            return HexagonalSkeleton.Domain.Common.AgeCalculator.CalculateAge(birthdate.Value, DateTime.UtcNow.Date);
         }
 
         /// <summary>

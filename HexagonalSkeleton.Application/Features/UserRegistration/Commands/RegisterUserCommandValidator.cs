@@ -77,10 +77,7 @@ namespace HexagonalSkeleton.Application.Features.UserRegistration.Commands
 
         private static bool BeAtLeast13YearsOld(DateTime birthdate)
         {
-            var today = DateTime.Today;
-            var age = today.Year - birthdate.Year;
-            if (birthdate.Date > today.AddYears(-age)) age--;
-            return age >= 13;
+            return HexagonalSkeleton.Domain.Common.AgeCalculator.IsAtLeastAge(birthdate, 13);
         }
 
         private static bool BeReasonableAge(DateTime birthdate)

@@ -116,7 +116,7 @@ namespace HexagonalSkeleton.Test
         }
 
         /// <summary>
-        /// Creates a valid RegisterUserCommand for testing
+        /// Creates a valid RegisterUserCommand for testing - DateTime overload for convenience
         /// </summary>
         public static RegisterUserCommand CreateValidRegisterUserCommand(
             string email,
@@ -128,9 +128,8 @@ namespace HexagonalSkeleton.Test
             DateTime birthdate,
             string password = "TestPassword123!")
         {
-            return CreateRegisterUserCommand(email: email, name: firstName, surname: lastName, 
-                phoneNumber: phoneNumber, latitude: latitude, longitude: longitude, 
-                birthdate: DateOnly.FromDateTime(birthdate), password: password);
+            return CreateValidRegisterUserCommand(email, firstName, lastName, phoneNumber, 
+                latitude, longitude, DateOnly.FromDateTime(birthdate), password);
         }
 
         /// <summary>
