@@ -16,14 +16,14 @@ using HexagonalSkeleton.Test.TestInfrastructure.Base;
 namespace HexagonalSkeleton.Test.Integration.API.Features.UserManagement
 {
     /// <summary>
-    /// Comprehensive integration tests for User Management workflows.
+    /// Integration tests for User Management workflows.
     /// Tests the complete flow from API to database using Testcontainers.
     /// Validates CQRS architecture, domain logic, and API responses.
     /// Implements automatic database cleanup between tests to ensure isolation.
     /// </summary>
-    public class ComprehensiveUserIntegrationTest : BaseIntegrationTest<ConfiguredTestWebApplicationFactory>, IClassFixture<ConfiguredTestWebApplicationFactory>
+    public class UserManagementIntegrationTest : BaseIntegrationTest<ConfiguredTestWebApplicationFactory>, IClassFixture<ConfiguredTestWebApplicationFactory>
     {
-        public ComprehensiveUserIntegrationTest(ConfiguredTestWebApplicationFactory factory) : base(factory)
+        public UserManagementIntegrationTest(ConfiguredTestWebApplicationFactory factory) : base(factory)
         {
         }
 

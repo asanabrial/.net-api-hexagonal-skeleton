@@ -17,7 +17,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Query
     /// Following Hexagonal Architecture with adapters and ports
     /// Also implements specialized interfaces following Interface Segregation Principle
     /// </summary>
-    public class UserReadRepositoryMongoAdapter : IUserReadRepository, IUserExistenceChecker, IUserSearchService, IUserBasicReader
+    public class UserReadRepositoryMongoAdapter : IUserReadRepository, IUserExistenceChecker, IUserSearchService, IUserReader
     {
         private readonly QueryDbContext _dbContext;
         private readonly IMapper _mapper;

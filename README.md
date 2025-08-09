@@ -20,14 +20,13 @@
 -   **⚡ CQRS Implementation**: Separate Command (PostgreSQL) and Query (MongoDB) stores
 -   **🚀 Event-Driven Architecture**: MassTransit + RabbitMQ for async messaging
 -   **🎯 Domain-Driven Design**: Rich domain models with business rules enforcement
--   **🧪 Comprehensive Testing**: 44+ test files with unit and integration coverage
+-   **🧪 Testing**: 60+ test files with unit and integration coverage
 -   **🔐 JWT Authentication**: Secure API with password hashing and validation
 -   **📊 Dual Database Strategy**: PostgreSQL for writes, MongoDB for optimized reads
 -   **🐋 Full Docker Stack**: PostgreSQL, MongoDB, RabbitMQ containerized
 -   **📝 API Documentation**: Interactive Swagger/OpenAPI with detailed schemas
 -   **🔄 Eventual Consistency**: RabbitMQ + MassTransit for automatic data synchronization
--   **📡 Event-Driven Architecture**: Integration events for decoupled communication
--   **🎯 Dual Database Strategy**: PostgreSQL + MongoDB optimized for different patterns
+-   **✨ Clean Code Principles**: DRY, KISS, YAGNI compliant with centralized utilities
 
 ## 🛠️ Technology Stack
 
@@ -268,22 +267,24 @@ graph TB
 │   ├── Services/                   # Application services
 │   └── Events/                     # Domain event handlers
 ├── HexagonalSkeleton.Domain/       # 🎯 Domain Layer
-│   ├── Entities/                   # Domain entities
+│   ├── Entities/                   # Domain entities (User.cs)
 │   ├── Services/                   # Domain services
 │   ├── Specifications/             # Business rules
+│   ├── Common/                     # Shared utilities (AgeCalculator)
 │   └── Ports/                      # Interface contracts
-├── HexagonalSkeleton.Infrastructure/ # � Infrastructure Layer
+├── HexagonalSkeleton.Infrastructure/ # 🔧 Infrastructure Layer
 │   ├── Persistence/                # Database context & repositories
 │   ├── Auth/                       # JWT implementation
 │   └── Services/                   # External service adapters
 └── HexagonalSkeleton.Test/         # 🧪 Testing
-    ├── Unit/                       # Unit tests
-    └── Integration/                # Integration tests
+    ├── Unit/                       # Unit tests (60+ test files)
+    ├── Integration/                # Integration tests
+    └── TestInfrastructure/         # Testing utilities
 ```
 
 ## 🧪 Testing
 
-**44+ Test Files** covering all architectural layers:
+**60+ Test Files** covering all architectural layers:
 
 ```bash
 # Run all tests
@@ -298,6 +299,13 @@ dotnet test --filter "Category=Integration"
 
 ### Test Categories
 
+-   **Unit Tests**: Domain logic, business rules, and value objects (including AgeCalculator)
+-   **Integration Tests**: End-to-end API workflows with test infrastructure
+-   **CQRS Tests**: Command and query handler validation
+-   **Event Tests**: Integration event publishing and consumption
+-   **Repository Tests**: Data access layer with in-memory databases
+-   **Authentication Tests**: JWT token generation and validation
+
 -   **Unit Tests**: Domain logic, business rules, and value objects
 -   **Integration Tests**: End-to-end API workflows with test infrastructure
 -   **CQRS Tests**: Command and query handler validation
@@ -311,6 +319,9 @@ dotnet test --filter "Category=Integration"
 -   **In-Memory Databases**: SQLite for commands, in-memory MongoDB for queries
 -   **AutoFixture**: Automated test data generation for comprehensive scenarios
 -   **Test Containers**: Docker-based integration testing when needed
+-   **Centralized Test Utilities**: DRY-compliant test data creation with `TestHelper.cs`
+-   **Domain Utility Testing**: Comprehensive coverage of `AgeCalculator` with edge cases
+-   **Postman Collection**: 66 automated API tests covering all endpoints and business rules
 
 ## 🔐 Security Features
 
@@ -320,6 +331,26 @@ dotnet test --filter "Category=Integration"
 -   **Global Exception Handling** without sensitive data exposure in responses
 -   **CORS** configuration for secure cross-origin requests
 -   **Authorization Attributes** for role-based endpoint protection
+
+## ✨ Clean Code Principles Implementation
+
+### 🎯 DRY (Don't Repeat Yourself)
+
+-   **Centralized Age Calculation**: `AgeCalculator` utility eliminates duplicate age logic across domain, validation, and mapping layers
+-   **Unified Test Utilities**: `TestHelper.cs` provides consistent test data creation methods
+-   **Shared Domain Logic**: Business rules centralized in domain services and specifications
+
+### 💎 KISS (Keep It Simple, Stupid)
+
+-   **Clear Method Names**: `CalculateAge()`, `IsAtLeastAge()`, `IsWithinAgeRange()` with obvious intent
+-   **Single Responsibility**: Each utility class focuses on one specific domain concern
+-   **Readable Business Logic**: Age validation expressed in natural, domain-friendly terms
+
+### 🚀 YAGNI (You Aren't Gonna Need It)
+
+-   **Focused Implementation**: Only essential age calculation methods without over-engineering
+-   **Minimal Dependencies**: Clean utilities with zero external dependencies
+-   **Pragmatic Design**: Business rules implemented as needed, not speculatively
 
 ## � Development Experience
 
@@ -343,10 +374,10 @@ dotnet ef database update --project HexagonalSkeleton.MigrationDb
 
 ### 🔐 Authentication & Registration
 
-| Endpoint            | Method | Description                        | Response                   |
-| ------------------- | ------ | ---------------------------------- | -------------------------- |
-| `/api/auth/login`   | POST   | User authentication with JWT       | AuthenticationToken + User |
-| `/api/registration` | POST   | User registration + authentication | AuthenticationToken + User |
+| Endpoint            | Method | Description                        | Response                   | Business Rules                   |
+| ------------------- | ------ | ---------------------------------- | -------------------------- | -------------------------------- |
+| `/api/auth/login`   | POST   | User authentication with JWT       | AuthenticationToken + User | Password validation, user exists |
+| `/api/registration` | POST   | User registration + authentication | AuthenticationToken + User | Age 13-120 years, email unique   |
 
 ### 👤 User Management (Admin)
 
@@ -374,7 +405,7 @@ dotnet ef database update --project HexagonalSkeleton.MigrationDb
 3. **Event Consumers** → Sync to MongoDB (Queries)
 4. **Read Operations** → MongoDB (Optimized for queries)
 
-**📖 Full API documentation with request/response schemas at `/swagger`**
+**📖 Full API documentation with request/response schemas at `/swagger`**.
 
 ## 🎯 Why This Architecture?
 
@@ -388,6 +419,8 @@ This template demonstrates **production-ready** enterprise software development:
 -   **Maintainability**: Clean Architecture with clear separation of concerns
 -   **Testability**: Comprehensive test coverage with dependency injection
 -   **Resilience**: Retry policies and error handling for distributed systems
+-   **Code Quality**: DRY, KISS, YAGNI principles with centralized utilities
+-   **Business Logic**: Domain-driven design with rich business rules enforcement
 
 ### 💼 Enterprise Benefits
 
@@ -406,6 +439,9 @@ Perfect for demonstrating expertise in:
 -   **Event-Driven Architecture** (RabbitMQ + MassTransit)
 -   **Database Design** (PostgreSQL + MongoDB optimization)
 -   **Enterprise Patterns** (Hexagonal Architecture, DDD, SOLID principles)
+-   **Clean Code Principles** (DRY, KISS, YAGNI with practical examples)
+-   **Domain-Driven Design** (Business rules, age calculations, specifications)
+-   **Comprehensive Testing** (Unit, integration, API testing with 60+ test files)
 
 ---
 
@@ -527,6 +563,8 @@ services:
 -   **Modern .NET** development practices with dependency injection and clean code
 -   **Microservices Patterns** ready for distributed system development
 -   **Database Optimization** for both transactional and analytical workloads
+-   **Clean Code Principles** practical implementation of DRY, KISS, YAGNI
+-   **Business Rules Engineering** centralized utilities for domain calculations
 
 ---
 

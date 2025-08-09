@@ -41,7 +41,7 @@ builder.Services.AddCqrsDatabases(builder.Configuration);
 // CQRS services configuration
 builder.Services.AddCqrsServices();
 
-// Simple MassTransit configuration
+// MassTransit configuration
 builder.Services.AddMassTransitWithRabbitMQ(builder.Configuration);
 
 builder.Services.AddRouting(opt =>

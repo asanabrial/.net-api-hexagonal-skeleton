@@ -25,10 +25,10 @@ namespace HexagonalSkeleton.Domain.Ports
     }
 
     /// <summary>
-    /// Interface segregation: Focused interface for basic user retrieval
-    /// Follows ISP by providing only basic read operations
+    /// Interface segregation: Focused interface for core user retrieval operations
+    /// Follows ISP by providing only essential read operations
     /// </summary>
-    public interface IUserBasicReader
+    public interface IUserReader
     {
         Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
         Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);

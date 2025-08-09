@@ -108,7 +108,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Factories
                 ConfigureTestRepositories(services);
                 
                 // 4. Configurar servicios básicos
-                ConfigureBasicServices(services);
+                ConfigureTestServices(services);
                 
                 // 5. Asegurar que la base de datos existe
                 EnsureDatabaseExists(services);
@@ -174,9 +174,9 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Factories
         }
 
         /// <summary>
-        /// Configura servicios básicos necesarios para los tests
+        /// Configura servicios necesarios para los tests
         /// </summary>
-        private static void ConfigureBasicServices(IServiceCollection services)
+        private static void ConfigureTestServices(IServiceCollection services)
         {
             // MediatR para CQRS
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(

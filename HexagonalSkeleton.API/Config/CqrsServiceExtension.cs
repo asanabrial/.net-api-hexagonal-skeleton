@@ -35,7 +35,7 @@ namespace HexagonalSkeleton.API.Config
                 provider.GetRequiredService<IUserReadRepository>() as UserReadRepositoryMongoAdapter 
                 ?? throw new InvalidOperationException("UserReadRepositoryMongoAdapter not registered"));
             
-            services.AddScoped<IUserBasicReader>(provider => 
+            services.AddScoped<IUserReader>(provider => 
                 provider.GetRequiredService<IUserReadRepository>() as UserReadRepositoryMongoAdapter 
                 ?? throw new InvalidOperationException("UserReadRepositoryMongoAdapter not registered"));
 
