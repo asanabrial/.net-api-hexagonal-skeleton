@@ -9,7 +9,6 @@ using Xunit;
 using AutoMapper;
 using DomainUser = HexagonalSkeleton.Domain.User;
 using HexagonalSkeleton.Application.Features.UserProfile.Commands;
-using HexagonalSkeleton.Test.TestInfrastructure.Helpers;
 
 namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
 {    public class UpdateProfileUserCommandHandlerTest

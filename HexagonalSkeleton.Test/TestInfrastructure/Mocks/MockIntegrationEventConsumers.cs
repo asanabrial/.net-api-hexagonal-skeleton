@@ -58,7 +58,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Mocks
                             isDeleted: false);
                         
                         // Add to in-memory read repository for consistency
-                        inMemoryRepo.AddUser(user);
+                        InMemoryUserReadRepository.SynchronizeUser(user);
                         _logger.LogInformation("Mock: Synchronized user {UserId} to read repository", message.UserId);
                     }
                 }

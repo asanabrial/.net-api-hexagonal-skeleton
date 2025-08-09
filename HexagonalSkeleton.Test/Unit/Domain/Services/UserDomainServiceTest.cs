@@ -3,7 +3,6 @@ using Moq;
 using HexagonalSkeleton.Domain.Services;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain.Exceptions;
-using HexagonalSkeleton.Test.TestInfrastructure.Helpers;
 
 namespace HexagonalSkeleton.Test.Unit.User.Domain.Services;
 

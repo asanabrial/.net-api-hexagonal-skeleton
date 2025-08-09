@@ -167,7 +167,9 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Auth
             // Act
             var salt = PasswordHasher.GenerateSalt();
 
-            // Assert            Assert.NotNull(salt); Assert.NotEmpty(salt);
+            // Assert
+            Assert.NotNull(salt);
+            Assert.NotEmpty(salt);
             // Should be able to convert back from Base64 without throwing
             var bytes = Record.Exception(() => Convert.FromBase64String(salt));
             Assert.Null(bytes);
@@ -199,7 +201,9 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Auth
             // Act
             var hash = PasswordHasher.ComputeHash(password, salt, pepper);
 
-            // Assert            Assert.NotNull(hash); Assert.NotEmpty(hash);
+            // Assert
+            Assert.NotNull(hash);
+            Assert.NotEmpty(hash);
             // Should be able to convert back from Base64 without throwing
             var exception = Record.Exception(() => Convert.FromBase64String(hash!));
             Assert.Null(exception);

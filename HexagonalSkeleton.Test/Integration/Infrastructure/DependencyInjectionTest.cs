@@ -35,8 +35,7 @@ namespace HexagonalSkeleton.Test
             });
 
             // Configure CQRS databases
-            services.AddCommandDatabase(configuration);
-            services.AddQueryDatabase(configuration);
+            services.AddCqrsDatabases(configuration);
 
             // Configure CQRS services
             services.AddCqrsServices();

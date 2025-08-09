@@ -59,8 +59,6 @@ namespace HexagonalSkeleton.Test.Integration.User
             // Assert
             getAllResponse.EnsureSuccessStatusCode();
             var getAllContent = await getAllResponse.Content.ReadAsStringAsync();
-              // Debug: Print the response
-            Console.WriteLine($"GetAll Response: {getAllContent}");
             
             var usersResponse = JsonSerializer.Deserialize<PagedResponse<UserResponse>>(getAllContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             

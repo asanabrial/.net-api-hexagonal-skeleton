@@ -9,7 +9,7 @@ using HexagonalSkeleton.API.Models.Auth;
 using Microsoft.EntityFrameworkCore;
 using HexagonalSkeleton.Infrastructure.Persistence.Command;
 using HexagonalSkeleton.Test.TestInfrastructure.Factories;
-using HexagonalSkeleton.Test.TestInfrastructure.Helpers;
+using static HexagonalSkeleton.Test.TestInfrastructure.Helpers.DatabaseCleanupHelper;
 
 namespace HexagonalSkeleton.Test.Integration
 {
@@ -17,12 +17,12 @@ namespace HexagonalSkeleton.Test.Integration
     /// Integration tests using the new Testcontainers infrastructure.
     /// This test class demonstrates the use of real databases for more realistic testing.
     /// </summary>
-    public class RegisterUserTestcontainersIntegrationTest : IClassFixture<RegisterUserTestcontainersTestWebApplicationFactory>
+    public class RegisterUserTestcontainersIntegrationTest : IClassFixture<ConfiguredTestWebApplicationFactory>
     {
-        private readonly RegisterUserTestcontainersTestWebApplicationFactory _factory;
+        private readonly ConfiguredTestWebApplicationFactory _factory;
         private readonly HttpClient _client;
 
-        public RegisterUserTestcontainersIntegrationTest(RegisterUserTestcontainersTestWebApplicationFactory factory)
+        public RegisterUserTestcontainersIntegrationTest(ConfiguredTestWebApplicationFactory factory)
         {
             _factory = factory;
             _client = _factory.CreateClient();
@@ -199,15 +199,6 @@ namespace HexagonalSkeleton.Test.Integration
             // Act
             var response = await _client.PostAsync("/api/auth/register", content);
 
-            // Debug validation errors if request fails
-            if (!response.IsSuccessStatusCode)
-            {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                System.Console.WriteLine($"Complex Data Validation Error Response: {errorContent}");
-                System.Console.WriteLine($"Status Code: {response.StatusCode}");
-                System.Console.WriteLine($"Request JSON: {json}");
-            }
-
             // Assert
             response.EnsureSuccessStatusCode();
             
@@ -278,7 +269,7 @@ namespace HexagonalSkeleton.Test.Integration
         {
             try
             {
-                await DatabaseCleanupHelper.CleanAllDatabasesAsync(_factory.Services);
+                await CleanAllDatabasesAsync(_factory.Services);
             }
             catch (Exception ex)
             {

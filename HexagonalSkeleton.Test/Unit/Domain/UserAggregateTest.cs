@@ -1,7 +1,6 @@
 using Xunit;
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.Events;
-using HexagonalSkeleton.Test.TestInfrastructure.Helpers;
 
 namespace HexagonalSkeleton.Test.Unit.User.Domain;
 

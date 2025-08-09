@@ -10,7 +10,6 @@ using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.ValueObjects;
 using AutoMapper;
 using HexagonalSkeleton.Application.Features.UserRegistration.Commands;
-using HexagonalSkeleton.Test.TestInfrastructure.Helpers;
 
 namespace HexagonalSkeleton.Test.Application.Features.UserRegistration.Commands;
 

@@ -196,14 +196,7 @@ namespace HexagonalSkeleton.Test.Integration.UseCases
             var registrationResult = await commandResponse.Content.ReadFromJsonAsync<LoginResponse>();
 
             // === ASSERT ===
-            // Verify we can access connection strings for both databases
-            // Connection strings not available in TestWebApplicationFactory
-            // var postgresConnection = _factory.GetPostgresConnectionString();
-            // var mongoConnection = _factory.GetMongoConnectionString();
-
-            // postgresConnection.Should().NotBeNullOrEmpty();
-            // mongoConnection.Should().NotBeNullOrEmpty();
-            // postgresConnection.Should().NotBe(mongoConnection);            // Verify the user was created and can be accessed
+            // Verify the user was created and can be accessed
             registrationResult.Should().NotBeNull();
             registrationResult!.User.Should().NotBeNull();
             registrationResult.User.Id.Should().NotBe(Guid.Empty);

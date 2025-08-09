@@ -1,5 +1,4 @@
 using HexagonalSkeleton.API.Handler.ExceptionMapping;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace HexagonalSkeleton.API.Config
 {
@@ -7,8 +6,6 @@ namespace HexagonalSkeleton.API.Config
     {
         public static IServiceCollection AddSingletons(this IServiceCollection services)
         {
-            services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-
             // Exception mapping services - Using Singleton lifetime
             services.AddSingleton<ExceptionMappingService>();
             services.AddSingleton<IExceptionMapper, DomainExceptionMapper>();

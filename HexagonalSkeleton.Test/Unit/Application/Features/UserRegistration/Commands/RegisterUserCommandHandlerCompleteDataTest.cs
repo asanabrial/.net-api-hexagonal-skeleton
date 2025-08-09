@@ -7,7 +7,6 @@ using HexagonalSkeleton.Application.Features.UserRegistration.Dto;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.ValueObjects;
-using HexagonalSkeleton.Test.TestInfrastructure.Helpers;
 using AutoMapper;
 using HexagonalSkeleton.Application.Features.UserRegistration.Commands;
 

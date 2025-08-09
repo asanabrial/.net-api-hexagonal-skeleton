@@ -2,7 +2,6 @@ using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Infrastructure.Adapters.Command;
 using HexagonalSkeleton.Infrastructure.Adapters.Query;
 using HexagonalSkeleton.Infrastructure.Services.Sync;
-using HexagonalSkeleton.Application.Services.Features;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace HexagonalSkeleton.API.Config
@@ -44,10 +43,8 @@ namespace HexagonalSkeleton.API.Config
             // Sync service for maintaining read model consistency via domain events
             services.AddScoped<HexagonalSkeleton.Domain.Services.IUserSyncService, UserSyncService>();
 
-            // === APPLICATION SERVICES (Screaming Architecture) ===
-            // Business feature-focused services that orchestrate domain operations
-            services.AddScoped<IUserRegistrationApplicationService, UserRegistrationApplicationService>();
-            services.AddScoped<IUserProfileApplicationService, UserProfileApplicationService>();
+            // Note: Application Services removed as they were legacy code not used by controllers
+            // Controllers use MediatR pattern directly with Command/Query handlers
 
             return services;
         }

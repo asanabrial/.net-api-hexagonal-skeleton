@@ -12,12 +12,12 @@ using HexagonalSkeleton.Test.TestInfrastructure.Factories;
 
 namespace HexagonalSkeleton.Test.Integration
 {    
-    public class RegisterUserIntegrationTest : IClassFixture<ComprehensiveUserTestWebApplicationFactory>
+    public class RegisterUserIntegrationTest : IClassFixture<ConfiguredTestWebApplicationFactory>
     {
-        private readonly ComprehensiveUserTestWebApplicationFactory _factory;
+        private readonly ConfiguredTestWebApplicationFactory _factory;
         private readonly HttpClient _client;
 
-        public RegisterUserIntegrationTest(ComprehensiveUserTestWebApplicationFactory factory)
+        public RegisterUserIntegrationTest(ConfiguredTestWebApplicationFactory factory)
         {
             _factory = factory;
             _client = _factory.CreateClient();
@@ -51,9 +51,6 @@ namespace HexagonalSkeleton.Test.Integration
             response.EnsureSuccessStatusCode();
             
             var responseContent = await response.Content.ReadAsStringAsync();
-            
-            // Debug: Print the actual response to understand the structure
-            System.Console.WriteLine($"Response content: {responseContent}");
             
             var loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseContent, new JsonSerializerOptions
             {
@@ -145,9 +142,6 @@ namespace HexagonalSkeleton.Test.Integration
             Assert.Equal(System.Net.HttpStatusCode.Conflict, secondResponse.StatusCode);
             
             var responseContent = await secondResponse.Content.ReadAsStringAsync();
-            
-            // Debug: Print the actual response to understand the structure
-            System.Console.WriteLine($"Conflict response content: {responseContent}");
             
             // Parse the problem details response
             using var document = JsonDocument.Parse(responseContent);

@@ -21,9 +21,9 @@ namespace HexagonalSkeleton.Test.Integration.API.Features.UserManagement
     /// Validates CQRS architecture, domain logic, and API responses.
     /// Implements automatic database cleanup between tests to ensure isolation.
     /// </summary>
-    public class ComprehensiveUserIntegrationTest : BaseIntegrationTest<ComprehensiveUserTestWebApplicationFactory>, IClassFixture<ComprehensiveUserTestWebApplicationFactory>
+    public class ComprehensiveUserIntegrationTest : BaseIntegrationTest<ConfiguredTestWebApplicationFactory>, IClassFixture<ConfiguredTestWebApplicationFactory>
     {
-        public ComprehensiveUserIntegrationTest(ComprehensiveUserTestWebApplicationFactory factory) : base(factory)
+        public ComprehensiveUserIntegrationTest(ConfiguredTestWebApplicationFactory factory) : base(factory)
         {
         }
 

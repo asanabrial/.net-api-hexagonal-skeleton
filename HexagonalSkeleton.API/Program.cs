@@ -12,7 +12,6 @@ builder.Services.AddDomainServices();
 
 // Infrastructure Services (Outer Layer) 
 builder.Services.AddSingletons();
-builder.Services.AddTransients();
 
 // API Layer Configuration
 builder.Services.AddSwagger();
@@ -50,7 +49,6 @@ builder.Services.AddRouting(opt =>
     opt.LowercaseUrls = true;
 });
 
-builder.Services.AddOptions();
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();

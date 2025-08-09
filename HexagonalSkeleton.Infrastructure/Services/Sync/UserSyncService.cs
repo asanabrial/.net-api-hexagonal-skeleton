@@ -27,7 +27,7 @@ namespace HexagonalSkeleton.Infrastructure.Services.Sync
             _queryDbContext = queryDbContext ?? throw new ArgumentNullException(nameof(queryDbContext));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _usersCollection = _queryDbContext.Users;
+            _usersCollection = _queryDbContext.Users ?? throw new InvalidOperationException("Users collection is not initialized");
         }
 
         /// <summary>
@@ -138,89 +138,6 @@ namespace HexagonalSkeleton.Infrastructure.Services.Sync
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to deactivate user {UserId} in query store", userId);
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Reactivate user (if user is restored)
-        /// </summary>
-        public async Task ReactivateUserAsync(User user, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                _logger.LogInformation("Reactivating user {UserId} in query store", user.Id);
-
-                // Full sync to ensure all data is up to date
-                await SyncUserAsync(user, cancellationToken);
-
-                _logger.LogInformation("Successfully reactivated user {UserId} in query store", user.Id);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to reactivate user {UserId} in query store", user.Id);
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Check if user exists in query store
-        /// </summary>
-        public async Task<bool> UserExistsAsync(Guid userId, CancellationToken cancellationToken = default)
-        {
-            var filter = Builders<UserQueryDocument>.Filter.Eq(u => u.Id, userId);
-            return await _usersCollection.Find(filter).AnyAsync(cancellationToken);
-        }
-
-        /// <summary>
-        /// Get sync status for a user
-        /// </summary>
-        public async Task<UserSyncStatus?> GetSyncStatusAsync(Guid userId, CancellationToken cancellationToken = default)
-        {
-            var filter = Builders<UserQueryDocument>.Filter.Eq(u => u.Id, userId);
-            var projection = Builders<UserQueryDocument>.Projection
-                .Include(u => u.Id)
-                .Include(u => u.UpdatedAt)
-                .Include(u => u.IsDeleted);
-
-            var document = await _usersCollection
-                .Find(filter)
-                .Project<UserSyncStatus>(projection)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            return document;
-        }
-
-        /// <summary>
-        /// Health check for query store
-        /// </summary>
-        public async Task<bool> IsHealthyAsync(CancellationToken cancellationToken = default)
-        {
-            return await _queryDbContext.IsHealthyAsync();
-        }
-
-        /// <summary>
-        /// Direct document sync for MassTransit consumers
-        /// Bypasses AutoMapper for performance in event-driven sync
-        /// </summary>
-        public async Task SyncUserDocumentAsync(UserQueryDocument userDocument, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                _logger.LogInformation("Starting direct document sync for user {UserId}", userDocument.Id);
-
-                userDocument.UpdatedAt = DateTime.UtcNow;
-                
-                var filter = Builders<UserQueryDocument>.Filter.Eq(u => u.Id, userDocument.Id);
-                var options = new ReplaceOptions { IsUpsert = true };
-
-                await _usersCollection.ReplaceOneAsync(filter, userDocument, options, cancellationToken);
-
-                _logger.LogInformation("Successfully synced user document {UserId} to query store", userDocument.Id);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to sync user document {UserId} to query store", userDocument.Id);
                 throw;
             }
         }

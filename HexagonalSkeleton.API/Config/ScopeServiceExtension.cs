@@ -24,8 +24,6 @@ namespace HexagonalSkeleton.API.Config
             
             // Domain Services (DDD)
             services.AddScoped<UserDomainService>();
-            services.AddScoped<IDomainServiceFactory, DomainServiceFactory>();
-            services.AddScoped<IUserDomainService, EnhancedUserDomainService>();
             
             // Application Services (Clean Architecture - Application Layer)
             services.AddScoped<IUserSpecificationService, UserSpecificationService>();

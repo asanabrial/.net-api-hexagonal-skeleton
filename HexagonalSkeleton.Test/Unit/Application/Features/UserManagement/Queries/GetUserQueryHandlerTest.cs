@@ -7,7 +7,6 @@ using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
 using AutoMapper;
 using HexagonalSkeleton.Application.Features.UserManagement.Queries;
-using HexagonalSkeleton.Test.TestInfrastructure.Helpers;
 
 namespace HexagonalSkeleton.Test.Application.Features.UserManagement.Queries;
 

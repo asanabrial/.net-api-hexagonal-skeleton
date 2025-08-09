@@ -2,6 +2,7 @@ using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Application.Features.UserRegistration.Commands;
 using HexagonalSkeleton.Application.Features.UserProfile.Commands;
 using HexagonalSkeleton.Application.Features.UserManagement.Commands;
+using HexagonalSkeleton.Application.Features.UserManagement.Queries;
 
 namespace HexagonalSkeleton.Test
 {
@@ -68,7 +69,7 @@ namespace HexagonalSkeleton.Test
         /// Supports named parameters for validation testing
         /// </summary>
         public static RegisterUserCommand CreateRegisterUserCommand(
-            string email = "test@example.com",
+            string? email = null,
             string password = "TestPassword123!",
             string? passwordConfirmation = null,
             string name = "John",
@@ -76,21 +77,60 @@ namespace HexagonalSkeleton.Test
             string phoneNumber = "+1234567890",
             double latitude = 40.7128,
             double longitude = -74.0060,
+            DateOnly? birthdate = null,
             string aboutMe = "Test about me")
         {
+            var actualEmail = email ?? $"test.user.{Guid.NewGuid():N}@example.com";
             return new RegisterUserCommand
             {
-                Email = email,
+                Email = actualEmail,
                 Password = password,
                 PasswordConfirmation = passwordConfirmation ?? password,
                 FirstName = name,
                 LastName = surname,
-                Birthdate = new DateTime(1990, 1, 1),
+                Birthdate = birthdate?.ToDateTime(TimeOnly.MinValue) ?? DateTime.Now.AddYears(-25),
                 PhoneNumber = phoneNumber,
                 Latitude = latitude,
                 Longitude = longitude,
                 AboutMe = aboutMe
             };
+        }
+
+        /// <summary>
+        /// Creates a valid RegisterUserCommand for testing
+        /// </summary>
+        public static RegisterUserCommand CreateValidRegisterUserCommand(
+            string email,
+            string firstName,
+            string lastName,
+            string phoneNumber,
+            double latitude,
+            double longitude,
+            DateOnly birthdate,
+            string password = "TestPassword123!",
+            string aboutMe = "Test about me")
+        {
+            return CreateRegisterUserCommand(email: email, name: firstName, surname: lastName, 
+                phoneNumber: phoneNumber, latitude: latitude, longitude: longitude, 
+                birthdate: birthdate, password: password, aboutMe: aboutMe);
+        }
+
+        /// <summary>
+        /// Creates a valid RegisterUserCommand for testing
+        /// </summary>
+        public static RegisterUserCommand CreateValidRegisterUserCommand(
+            string email,
+            string firstName,
+            string lastName,
+            string phoneNumber,
+            double latitude,
+            double longitude,
+            DateTime birthdate,
+            string password = "TestPassword123!")
+        {
+            return CreateRegisterUserCommand(email: email, name: firstName, surname: lastName, 
+                phoneNumber: phoneNumber, latitude: latitude, longitude: longitude, 
+                birthdate: DateOnly.FromDateTime(birthdate), password: password);
         }
 
         /// <summary>
@@ -114,6 +154,34 @@ namespace HexagonalSkeleton.Test
                 Birthdate = birthdate ?? new DateTime(1985, 5, 15),
                 AboutMe = aboutMe
             };
+        }
+
+        /// <summary>
+        /// Creates a valid UpdateProfileUserCommand for testing
+        /// </summary>
+        public static UpdateProfileUserCommand CreateValidUpdateProfileCommand(
+            Guid userId,
+            string firstName = "UpdatedJohn",
+            string lastName = "UpdatedDoe",
+            DateTime? birthdate = null,
+            string aboutMe = "Updated about me")
+        {
+            return new UpdateProfileUserCommand
+            {
+                Id = userId,
+                FirstName = firstName,
+                LastName = lastName,
+                Birthdate = birthdate ?? DateTime.Now.AddYears(-25),
+                AboutMe = aboutMe
+            };
+        }
+
+        /// <summary>
+        /// Creates a valid GetUserQuery for testing
+        /// </summary>
+        public static GetUserQuery CreateGetUserQuery(Guid userId)
+        {
+            return new GetUserQuery { Id = userId };
         }
 
         /// <summary>

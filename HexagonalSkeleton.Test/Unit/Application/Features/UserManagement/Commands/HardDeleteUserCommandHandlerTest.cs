@@ -7,7 +7,6 @@ using HexagonalSkeleton.Test.Unit.User.Domain;
 using Moq;
 using Xunit;
 using DomainUser = HexagonalSkeleton.Domain.User;
-using HexagonalSkeleton.Test.TestInfrastructure.Helpers;
 
 namespace HexagonalSkeleton.Test.Application.Features.UserManagement.Commands
 {
