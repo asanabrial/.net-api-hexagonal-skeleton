@@ -216,7 +216,10 @@ namespace HexagonalSkeleton.Domain
         public override void Delete()
         {
             base.Delete();
-            // Could add domain event here if needed
+            
+            // Raise domain event following DDD principles
+            // The domain is responsible for business logic and events
+            AddDomainEvent(new UserDeletedEvent(Id, Email.Value, DeletedAt!.Value));
         }
 
         // Private helper methods

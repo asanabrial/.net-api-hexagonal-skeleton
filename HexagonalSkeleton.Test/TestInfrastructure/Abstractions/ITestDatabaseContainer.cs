@@ -59,14 +59,4 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Abstractions
         string Username { get; }
         int Port { get; }
     }
-
-    /// <summary>
-    /// Specific abstraction for RabbitMQ containers
-    /// </summary>
-    public interface IRabbitMqTestContainer : ITestDatabaseContainer
-    {
-        string Username { get; }
-        int Port { get; }
-        int ManagementPort { get; }
-    }
 }

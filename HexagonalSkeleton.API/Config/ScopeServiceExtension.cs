@@ -19,9 +19,6 @@ namespace HexagonalSkeleton.API.Config
         /// <returns>Return the service collection for further configuration.</returns>
         public static IServiceCollection AddDomainServices(this IServiceCollection services)
         {
-            // Note: Repository registrations are now handled by AddCqrsServices() 
-            // to properly implement CQRS pattern with separate read/write stores
-            
             // Domain Services (DDD)
             services.AddScoped<UserDomainService>();
             

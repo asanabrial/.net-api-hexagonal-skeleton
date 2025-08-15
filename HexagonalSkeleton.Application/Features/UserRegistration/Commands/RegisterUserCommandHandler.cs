@@ -1,8 +1,6 @@
 using FluentValidation;
-using HexagonalSkeleton.Application.IntegrationEvents;
 using HexagonalSkeleton.Application.Features.UserRegistration.Dto;
 using HexagonalSkeleton.Application.Features.UserAuthentication.Dto;
-using HexagonalSkeleton.Application.Services;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain.Services;
 using MediatR;
@@ -10,7 +8,6 @@ using MediatR;
 namespace HexagonalSkeleton.Application.Features.UserRegistration.Commands
 {    public class RegisterUserCommandHandler(
         IValidator<RegisterUserCommand> validator,
-        IIntegrationEventService integrationEventService,
         IUserWriteRepository userWriteRepository,
         IUserReadRepository userReadRepository,
         IAuthenticationService authenticationService)
@@ -43,7 +40,7 @@ namespace HexagonalSkeleton.Application.Features.UserRegistration.Commands
                 request.Longitude,
                 request.AboutMe);
 
-            // 4. Persist and complete workflow
+            // 4. Persist user - CDC will automatically handle synchronization to MongoDB
             var userId = await userWriteRepository.CreateAsync(user, cancellationToken);
             
             // Generate JWT token using user data directly (avoiding CQRS read-side dependency)
@@ -53,21 +50,8 @@ namespace HexagonalSkeleton.Application.Features.UserRegistration.Commands
                 user.FullName.GetFullName(), 
                 user.PhoneNumber.Value);
             
-            // Publish simple integration event for CQRS synchronization
-            var integrationEvent = new UserCreatedIntegrationEvent(
-                userId,
-                user.Email.Value,
-                user.FullName.FirstName,
-                user.FullName.LastName,
-                user.PhoneNumber.Value,
-                user.CreatedAt
-            );
-            
-            await integrationEventService.PublishAsync(integrationEvent, cancellationToken);
-            
-            // Also publish login event for activity tracking
-            var loginEvent = new UserLoggedInIntegrationEvent(userId, DateTime.UtcNow);
-            await integrationEventService.PublishAsync(loginEvent, cancellationToken);
+            // CDC with Debezium will automatically handle database synchronization
+            // No need for manual integration events - the change is captured via PostgreSQL WAL
               
             // Map user data to DTO using the correct userId from the repository
             var userDto = new RegisterUserInfoDto

@@ -8,7 +8,6 @@ using MediatR;
 namespace HexagonalSkeleton.Application.Features.UserProfile.Commands
 {    public class UpdateProfileUserCommandHandler(
         IValidator<UpdateProfileUserCommand> validator,
-        IUserReadRepository userReadRepository,
         IUserWriteRepository userWriteRepository,
         IMapper mapper)
         : IRequestHandler<UpdateProfileUserCommand, UserProfileDto>
@@ -18,7 +17,8 @@ namespace HexagonalSkeleton.Application.Features.UserProfile.Commands
             if (!result.IsValid)
                 throw new Exceptions.ValidationException(result.ToDictionary());
 
-            var user = await userReadRepository.GetByIdAsync(id: request.Id, cancellationToken: cancellationToken);
+            // Get the user (including deleted ones for domain validation)
+            var user = await userWriteRepository.GetByIdUnfilteredAsync(request.Id, cancellationToken);
             if (user is null) 
                 throw new NotFoundException("User", request.Id);
 

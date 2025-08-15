@@ -1,18 +1,17 @@
-using HexagonalSkeleton.Domain.Ports;
+using AutoMapper;
 using HexagonalSkeleton.Domain;
+using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Infrastructure.Persistence.Command;
 using HexagonalSkeleton.Infrastructure.Persistence.Command.Entities;
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace HexagonalSkeleton.Infrastructure.Adapters.Command
 {
     /// <summary>
-    /// Command repository adapter for user write operations
-    /// Implements the outbound port for data persistence
-    /// Follows CQRS pattern - only handles write operations
-    /// Uses PostgreSQL for transactional consistency
+    /// Command Repository for User entity write operations following CQRS pattern.
+    /// Implements the outbound port for data persistence using PostgreSQL.
+    /// CDC is handled automatically by Debezium.
     /// </summary>
     public class UserCommandRepository : IUserWriteRepository
     {
@@ -38,15 +37,13 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Command
             {
                 var userEntity = _mapper.Map<UserCommandEntity>(user);
                 _dbContext.Users.Add(userEntity);
-                
                 await _dbContext.SaveChangesAsync(cancellationToken);
-                
-                _logger.LogInformation("User created successfully with ID: {UserId}", userEntity.Id);
+
                 return userEntity.Id;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating user with email: {Email}", user.Email.Value);
+                _logger.LogError(ex, "Failed to create user with email: {Email}", user.Email.Value);
                 throw;
             }
         }
@@ -62,19 +59,19 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Command
 
                 if (existingEntity == null)
                 {
-                    throw new InvalidOperationException($"User with ID {user.Id} not found or is deleted");
+                    throw new InvalidOperationException($"User with ID {user.Id} not found or deleted");
                 }
 
+                // Map domain object to entity
                 _mapper.Map(user, existingEntity);
-                existingEntity.UpdateTimestamp();
+                existingEntity.UpdatedAt = DateTime.UtcNow;
 
                 await _dbContext.SaveChangesAsync(cancellationToken);
-                
-                _logger.LogInformation("User updated successfully with ID: {UserId}", user.Id);
+                user.ClearDomainEvents();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating user with ID: {UserId}", user.Id);
+                _logger.LogError(ex, "Failed to update user with ID: {UserId}", user.Id);
                 throw;
             }
         }
@@ -93,14 +90,15 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Command
                     throw new InvalidOperationException($"User with ID {id} not found or already deleted");
                 }
 
-                userEntity.Delete();
+                // Logical deletion (soft delete)
+                userEntity.IsDeleted = true;
+                userEntity.UpdatedAt = DateTime.UtcNow;
+
                 await _dbContext.SaveChangesAsync(cancellationToken);
-                
-                _logger.LogInformation("User deleted successfully with ID: {UserId}", id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting user with ID: {UserId}", id);
+                _logger.LogError(ex, "Failed to delete user with ID: {UserId}", id);
                 throw;
             }
         }
@@ -114,41 +112,114 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Command
                 var userEntity = await _dbContext.Users
                     .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted, cancellationToken);
 
-                if (userEntity != null)
+                if (userEntity == null)
                 {
-                    userEntity.LastLogin = DateTime.UtcNow;
-                    userEntity.UpdateTimestamp();
-                    await _dbContext.SaveChangesAsync(cancellationToken);
+                    throw new InvalidOperationException($"User with ID {userId} not found or deleted");
                 }
-                
-                _logger.LogInformation("Last login updated for user ID: {UserId}", userId);
+
+                userEntity.LastLogin = DateTime.UtcNow;
+                userEntity.UpdatedAt = DateTime.UtcNow;
+
+                await _dbContext.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error setting last login for user ID: {UserId}", userId);
+                _logger.LogError(ex, "Failed to set last login for user ID: {UserId}", userId);
                 throw;
             }
         }
 
         public async Task<User?> GetTrackedByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            var userEntity = await _dbContext.Users
-                .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted, cancellationToken);
+            _logger.LogInformation("Getting tracked user by ID: {UserId}", id);
 
-            return userEntity != null ? _mapper.Map<User>(userEntity) : null;
+            try
+            {
+                var userEntity = await _dbContext.Users
+                    .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted, cancellationToken);
+
+                if (userEntity == null)
+                {
+                    _logger.LogInformation("User with ID {UserId} not found", id);
+                    return null;
+                }
+
+                var user = _mapper.Map<User>(userEntity);
+                
+                return user;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get tracked user by ID: {UserId}", id);
+                throw;
+            }
         }
 
-        public async Task<User?> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default)
+        public async Task<User?> GetByIdUnfilteredAsync(Guid id, CancellationToken cancellationToken = default)
         {
-            var userEntity = await _dbContext.Users
-                .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted, cancellationToken);
+            _logger.LogInformation("Getting unfiltered user by ID: {UserId}", id);
 
-            return userEntity != null ? _mapper.Map<User>(userEntity) : null;
+            try
+            {
+                var userEntity = await _dbContext.Users
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(u => u.Id == id, cancellationToken); // No IsDeleted filter
+
+                if (userEntity == null)
+                {
+                    _logger.LogInformation("User with ID {UserId} not found", id);
+                    return null;
+                }
+
+                var user = _mapper.Map<User>(userEntity);
+                
+                return user;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get unfiltered user by ID: {UserId}", id);
+                throw;
+            }
         }
 
         public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            try
+            {
+                await _dbContext.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to save changes to database");
+                throw;
+            }
+        }
+
+        public async Task<User?> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Getting user by email for authentication: {Email}", email);
+
+            try
+            {
+                var userEntity = await _dbContext.Users
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted, cancellationToken);
+
+                if (userEntity == null)
+                {
+                    _logger.LogInformation("User with email {Email} not found", email);
+                    return null;
+                }
+
+                var user = _mapper.Map<User>(userEntity);
+                
+                return user;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get user by email: {Email}", email);
+                throw;
+            }
         }
     }
 }

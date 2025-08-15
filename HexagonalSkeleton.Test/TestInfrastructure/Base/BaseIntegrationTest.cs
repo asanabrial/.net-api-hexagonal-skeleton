@@ -13,29 +13,15 @@ public abstract class BaseIntegrationTest<TFactory> where TFactory : AbstractTes
 {
     protected readonly TFactory _factory;
     protected readonly HttpClient _client;
+    protected readonly CdcTestHelper _cdcHelper;
+    protected readonly MongoDbSyncHelper _mongoHelper;
 
     protected BaseIntegrationTest(TFactory factory)
     {
         _factory = factory ?? throw new ArgumentNullException(nameof(factory));
         _client = _factory.CreateClient();
-    }
-
-    /// <summary>
-    /// Manual database cleanup method.
-    /// Call this method explicitly when you need to clean databases.
-    /// </summary>
-    private async Task CleanupDatabases()
-    {
-        try
-        {
-            // Clean both Command (PostgreSQL) and Query (MongoDB) databases
-            await DatabaseCleanupHelper.CleanAllDatabasesAsync(_factory.Services);
-        }
-        catch (Exception ex)
-        {
-            // Log but don't fail the test initialization
-            Console.WriteLine($"Warning: Database cleanup failed during test initialization: {ex.Message}");
-        }
+        _cdcHelper = _factory.Services.GetRequiredService<CdcTestHelper>();
+        _mongoHelper = _factory.Services.GetRequiredService<MongoDbSyncHelper>();
     }
 
     /// <summary>

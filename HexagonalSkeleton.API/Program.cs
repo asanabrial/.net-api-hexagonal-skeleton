@@ -41,8 +41,8 @@ builder.Services.AddCqrsDatabases(builder.Configuration);
 // CQRS services configuration
 builder.Services.AddCqrsServices();
 
-// MassTransit configuration
-builder.Services.AddMassTransitWithRabbitMQ(builder.Configuration);
+// CDC Configuration with Debezium + Kafka (Enterprise-grade)
+builder.Services.AddDebeziumCdc(builder.Configuration);
 
 builder.Services.AddRouting(opt =>
 {

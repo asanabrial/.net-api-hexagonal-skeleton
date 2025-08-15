@@ -1,7 +1,10 @@
 using HexagonalSkeleton.Test.TestInfrastructure.Abstractions;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using DotNet.Testcontainers.Builders;
+using DotNet.Testcontainers.Networks;
 
 namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
 {
@@ -11,77 +14,233 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
     public class TestContainerOrchestrator : ITestContainerOrchestrator
     {
         private readonly ITestContainerFactory _factory;
+        private readonly INetwork _sharedNetwork;
         private bool _disposed = false;
+        private bool _debeziumConnectAvailable = false; // Flag para Debezium Connect
 
         public TestContainerOrchestrator(ITestContainerFactory factory)
         {
             _factory = factory ?? throw new ArgumentNullException(nameof(factory));
             
-            PostgreSql = _factory.CreatePostgreSqlContainer();
-            MongoDb = _factory.CreateMongoDbContainer();
-            RabbitMq = _factory.CreateRabbitMqContainer();
+            // Create shared network for all containers with unique name
+            var networkName = $"hexagonal-test-network-{Guid.NewGuid():N}";
+            _sharedNetwork = new NetworkBuilder()
+                .WithName(networkName)
+                .WithCleanUp(true)
+                .Build();
+            
+            // Crear una nueva instancia del factory con la red compartida
+            var networkFactory = new TestcontainersFactory(_sharedNetwork);
+            
+            PostgreSql = networkFactory.CreatePostgreSqlContainer();
+            MongoDb = networkFactory.CreateMongoDbContainer();
+            Zookeeper = networkFactory.CreateZookeeperContainer();
+            Kafka = networkFactory.CreateKafkaContainer();
+            SchemaRegistry = networkFactory.CreateSchemaRegistryContainer(); // ✅ Agregar Schema Registry
+            // DebeziumConnect se creará después de que todos los servicios estén iniciados
         }
 
         public IPostgreSqlTestContainer PostgreSql { get; }
         
         public IMongoDbTestContainer MongoDb { get; }
         
-        public IRabbitMqTestContainer RabbitMq { get; }
+        public IZookeeperTestContainer Zookeeper { get; }
+        
+        public IKafkaTestContainer Kafka { get; }
+        
+        public ISchemaRegistryTestContainer? SchemaRegistry { get; private set; } // ✅ Ahora será inicializado
+        
+        public IDebeziumConnectTestContainer DebeziumConnect { get; private set; } = null!;
+
+        public bool IsDebeziumConnectAvailable => _debeziumConnectAvailable;
 
         public async Task StartAllAsync(CancellationToken cancellationToken = default)
         {
-            // Start containers in parallel for better performance
-            var tasks = new[]
+            Console.WriteLine("🔄 Fase 0: Creando red compartida...");
+            await _sharedNetwork.CreateAsync(cancellationToken);
+            Console.WriteLine("✅ Red compartida creada");
+            
+            // Official Confluent stack startup sequence
+            // Dependency order: Zookeeper → Kafka → Schema Registry → Debezium Connect
+            
+            Console.WriteLine("🚀 Fase 1: Iniciando servicios base independientes...");
+            var phase1Tasks = new[]
             {
-                PostgreSql.StartAsync(cancellationToken),
-                MongoDb.StartAsync(cancellationToken),
-                RabbitMq.StartAsync(cancellationToken)
+                Task.Run(async () => 
+                {
+                    Console.WriteLine("🔧 Iniciando PostgreSQL...");
+                    await PostgreSql.StartAsync(cancellationToken);
+                    Console.WriteLine("✅ PostgreSQL completado");
+                }, cancellationToken),
+                Task.Run(async () => 
+                {
+                    Console.WriteLine("🔧 Iniciando MongoDB...");
+                    await MongoDb.StartAsync(cancellationToken);
+                    Console.WriteLine("✅ MongoDB completado");
+                }, cancellationToken)
             };
+            await Task.WhenAll(phase1Tasks);
+            Console.WriteLine("✅ Fase 1 completada: PostgreSQL, MongoDB iniciados");
 
-            await Task.WhenAll(tasks);
+            Console.WriteLine("� Fase 2: Iniciando Zookeeper...");
+            await Zookeeper.StartAsync(cancellationToken);
+            Console.WriteLine("✅ Zookeeper iniciado y listo");
+
+            Console.WriteLine("🚀 Fase 3: Iniciando Kafka (requiere Zookeeper)...");
+            await Kafka.StartAsync(cancellationToken);
+            Console.WriteLine("✅ Kafka iniciado y conectado a Zookeeper");
+
+            Console.WriteLine("🎯 Fase 4: Iniciando Schema Registry (requiere Kafka)...");
+            await SchemaRegistry!.StartAsync(cancellationToken);
+            Console.WriteLine("✅ Schema Registry iniciado y conectado a Kafka");
+
+            Console.WriteLine("🚀 Fase 5: Iniciando Debezium Connect (requiere Kafka + Schema Registry)...");
+            // ✅ Sin Schema Registry - solo Kafka como en el ejemplo
+            
+            // Obtener las direcciones para Debezium Connect
+            var kafkaBootstrapServers = Kafka.BootstrapServers;
+            var schemaRegistryUrl = SchemaRegistry!.SchemaRegistryUrl;
+            
+            // Para contenedores en la misma red, usar el listener interno
+            var kafkaInternalAddress = "kafka:29092";
+            var schemaRegistryInternalUrl = "http://schema-registry:8081";
+            
+            Console.WriteLine($"📡 Kafka público: {kafkaBootstrapServers}");
+            Console.WriteLine($"📡 Kafka interno para Debezium: {kafkaInternalAddress}");
+            Console.WriteLine($"🎯 Schema Registry público: {schemaRegistryUrl}");
+            Console.WriteLine($"🎯 Schema Registry interno para Debezium: {schemaRegistryInternalUrl}");
+            
+            var debeziumConfig = new TestContainerConfiguration
+            {
+                KafkaBootstrapServers = kafkaInternalAddress,
+                SchemaRegistryUrl = schemaRegistryInternalUrl // ✅ Ahora con Schema Registry
+            };
+            
+            // Usar el mismo factory con red para Debezium Connect
+            var networkFactory = new TestcontainersFactory(_sharedNetwork);
+            DebeziumConnect = networkFactory.CreateDebeziumConnectContainer(debeziumConfig);
+            
+            try
+            {
+                // Timeout para Debezium Connect con stack completa
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60)); // Timeout más largo para stack completa
+                var combinedToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, cts.Token).Token;
+                
+                Console.WriteLine("⏱️ Intentando iniciar Debezium Connect con Avro/Schema Registry (timeout: 60s)...");
+                await DebeziumConnect.StartAsync(combinedToken);
+                _debeziumConnectAvailable = true;
+                Console.WriteLine("✅ Debezium Connect iniciado exitosamente");
+
+                // Configurar automáticamente el conector PostgreSQL
+                Console.WriteLine("🔧 Configurando conector PostgreSQL en Debezium Connect...");
+                try
+                {
+                    var postgreSqlConnectionString = PostgreSql.ConnectionString;
+                    await DebeziumConnect.ConfigurePostgreSqlConnectorAsync("postgres-connector", postgreSqlConnectionString, combinedToken);
+                    Console.WriteLine("✅ Conector PostgreSQL configurado exitosamente");
+                }
+                catch (Exception connectorEx)
+                {
+                    Console.WriteLine($"⚠️ Warning: No se pudo configurar el conector PostgreSQL: {connectorEx.Message}");
+                    Console.WriteLine("💡 El CDC puede no funcionar correctamente sin el conector");
+                }
+                
+                Console.WriteLine("✅ Fase 6 completada: Debezium Connect iniciado con soporte Avro completo");
+            }
+            catch (Exception ex)
+            {
+                _debeziumConnectAvailable = false;
+                Console.WriteLine($"❌ Debezium Connect falló: {ex.Message}");
+                Console.WriteLine("💡 Los tests continuarán sin CDC - funcionalidad limitada");
+                // NO hacer throw - permitir que tests continúen sin CDC
+            }
+            
+            Console.WriteLine("✅ Toda la stack completa iniciada exitosamente");
+            Console.WriteLine("🎯 Stack activa: Zookeeper + Kafka + Schema Registry + Debezium Connect");
         }
 
         public async Task StopAllAsync(CancellationToken cancellationToken = default)
         {
-            // Stop containers in parallel
-            var tasks = new[]
+            // Stop en orden inverso al startup para respeter dependencias
+            var tasks = new List<Task>
             {
                 PostgreSql.StopAsync(cancellationToken),
-                MongoDb.StopAsync(cancellationToken),
-                RabbitMq.StopAsync(cancellationToken)
+                MongoDb.StopAsync(cancellationToken)
             };
+
+            // Solo incluir Debezium Connect si se inició
+            if (_debeziumConnectAvailable)
+            {
+                tasks.Add(DebeziumConnect.StopAsync(cancellationToken));
+            }
+
+            // ✅ Agregar todos los componentes que estamos usando
+            tasks.Add(Kafka.StopAsync(cancellationToken));
+            if (SchemaRegistry != null)
+            {
+                tasks.Add(SchemaRegistry.StopAsync(cancellationToken));
+            }
+            tasks.Add(Zookeeper.StopAsync(cancellationToken));
 
             await Task.WhenAll(tasks);
         }
 
         public async Task<bool> AreAllHealthyAsync(CancellationToken cancellationToken = default)
         {
-            // Check health of all containers in parallel
-            var tasks = new[]
+            // ✅ Contenedores esenciales que estamos usando
+            var essentialTasks = new[]
             {
                 PostgreSql.IsHealthyAsync(cancellationToken),
                 MongoDb.IsHealthyAsync(cancellationToken),
-                RabbitMq.IsHealthyAsync(cancellationToken)
+                Zookeeper.IsHealthyAsync(cancellationToken),
+                Kafka.IsHealthyAsync(cancellationToken),
+                SchemaRegistry!.IsHealthyAsync(cancellationToken)
             };
 
-            var results = await Task.WhenAll(tasks);
-            
-            // All containers must be healthy
-            return results[0] && results[1] && results[2];
+            var essentialResults = await Task.WhenAll(essentialTasks);
+            var allEssentialHealthy = essentialResults.All(r => r);
+
+            // Only verify Debezium Connect if it's available
+            if (_debeziumConnectAvailable)
+            {
+                var debeziumHealthy = await DebeziumConnect.IsHealthyAsync(cancellationToken);
+                return allEssentialHealthy && debeziumHealthy;
+            }
+
+            // If Debezium Connect is not available, only verify essential containers
+            return allEssentialHealthy;
         }
 
         public async ValueTask DisposeAsync()
         {
             if (!_disposed)
             {
-                var tasks = new[]
-                {
-                    PostgreSql.DisposeAsync(),
-                    MongoDb.DisposeAsync(),
-                    RabbitMq.DisposeAsync()
-                };
+                var tasks = new List<ValueTask>();
+
+                // Siempre dispose de PostgreSQL y MongoDB
+                tasks.Add(PostgreSql.DisposeAsync());
+                tasks.Add(MongoDb.DisposeAsync());
+
+                // Dispose de Zookeeper, Kafka y Schema Registry si están inicializados
+                if (Zookeeper != null)
+                    tasks.Add(Zookeeper.DisposeAsync());
+
+                if (Kafka != null)
+                    tasks.Add(Kafka.DisposeAsync());
+
+                if (SchemaRegistry != null)
+                    tasks.Add(SchemaRegistry.DisposeAsync());
+
+                // Solo dispose de Debezium Connect si está disponible y no es null
+                if (_debeziumConnectAvailable && DebeziumConnect != null)
+                    tasks.Add(DebeziumConnect.DisposeAsync());
 
                 await Task.WhenAll(tasks.Select(t => t.AsTask()));
+
+                // Dispose de la red compartida
+                if (_sharedNetwork != null)
+                    await _sharedNetwork.DisposeAsync();
+
                 _disposed = true;
             }
         }

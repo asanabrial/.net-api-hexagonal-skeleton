@@ -39,12 +39,8 @@ namespace HexagonalSkeleton.API.Config
                 provider.GetRequiredService<IUserReadRepository>() as UserReadRepositoryMongoAdapter 
                 ?? throw new InvalidOperationException("UserReadRepositoryMongoAdapter not registered"));
 
-            // === EVENTUAL CONSISTENCY ===
-            // Sync service for maintaining read model consistency via domain events
+            // Eventual consistency sync service for maintaining read model consistency
             services.AddScoped<HexagonalSkeleton.Domain.Services.IUserSyncService, UserSyncService>();
-
-            // Note: Application Services removed as they were legacy code not used by controllers
-            // Controllers use MediatR pattern directly with Command/Query handlers
 
             return services;
         }

@@ -42,7 +42,7 @@ namespace HexagonalSkeleton.API.Controllers.Features
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var result = await _mediator.Send(new GetUserQuery(id));
+            var result = await _mediator.Send(new GetUserManagementQuery(id));
             return Ok(_mapper.Map<UserResponse>(result));
         }
 
@@ -67,7 +67,7 @@ namespace HexagonalSkeleton.API.Controllers.Features
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetAll([FromQuery] GetAllUsersRequest request)
         {
-            var query = _mapper.Map<GetAllUsersQuery>(request);
+            var query = _mapper.Map<GetAllUsersManagementQuery>(request);
             var result = await _mediator.Send(query);
             return Ok(_mapper.Map<PagedResponse<UserResponse>>(result));
         }
@@ -84,7 +84,7 @@ namespace HexagonalSkeleton.API.Controllers.Features
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update(UpdateUserRequest request)
         {
-            var command = _mapper.Map<UpdateUserCommand>(request);
+            var command = _mapper.Map<UpdateUserManagementCommand>(request);
             var result = await _mediator.Send(command);
             return Ok(_mapper.Map<UserResponse>(result));
         }
@@ -119,7 +119,7 @@ namespace HexagonalSkeleton.API.Controllers.Features
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(Guid id)
         {
-            await _mediator.Send(new HardDeleteUserCommand(id));
+            await _mediator.Send(new HardDeleteUserManagementCommand(id));
             return NoContent();
         }
 
@@ -134,7 +134,7 @@ namespace HexagonalSkeleton.API.Controllers.Features
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> SoftDelete(Guid id)
         {
-            var result = await _mediator.Send(new SoftDeleteUserCommand(id));
+            var result = await _mediator.Send(new SoftDeleteUserManagementCommand(id));
             return Ok(_mapper.Map<DeleteUserResponse>(result));
         }
     }

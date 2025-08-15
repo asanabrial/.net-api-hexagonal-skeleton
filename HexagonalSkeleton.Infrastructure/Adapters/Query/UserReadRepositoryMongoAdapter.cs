@@ -152,6 +152,21 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Query
             return await GetUserAsync(id, cancellationToken);
         }
 
+        public async Task<User?> GetByIdUnfilteredAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            if (!IsMongoDbAvailable)
+                return null;
+
+            // Query WITHOUT the IsDeleted filter for management purposes
+            var filter = Builders<UserQueryDocument>.Filter.Eq(u => u.Id, id);
+            
+            var document = await _dbContext.Users!
+                .Find(filter)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return document != null ? _mapper.Map<User>(document) : null;
+        }
+
         public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
         {
             return await GetUserByEmailAsync(email, cancellationToken);

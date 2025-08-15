@@ -184,9 +184,9 @@ namespace HexagonalSkeleton.Test
         /// <summary>
         /// Creates a test soft delete user command
         /// </summary>
-        public static SoftDeleteUserCommand CreateSoftDeleteUserCommand(Guid? userId = null)
+        public static SoftDeleteUserManagementCommand CreateSoftDeleteUserManagementCommand(Guid? userId = null)
         {
-            return new SoftDeleteUserCommand
+            return new SoftDeleteUserManagementCommand
             {
                 Id = userId ?? Guid.NewGuid()
             };
@@ -195,9 +195,9 @@ namespace HexagonalSkeleton.Test
         /// <summary>
         /// Creates a test hard delete user command
         /// </summary>
-        public static HardDeleteUserCommand CreateHardDeleteUserCommand(Guid? userId = null)
+        public static HardDeleteUserManagementCommand CreateHardDeleteUserManagementCommand(Guid? userId = null)
         {
-            return new HardDeleteUserCommand
+            return new HardDeleteUserManagementCommand
             {
                 Id = userId ?? Guid.NewGuid()
             };

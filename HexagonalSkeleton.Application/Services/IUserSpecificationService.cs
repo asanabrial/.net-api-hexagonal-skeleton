@@ -16,6 +16,6 @@ namespace HexagonalSkeleton.Application.Services
         /// </summary>
         /// <param name="query">Query parameters containing filter criteria</param>
         /// <returns>Specification for filtering users</returns>
-        ISpecification<User> BuildSpecification(GetAllUsersQuery query);
+        ISpecification<User> BuildSpecification(GetAllUsersManagementQuery query);
     }
 }

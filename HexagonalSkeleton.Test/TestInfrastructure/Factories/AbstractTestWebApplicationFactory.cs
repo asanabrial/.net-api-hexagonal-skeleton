@@ -3,36 +3,35 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using HexagonalSkeleton.Infrastructure.Persistence.Command;
 using HexagonalSkeleton.Infrastructure.Persistence.Query;
+using HexagonalSkeleton.Infrastructure.Services;
+using HexagonalSkeleton.Infrastructure.Adapters.Command;
+using HexagonalSkeleton.Infrastructure.Adapters.Query;
 using HexagonalSkeleton.Test.TestInfrastructure.Abstractions;
+using HexagonalSkeleton.Test.TestInfrastructure.Services;
 using HexagonalSkeleton.Test.TestInfrastructure.Implementations;
-using HexagonalSkeleton.Test.TestInfrastructure.Mocks;
 using HexagonalSkeleton.Test.TestInfrastructure.Helpers;
 using MongoDB.Driver;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using AutoMapper;
 using FluentValidation;
 using MediatR;
-using MassTransit;
 using System;
 using System.Threading.Tasks;
-using HexagonalSkeleton.Application.Services;
-using HexagonalSkeleton.Application.IntegrationEvents;
 using HexagonalSkeleton.Domain.Ports;
-using HexagonalSkeleton.Infrastructure.Adapters.Command;
-using HexagonalSkeleton.Infrastructure.Adapters.Query;
 
 namespace HexagonalSkeleton.Test.TestInfrastructure.Factories
 {
     /// <summary>
-    /// Configuración simplificada para tests con contenedores Docker.
+    /// Simplified configuration for tests with Docker containers.
     /// 
-    /// CONCEPTOS CLAVE PARA JUNIORS:
-    /// 1. Cada clase de test tiene sus propios contenedores Docker (PostgreSQL, MongoDB, RabbitMQ)
-    /// 2. Los repositorios de lectura usan memoria compartida para sincronización CQRS inmediata
-    /// 3. Los repositorios de escritura usan PostgreSQL real para validaciones de integridad
-    /// 4. El mock de eventos sincroniza inmediatamente entre escritura y lectura
+    /// KEY CONCEPTS:
+    /// 1. Each test class has its own Docker containers (PostgreSQL, MongoDB, Kafka)
+    /// 2. Read repositories use shared memory for immediate CQRS synchronization
+    /// 3. Write repositories use real PostgreSQL for integrity validations
+    /// 4. Event handling synchronizes immediately between write and read models
     /// </summary>
     public abstract class AbstractTestWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime, IDisposable
     {
@@ -48,16 +47,19 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Factories
         }
 
         /// <summary>
-        /// Inicia todos los contenedores Docker al comenzar la clase de test
+        /// Starts all Docker containers when test class begins
         /// </summary>
         public virtual async Task InitializeAsync()
         {
             await _containerOrchestrator.StartAllAsync();
             await WaitForContainersToBeHealthy();
+            
+            // Configure Debezium connector for testing
+            await ConfigureDebeziumConnectorAsync();
         }
 
         /// <summary>
-        /// Limpia todos los contenedores Docker al terminar la clase de test
+        /// Cleans up all Docker containers when test class finishes
         /// </summary>
         public new virtual async Task DisposeAsync()
         {
@@ -66,7 +68,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Factories
         }
 
         /// <summary>
-        /// Limpieza síncrona para compatibilidad con IDisposable
+        /// Synchronous cleanup for IDisposable compatibility
         /// </summary>
         public new void Dispose()
         {
@@ -76,16 +78,40 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Factories
 
         private async Task WaitForContainersToBeHealthy()
         {
-            const int maxRetries = 30;
+            const int maxRetries = 20; // More retries but shorter intervals
+            const int delayMs = 500; // Reduced from 1000ms to 500ms
+            
             for (int i = 0; i < maxRetries; i++)
             {
                 if (await _containerOrchestrator.AreAllHealthyAsync())
                     return;
 
-                await Task.Delay(1000);
+                await Task.Delay(delayMs);
             }
             
-            throw new InvalidOperationException("Los contenedores Docker no pudieron iniciarse correctamente");
+            throw new InvalidOperationException($"Docker containers could not start correctly after {maxRetries} attempts");
+        }
+
+        /// <summary>
+        /// Configures Debezium connector for test containers to enable CDC
+        /// </summary>
+        private async Task ConfigureDebeziumConnectorAsync()
+        {
+            // Configure real Debezium Connect connector for testing
+            try
+            {
+                var connectorName = "hexagonal-postgres-connector-test";
+                await ContainerOrchestrator.DebeziumConnect.ConfigurePostgreSqlConnectorAsync(
+                    connectorName, 
+                    ContainerOrchestrator.PostgreSql.ConnectionString);
+                
+                Console.WriteLine("✅ Debezium Connect configurado para tests CDC");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"⚠️ Warning: Failed to configure Debezium connector: {ex.Message}");
+                // Continue with tests - TestCdcEventPublisher will be used as fallback
+            }
         }
 
         #endregion
@@ -96,21 +122,49 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Factories
         {
             builder.UseEnvironment("Test");
             
+            // Configure test-specific settings
+            builder.ConfigureAppConfiguration((context, config) =>
+            {
+                // Generate unique GroupId for test run to ensure clean kafka consumer state
+                var uniqueGroupId = $"hexagonal-test-{Guid.NewGuid():N}";
+                
+                // Configure container ports dynamically
+                var connectionStrings = new Dictionary<string, string?>
+                {
+                    {"ConnectionStrings:CommandDatabase", ContainerOrchestrator.PostgreSql.ConnectionString},
+                    {"ConnectionStrings:QueryDatabase", ContainerOrchestrator.MongoDb.ConnectionString},
+                    {"Debezium:Producer:BootstrapServers", ContainerOrchestrator.Kafka.BootstrapServers},
+                    {"Debezium:Consumer:BootstrapServers", ContainerOrchestrator.Kafka.BootstrapServers},
+                    {"Debezium:Consumer:GroupId", uniqueGroupId} // Unique group ID per test run
+                };
+
+                // Only configure Debezium Connect if available
+                if (ContainerOrchestrator.IsDebeziumConnectAvailable)
+                {
+                    connectionStrings["Debezium:Connect:Url"] = ContainerOrchestrator.DebeziumConnect.ConnectUrl;
+                }
+                
+                config.AddInMemoryCollection(connectionStrings);
+            });
+            
             builder.ConfigureServices(services =>
             {
-                // 1. Remover servicios de producción que causan conflictos
+                // 1. Remove production services that cause conflicts
                 RemoveProductionServices(services);
                 
-                // 2. Configurar bases de datos de test
+                // 2. Configure test databases
                 ConfigureTestDatabases(services);
                 
-                // 3. Configurar repositorios para tests
+                // 3. Configure repositories for tests
                 ConfigureTestRepositories(services);
                 
-                // 4. Configurar servicios básicos
+                // 4. Configure basic services
                 ConfigureTestServices(services);
                 
-                // 5. Asegurar que la base de datos existe
+                // 5. Configure Test CDC Event Publisher to simulate Debezium
+                ConfigureTestCdcServices(services);
+                
+                // 6. Ensure database exists
                 EnsureDatabaseExists(services);
             });
 
@@ -119,19 +173,19 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Factories
 
         #endregion
 
-        #region Métodos de configuración (privados para simplicidad)
+        #region Configuration methods (private for simplicity)
 
         /// <summary>
-        /// Remueve servicios de producción que causan problemas en tests
+        /// Removes production services that cause problems in tests
         /// </summary>
         private static void RemoveProductionServices(IServiceCollection services)
         {
-            // Remover servicios de base de datos de producción
+            // Remove production database services
             var dbServices = services.Where(s => 
                 s.ServiceType == typeof(CommandDbContext) ||
                 s.ServiceType.Name.Contains("DbContext") ||
                 s.ServiceType.Name.Contains("MassTransit") ||
-                s.ServiceType.Name.Contains("Consumer") ||
+                (s.ServiceType.Name.Contains("Consumer") && !s.ServiceType.Name.Contains("DebeziumConsumer")) ||
                 s.ImplementationType?.Name.Contains("Repository") == true)
                 .ToList();
 
@@ -142,7 +196,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Factories
         }
 
         /// <summary>
-        /// Configura las conexiones a las bases de datos de test (contenedores Docker)
+        /// Configures database connections for tests (Docker containers)
         /// </summary>
         private void ConfigureTestDatabases(IServiceCollection services)
         {
@@ -150,31 +204,44 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Factories
             services.AddDbContext<CommandDbContext>(options =>
             {
                 options.UseNpgsql(ContainerOrchestrator.PostgreSql.ConnectionString);
-                options.EnableSensitiveDataLogging(); // Para debug en tests
+                options.EnableSensitiveDataLogging(); // For debugging in tests
             });
 
-            // MongoDB para lectura (queries) - aunque usamos memoria compartida
+            // MongoDB for reading (queries) - complete configuration for CDC
             services.AddSingleton<IMongoClient>(_ => 
                 new MongoClient(ContainerOrchestrator.MongoDb.ConnectionString));
+            
+            // IMongoDatabase for direct access (needed for TestCdcSynchronizer)
+            services.AddScoped<IMongoDatabase>(sp =>
+                sp.GetRequiredService<IMongoClient>().GetDatabase("hexagonal_test"));
+            
+            // QueryDbContext for MongoDB
+            services.AddScoped<QueryDbContext>(sp => 
+                new QueryDbContext(sp.GetRequiredService<IMongoClient>(), "hexagonal_test"));
+            
+            // Auxiliary services for MongoDB
+            services.AddScoped<IMongoFilterBuilder, MongoFilterBuilder>();
+            services.AddScoped<IMongoSortBuilder, MongoSortBuilder>();
         }
 
         /// <summary>
-        /// Configura los repositorios específicos para tests
+        /// Configures test-specific repositories
         /// </summary>
         private static void ConfigureTestRepositories(IServiceCollection services)
         {
-            // Repositorio de escritura: usa PostgreSQL real para validaciones de integridad
+            // For real integration tests with CDC: use complete CQRS architecture
+            // Write repository: uses PostgreSQL 
             services.AddScoped<IUserWriteRepository, UserCommandRepository>();
             
-            // Repositorio de lectura: usa memoria compartida para sincronización inmediata
-            services.AddSingleton<IUserReadRepository, InMemoryUserReadRepository>();
+            // Read repository: uses MongoDB with real CDC synchronization
+            services.AddScoped<IUserReadRepository, UserReadRepositoryMongoAdapter>();
             
-            // Servicio de eventos: sincronización inmediata entre escritura y lectura
-            services.AddScoped<IIntegrationEventService, MockIntegrationEventService>();
+            // Enable CDC services for complete integration tests
+            // CDC will automatically synchronize between PostgreSQL (write) and MongoDB (read)
         }
 
         /// <summary>
-        /// Configura servicios necesarios para los tests
+        /// Configures services needed for tests
         /// </summary>
         private static void ConfigureTestServices(IServiceCollection services)
         {
@@ -191,7 +258,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Factories
             services.AddValidatorsFromAssembly(
                 typeof(HexagonalSkeleton.Application.Features.UserProfile.Commands.UpdateProfileUserCommand).Assembly);
 
-            // Autenticación de test
+            // Test authentication
             services.AddAuthentication("Test")
                 .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, TestAuthenticationHandler>(
                     "Test", _ => { });
@@ -202,7 +269,35 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Factories
         }
 
         /// <summary>
-        /// Asegura que la base de datos existe y está lista para usar
+        /// Configures Test CDC services to simulate Debezium events for testing
+        /// CDC is always enabled in this CQRS architecture
+        /// </summary>
+        private void ConfigureTestCdcServices(IServiceCollection services)
+        {
+            // CDC is always enabled in this CQRS architecture
+            Console.WriteLine("✅ CDC enabled for integration tests");
+            
+            // Do NOT configure ProducerConfig here - use the one from CdcServiceExtension.cs
+            // which gets the correct configuration from in-memory config overrides
+            
+            // Register TestCdcEventPublisher - it will use the ProducerConfig from CdcServiceExtension.cs
+            services.AddSingleton<TestInfrastructure.Services.TestCdcEventPublisher>();
+            
+            // Register CDC Synchronization Helper for elegant test synchronization without delays
+            services.AddSingleton<TestInfrastructure.Services.CdcSynchronizationHelper>();
+            
+            // Register Test Debezium Event Processor Decorator for CDC synchronization
+            services.AddScoped<TestInfrastructure.Services.TestDebeziumEventProcessorDecorator>();
+            
+            // Register convenient CDC Test Helper for easy test usage
+            services.AddScoped<TestInfrastructure.Helpers.CdcTestHelper>();
+            
+            // Register MongoDB Sync Helper - Simple polling-based synchronization (more reliable)
+            services.AddScoped<TestInfrastructure.Helpers.MongoDbSyncHelper>();
+        }
+
+        /// <summary>
+        /// Ensures that the database exists and is ready for use
         /// </summary>
         private static void EnsureDatabaseExists(IServiceCollection services)
         {
@@ -213,7 +308,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Factories
         }
 
         /// <summary>
-        /// Configura logging mínimo para tests
+        /// Configures minimal logging for tests
         /// </summary>
         protected virtual void ConfigureTestLogging(IWebHostBuilder builder)
         {

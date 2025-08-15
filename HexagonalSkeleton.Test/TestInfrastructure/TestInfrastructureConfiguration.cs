@@ -28,44 +28,8 @@ namespace HexagonalSkeleton.Test.TestInfrastructure
                 Username = Environment.GetEnvironmentVariable("TEST_DATABASE_USER") ?? "test_user",
                 Password = Environment.GetEnvironmentVariable("TEST_DATABASE_PASSWORD") ?? "test_password",
                 CleanUp = bool.Parse(Environment.GetEnvironmentVariable("TEST_CONTAINER_CLEANUP") ?? "true"),
-                StartupTimeout = TimeSpan.FromMinutes(
-                    int.Parse(Environment.GetEnvironmentVariable("TEST_CONTAINER_TIMEOUT_MINUTES") ?? "2"))
-            };
-        }
-
-        /// <summary>
-        /// Gets PostgreSQL-specific configuration
-        /// </summary>
-        public static TestContainerConfiguration GetPostgreSqlConfiguration()
-        {
-            var baseConfig = GetDefaultConfiguration();
-            return baseConfig with
-            {
-                Image = Environment.GetEnvironmentVariable("TEST_POSTGRES_IMAGE") ?? "postgres:15-alpine"
-            };
-        }
-
-        /// <summary>
-        /// Gets MongoDB-specific configuration
-        /// </summary>
-        public static TestContainerConfiguration GetMongoDbConfiguration()
-        {
-            var baseConfig = GetDefaultConfiguration();
-            return baseConfig with
-            {
-                Image = Environment.GetEnvironmentVariable("TEST_MONGODB_IMAGE") ?? "mongo:7"
-            };
-        }
-
-        /// <summary>
-        /// Gets RabbitMQ-specific configuration
-        /// </summary>
-        public static TestContainerConfiguration GetRabbitMqConfiguration()
-        {
-            var baseConfig = GetDefaultConfiguration();
-            return baseConfig with
-            {
-                Image = Environment.GetEnvironmentVariable("TEST_RABBITMQ_IMAGE") ?? "rabbitmq:3-management-alpine"
+                StartupTimeout = TimeSpan.FromSeconds(
+                    int.Parse(Environment.GetEnvironmentVariable("TEST_CONTAINER_STARTUP_TIMEOUT_SECONDS") ?? "15"))
             };
         }
 

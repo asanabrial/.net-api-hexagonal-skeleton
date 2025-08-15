@@ -5,8 +5,8 @@ using HexagonalSkeleton.Test.TestInfrastructure.Abstractions;
 namespace HexagonalSkeleton.Test.TestInfrastructure.Factories
 {
     /// <summary>
-    /// Configured test web application factory that uses the centralized configuration.
-    /// This is the recommended factory to use in tests.
+    /// Configured test web application factory that uses testcontainers.
+    /// Includes PostgreSQL + MongoDB + Kafka + Debezium Connect for CDC integration tests.
     /// </summary>
     public class ConfiguredTestWebApplicationFactory : AbstractTestWebApplicationFactory
     {

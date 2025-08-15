@@ -7,7 +7,7 @@ namespace HexagonalSkeleton.API.Models.Users
     /// <summary>
     /// Request model for updating user information
     /// </summary>
-    [AutoMap(typeof(UpdateUserCommand), ReverseMap = true)]
+    [AutoMap(typeof(UpdateUserManagementCommand), ReverseMap = true)]
     public class UpdateUserRequest
     {
         /// <summary>

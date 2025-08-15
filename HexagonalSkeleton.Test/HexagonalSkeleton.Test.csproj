@@ -10,12 +10,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Unit\Application\Features\SocialNetwork\**" />
-    <Compile Remove="Unit\Application\Features\UserAuthentication\**" />
-    <EmbeddedResource Remove="Unit\Application\Features\SocialNetwork\**" />
-    <EmbeddedResource Remove="Unit\Application\Features\UserAuthentication\**" />
-    <None Remove="Unit\Application\Features\SocialNetwork\**" />
-    <None Remove="Unit\Application\Features\UserAuthentication\**" />
+    <Compile Remove="UnitTests\Application\Features\SocialNetwork\**" />
+    <Compile Remove="UnitTests\Application\Features\UserAuthentication\**" />
+    <EmbeddedResource Remove="UnitTests\Application\Features\SocialNetwork\**" />
+    <EmbeddedResource Remove="UnitTests\Application\Features\UserAuthentication\**" />
+    <None Remove="UnitTests\Application\Features\SocialNetwork\**" />
+    <None Remove="UnitTests\Application\Features\UserAuthentication\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,12 +24,9 @@
     <PackageReference Include="coverlet.collector" Version="6.0.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>    <PackageReference Include="EntityFrameworkCore.AutoFixture" Version="2.1.0" />
-    <PackageReference Include="FluentAssertions" Version="7.0.0" />
+    </PackageReference>    <PackageReference Include="FluentAssertions" Version="7.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.6" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.6" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.6">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -40,11 +37,10 @@
     <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.12.1" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
-    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
-    <PackageReference Include="Testcontainers" Version="3.10.0" />
-    <PackageReference Include="Testcontainers.PostgreSql" Version="3.10.0" />
-    <PackageReference Include="Testcontainers.MongoDb" Version="3.10.0" />
-    <PackageReference Include="Testcontainers.RabbitMq" Version="3.10.0" />
+    <PackageReference Include="Testcontainers" Version="4.6.0" />
+    <PackageReference Include="Testcontainers.Kafka" Version="4.6.0" />
+    <PackageReference Include="Testcontainers.PostgreSql" Version="4.6.0" />
+    <PackageReference Include="Testcontainers.MongoDb" Version="4.6.0" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.1">
       <PrivateAssets>all</PrivateAssets>

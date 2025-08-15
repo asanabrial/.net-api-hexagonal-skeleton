@@ -42,7 +42,8 @@ namespace HexagonalSkeleton.API.Config
 
             // En un patrón CQRS bien implementado, solo necesitamos un contexto para comandos (escritura)
             // CommandDbContext será el único contexto para operaciones de escritura usando PostgreSQL
-            services.AddDbContextPool<CommandDbContext>(
+            // Using AddDbContext instead of AddDbContextPool due to custom constructor with IMediator
+            services.AddDbContext<CommandDbContext>(
                 dbContextOptions =>
                     dbContextOptions.UseNpgsql(
                         connectionStr, 

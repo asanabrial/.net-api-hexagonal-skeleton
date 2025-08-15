@@ -3,6 +3,7 @@ using Testcontainers.MongoDb;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using DotNet.Testcontainers.Networks;
 
 namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
 {
@@ -20,16 +21,24 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
             string image = "mongo:7",
             string database = "hexagonal_test",
             string username = "test_user",
-            string password = "test_password")
+            string password = "test_password",
+            INetwork? network = null)
         {
             _database = database;
             _username = username;
-            _container = new MongoDbBuilder()
+            
+            var builder = new MongoDbBuilder()
                 .WithImage(image)
                 .WithUsername(username)
                 .WithPassword(password)
-                .WithCleanUp(true)
-                .Build();
+                .WithCleanUp(true);
+                
+            if (network != null)
+            {
+                builder = builder.WithNetwork(network);
+            }
+            
+            _container = builder.Build();
         }
 
         public string ConnectionString => _container.GetConnectionString();

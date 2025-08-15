@@ -7,12 +7,15 @@ namespace HexagonalSkeleton.Infrastructure.Persistence.Command
     /// <summary>
     /// Command Database Context for write operations
     /// Optimized for transactional consistency and data integrity
-    /// Uses PostgreSQL for ACID compliance
+    /// Uses PostgreSQL for ACID compliance with Debezium CDC
     /// Follows CQRS pattern - only for write operations
+    /// CDC is handled automatically by Debezium through WAL (Write-Ahead Log)
+    /// No manual event publishing needed - Debezium captures all changes
     /// </summary>
     public class CommandDbContext : DbContext
     {
-        public CommandDbContext(DbContextOptions<CommandDbContext> options) : base(options)
+        public CommandDbContext(DbContextOptions<CommandDbContext> options) 
+            : base(options)
         {
         }
 
@@ -44,13 +47,14 @@ namespace HexagonalSkeleton.Infrastructure.Persistence.Command
 
                 // Audit fields
                 entity.Property(e => e.CreatedAt).IsRequired();
+                entity.Property(e => e.UpdatedAt);
                 entity.Property(e => e.IsDeleted).HasDefaultValue(false);
 
-                // Indexes for performance
-                entity.HasIndex(e => e.CreatedAt);
-                entity.HasIndex(e => e.IsDeleted);
-                entity.HasIndex(e => e.LastLogin);
+                // Configure table name (important for Debezium topic naming)
+                entity.ToTable("users");
             });
+
+            base.OnModelCreating(modelBuilder);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -62,5 +66,9 @@ namespace HexagonalSkeleton.Infrastructure.Persistence.Command
                 optionsBuilder.EnableDetailedErrors(false);
             }
         }
+
+        // Note: No custom SaveChangesAsync needed
+        // Debezium automatically captures all changes through PostgreSQL WAL
+        // This provides better reliability than application-level event publishing
     }
 }
