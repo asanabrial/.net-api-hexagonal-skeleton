@@ -105,6 +105,13 @@ namespace HexagonalSkeleton.Infrastructure.CDC
                     },
                     Email = userData.Email,
                     PhoneNumber = userData.PhoneNumber,
+                    Birthdate = userData.GetBirthdate(),
+                    Location = new LocationDocument
+                    {
+                        Latitude = userData.Latitude ?? 0.0,
+                        Longitude = userData.Longitude ?? 0.0
+                    },
+                    AboutMe = userData.AboutMe ?? string.Empty,
                     CreatedAt = userData.GetCreatedAt(),
                     UpdatedAt = userData.GetUpdatedAt(),
                     IsDeleted = userData.IsDeleted,
@@ -154,6 +161,13 @@ namespace HexagonalSkeleton.Infrastructure.CDC
                     },
                     Email = userData.Email,
                     PhoneNumber = userData.PhoneNumber,
+                    Birthdate = userData.GetBirthdate(),
+                    Location = new LocationDocument
+                    {
+                        Latitude = userData.Latitude ?? 0.0,
+                        Longitude = userData.Longitude ?? 0.0
+                    },
+                    AboutMe = userData.AboutMe ?? string.Empty,
                     CreatedAt = userData.GetCreatedAt(),
                     UpdatedAt = userData.GetUpdatedAt(),
                     IsDeleted = userData.IsDeleted,
@@ -336,6 +350,18 @@ namespace HexagonalSkeleton.Infrastructure.CDC
         [JsonPropertyName("PhoneNumber")]
         public string PhoneNumber { get; set; } = string.Empty;
         
+        [JsonPropertyName("Birthdate")]
+        public string? BirthdateString { get; set; }
+        
+        [JsonPropertyName("Latitude")]
+        public double? Latitude { get; set; }
+        
+        [JsonPropertyName("Longitude")]
+        public double? Longitude { get; set; }
+        
+        [JsonPropertyName("AboutMe")]
+        public string? AboutMe { get; set; }
+        
         [JsonPropertyName("CreatedAt")]
         public string CreatedAtString { get; set; } = string.Empty;
         
@@ -356,5 +382,6 @@ namespace HexagonalSkeleton.Infrastructure.CDC
         public DateTime GetUpdatedAt() => DateTime.TryParse(UpdatedAtString, out var result) ? result : DateTime.UtcNow;
         public DateTime? GetLastLogin() => DateTime.TryParse(LastLoginString, out var result) ? result : null;
         public DateTime? GetDeletedAt() => DateTime.TryParse(DeletedAtString, out var result) ? result : null;
+        public DateTime? GetBirthdate() => DateTime.TryParse(BirthdateString, out var result) ? result : null;
     }
 }
