@@ -1,9 +1,11 @@
 using Confluent.Kafka;
 using HexagonalSkeleton.Infrastructure.CDC;
+using HexagonalSkeleton.Infrastructure.CDC.Configuration;
 using HexagonalSkeleton.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace HexagonalSkeleton.API.Config
 {
@@ -20,29 +22,22 @@ namespace HexagonalSkeleton.API.Config
         /// </summary>
         public static IServiceCollection AddDebeziumCdc(this IServiceCollection services, IConfiguration configuration)
         {
+            // Configurar opciones CDC
+            services.Configure<CdcOptions>(configuration.GetSection(CdcOptions.SectionName));
             
-            // Configuración de Kafka Producer - simplified
-            services.Configure<ProducerConfig>(options =>
-            {
-                options.BootstrapServers = "localhost:9092";
-                options.Acks = Acks.All;
-                options.EnableIdempotence = true;
-                options.SecurityProtocol = SecurityProtocol.Plaintext;
-                options.ClientId = "hexagonal-producer";
-            });
-
-            // Configuración de Kafka Consumer - simplified
-            services.Configure<ConsumerConfig>(options =>
-            {
-                options.BootstrapServers = "localhost:9092";
-                options.GroupId = "hexagonal-cdc-consumer-group";
-                options.AutoOffsetReset = AutoOffsetReset.Earliest;
-                options.EnableAutoCommit = false;
-                options.SecurityProtocol = SecurityProtocol.Plaintext;
-                options.ClientId = "hexagonal-consumer";
-            });
-
-            // Registrar servicios CDC
+        // Configurar Kafka Producer desde configuración CDC
+        services.Configure<ProducerConfig>(options =>
+        {
+            // This configuration will be evaluated at DI resolution time, not registration time
+            // However, for test scenarios, we need to ensure dynamic config is available
+            // We'll implement delayed configuration in the service constructor instead
+        });        // Configurar Kafka Consumer desde configuración CDC
+        services.Configure<ConsumerConfig>(options =>
+        {
+            // This configuration will be evaluated at DI resolution time, not registration time
+            // However, for test scenarios, we need to ensure dynamic config is available
+            // We'll implement delayed configuration in the service constructor instead
+        });            // Registrar servicios CDC
             services.AddScoped<DebeziumEventProcessor>(); // Changed to Scoped to match QueryDbContext lifetime
             services.AddHostedService<DebeziumConsumerService>();
 

@@ -2,6 +2,8 @@ using System.Text.Json;
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
 using HexagonalSkeleton.Infrastructure.CDC;
+using HexagonalSkeleton.Infrastructure.CDC.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -15,28 +17,81 @@ namespace HexagonalSkeleton.Infrastructure.Services
     /// </summary>
     public class DebeziumConsumerService : BackgroundService
     {
-        private readonly IConsumer<string, string> _consumer;
+        private IConsumer<string, string>? _consumer; // Remove readonly for runtime initialization
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<DebeziumConsumerService> _logger;
-        private readonly ConsumerConfig _config;
+        private readonly IConfiguration _configuration; // Add configuration injection
+        private ConsumerConfig? _config; // Remove readonly, will be set at runtime
+        private readonly CdcOptions _cdcOptions;
         private readonly string[] _topics;
 
         public DebeziumConsumerService(
-            IOptions<ConsumerConfig> config,
+            IOptions<CdcOptions> cdcOptions,
             IServiceProvider serviceProvider,
-            ILogger<DebeziumConsumerService> logger)
+            ILogger<DebeziumConsumerService> logger,
+            IConfiguration configuration) // Inject IConfiguration directly
         {
-            _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
+            _cdcOptions = cdcOptions?.Value ?? throw new ArgumentNullException(nameof(cdcOptions));
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
-            // Configure topics to consume
-            _topics = new[]
+            // Configure topics to consume from CDC configuration
+            _topics = _cdcOptions.Kafka.Topics ?? new[] { "hexagonal-postgres.public.users" };
+
+            // Delay consumer creation until StartAsync is called
+        }
+
+        /// <summary>
+        /// Creates the Kafka consumer with runtime configuration resolution
+        /// </summary>
+        private void InitializeConsumer()
+        {
+            // Resolve configuration at runtime to get dynamic values from TestContainers
+            var cdcSection = _configuration.GetSection($"{CdcOptions.SectionName}:Kafka");
+            
+            Console.WriteLine($"🔧 [DEBUG] Initializing Consumer at runtime");
+            Console.WriteLine($"🔧 [DEBUG] Configuration Section: {CdcOptions.SectionName}:Kafka");
+            Console.WriteLine($"🔧 [DEBUG] All CDC:Kafka configuration keys:");
+            foreach (var kvp in cdcSection.AsEnumerable())
             {
-                "hexagonal-postgres.public.users"
-            };
+                Console.WriteLine($"🔧 [DEBUG]   {kvp.Key} = {kvp.Value}");
+            }
+            
+            var baseGroupId = _configuration[$"{CdcOptions.SectionName}:Kafka:ConsumerGroupId"] ?? "hexagonal-cdc-consumer-group";
+            var generateUniqueGroupId = bool.Parse(_configuration[$"{CdcOptions.SectionName}:Kafka:GenerateUniqueGroupId"] ?? "false");
+            
+            var groupId = generateUniqueGroupId 
+                ? $"{baseGroupId}-{Guid.NewGuid()}" 
+                : baseGroupId;
 
-            // Create consumer with enterprise configuration
+            var bootstrapServers = _configuration[$"{CdcOptions.SectionName}:Kafka:BootstrapServers"];
+            if (string.IsNullOrEmpty(bootstrapServers))
+            {
+                // Check if we're in a test environment
+                var environment = _configuration["ASPNETCORE_ENVIRONMENT"];
+                if (environment == "Test")
+                {
+                    _logger.LogWarning("CDC:Kafka:BootstrapServers not configured for Test environment. Debezium Consumer Service will be disabled.");
+                    return;
+                }
+                
+                throw new InvalidOperationException("CDC:Kafka:BootstrapServers configuration is required");
+            }
+            
+            Console.WriteLine($"🔧 [DEBUG] Consumer BootstrapServers from runtime config: {bootstrapServers}");
+            Console.WriteLine($"🔧 [DEBUG] Consumer GroupId: {groupId}");
+            
+            _config = new ConsumerConfig
+            {
+                BootstrapServers = bootstrapServers,
+                GroupId = groupId,
+                AutoOffsetReset = AutoOffsetReset.Earliest,
+                EnableAutoCommit = false,
+                SecurityProtocol = SecurityProtocol.Plaintext,
+                ClientId = _configuration[$"{CdcOptions.SectionName}:Kafka:ConsumerClientId"] ?? "hexagonal-consumer"
+            };
+            
             _consumer = new ConsumerBuilder<string, string>(_config)
                 .SetErrorHandler((_, error) =>
                 {
@@ -50,6 +105,21 @@ namespace HexagonalSkeleton.Infrastructure.Services
                 {
                     _logger.LogInformation("Assigned partitions: {Partitions}", 
                         string.Join(", ", partitions.Select(p => $"{p.Topic}[{p.Partition}]")));
+                    // Log current offset position for debugging
+                    foreach (var partition in partitions)
+                    {
+                        try
+                        {
+                            var watermarkOffsets = c.QueryWatermarkOffsets(partition, TimeSpan.FromSeconds(5));
+                            _logger.LogInformation("Topic {Topic}[{Partition}] watermark: Low={Low}, High={High}", 
+                                partition.Topic, partition.Partition, watermarkOffsets.Low, watermarkOffsets.High);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning("Could not query watermark offsets for {Topic}[{Partition}]: {Error}", 
+                                partition.Topic, partition.Partition, ex.Message);
+                        }
+                    }
                 })
                 .SetPartitionsRevokedHandler((c, partitions) =>
                 {
@@ -66,12 +136,22 @@ namespace HexagonalSkeleton.Infrastructure.Services
         {
             _logger.LogInformation("Starting Debezium Consumer Service...");
 
+            // Initialize consumer with runtime configuration
+            InitializeConsumer();
+            
+            // Check if consumer was initialized (it won't be in test environment if config is missing)
+            if (_consumer == null)
+            {
+                _logger.LogWarning("Debezium Consumer Service not initialized. Service will exit.");
+                return;
+            }
+
             // Don't block startup - run consumer in background
             await Task.Run(async () =>
             {
                 try
                 {
-                    _consumer.Subscribe(_topics);
+                    _consumer!.Subscribe(_topics);
                     _logger.LogInformation("Subscribed to Debezium CDC topics: {Topics}", string.Join(", ", _topics));
 
                     while (!stoppingToken.IsCancellationRequested)
@@ -81,7 +161,13 @@ namespace HexagonalSkeleton.Infrastructure.Services
                             var consumeResult = _consumer.Consume(TimeSpan.FromSeconds(5));
                             if (consumeResult?.Message != null)
                             {
+                                _logger.LogInformation("📨 Received message from {Topic} with key {Key}", 
+                                    consumeResult.Topic, consumeResult.Message.Key);
                                 await ProcessMessageAsync(consumeResult, stoppingToken);
+                            }
+                            else
+                            {
+                                _logger.LogDebug("🔍 No messages available, continuing to poll...");
                             }
                         }
                         catch (ConsumeException ex)
@@ -121,7 +207,7 @@ namespace HexagonalSkeleton.Infrastructure.Services
                 {
                     try
                     {
-                        _consumer.Close();
+                        _consumer?.Close();
                         _logger.LogInformation("Debezium Consumer Service stopped gracefully");
                     }
                     catch (Exception ex)
@@ -160,7 +246,7 @@ namespace HexagonalSkeleton.Infrastructure.Services
                 // Commit offset after successful processing
                 try
                 {
-                    _consumer.Commit(consumeResult);
+                    _consumer?.Commit(consumeResult);
                     _logger.LogDebug("Committed offset {Offset} for {Topic}[{Partition}]", 
                         offset, topic, partition);
                 }
@@ -239,13 +325,13 @@ namespace HexagonalSkeleton.Infrastructure.Services
                     topic, partition, offset);
                 
                 
-                _consumer.Commit(consumeResult);
+                _consumer?.Commit(consumeResult);
                 return;
             }
 
             
             _logger.LogError(exception, "Unexpected error processing message, skipping");
-            _consumer.Commit(consumeResult);
+            _consumer?.Commit(consumeResult);
         }
 
         /// <summary>
@@ -276,6 +362,12 @@ namespace HexagonalSkeleton.Infrastructure.Services
         {
             try
             {
+                if (_config == null)
+                {
+                    _logger.LogWarning("Kafka config is null, cannot ensure topics exist");
+                    return;
+                }
+                
                 using var adminClient = new AdminClientBuilder(new AdminClientConfig
                 {
                     BootstrapServers = _config.BootstrapServers

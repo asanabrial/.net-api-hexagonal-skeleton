@@ -1,4 +1,5 @@
 using HexagonalSkeleton.Domain.Ports;
+using HexagonalSkeleton.Domain.Ports.Dtos;
 using HexagonalSkeleton.Domain.ValueObjects;
 using HexagonalSkeleton.Infrastructure.Persistence.Query;
 using HexagonalSkeleton.Infrastructure.Persistence.Query.Documents;

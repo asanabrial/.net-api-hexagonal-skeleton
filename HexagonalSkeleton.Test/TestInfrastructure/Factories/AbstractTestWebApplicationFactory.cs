@@ -133,15 +133,15 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Factories
                 {
                     {"ConnectionStrings:CommandDatabase", ContainerOrchestrator.PostgreSql.ConnectionString},
                     {"ConnectionStrings:QueryDatabase", ContainerOrchestrator.MongoDb.ConnectionString},
-                    {"Debezium:Producer:BootstrapServers", ContainerOrchestrator.Kafka.BootstrapServers},
-                    {"Debezium:Consumer:BootstrapServers", ContainerOrchestrator.Kafka.BootstrapServers},
-                    {"Debezium:Consumer:GroupId", uniqueGroupId} // Unique group ID per test run
+                    {"CDC:Kafka:BootstrapServers", ContainerOrchestrator.Kafka.BootstrapServers},
+                    {"CDC:Kafka:ConsumerGroupId", uniqueGroupId}, // Unique group ID per test run
+                    {"CDC:Kafka:GenerateUniqueGroupId", "true"} // Enable unique group ID generation for tests
                 };
 
                 // Only configure Debezium Connect if available
                 if (ContainerOrchestrator.IsDebeziumConnectAvailable)
                 {
-                    connectionStrings["Debezium:Connect:Url"] = ContainerOrchestrator.DebeziumConnect.ConnectUrl;
+                    connectionStrings["CDC:DebeziumConnectUrl"] = ContainerOrchestrator.DebeziumConnect.ConnectUrl;
                 }
                 
                 config.AddInMemoryCollection(connectionStrings);

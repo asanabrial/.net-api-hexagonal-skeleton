@@ -1,8 +1,10 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using HexagonalSkeleton.Infrastructure.CDC.Configuration;
+using HexagonalSkeleton.Infrastructure.CDC.Models;
 using HexagonalSkeleton.Infrastructure.Persistence.Query;
 using HexagonalSkeleton.Infrastructure.Persistence.Query.Documents;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
 namespace HexagonalSkeleton.Infrastructure.CDC
@@ -15,13 +17,32 @@ namespace HexagonalSkeleton.Infrastructure.CDC
     {
         private readonly QueryDbContext _queryDbContext;
         private readonly ILogger<DebeziumEventProcessor> _logger;
+        private readonly CdcOptions _cdcOptions;
 
         public DebeziumEventProcessor(
             QueryDbContext queryDbContext,
-            ILogger<DebeziumEventProcessor> logger)
+            ILogger<DebeziumEventProcessor> logger,
+            IOptions<CdcOptions> cdcOptions)
         {
             _queryDbContext = queryDbContext;
             _logger = logger;
+            _cdcOptions = cdcOptions.Value;
+            
+            _logger.LogInformation("🔧 CDC Configuration - TargetDatabase: {Database}, ProcessOnlyTargetDatabase: {ProcessOnly}", 
+                _cdcOptions.TargetDatabase, _cdcOptions.ProcessOnlyTargetDatabase);
+        }
+
+        /// <summary>
+        /// Valida si el evento proviene de la base de datos objetivo
+        /// </summary>
+        private bool IsValidDatabaseSource(string? sourceDatabaseName)
+        {
+            // Si no está configurado para filtrar, procesa todos los eventos
+            if (!_cdcOptions.ProcessOnlyTargetDatabase || string.IsNullOrEmpty(_cdcOptions.TargetDatabase))
+                return true;
+                
+            // Filtrar por base de datos objetivo
+            return string.Equals(sourceDatabaseName, _cdcOptions.TargetDatabase, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -55,8 +76,17 @@ namespace HexagonalSkeleton.Infrastructure.CDC
                     return false;
                 }
 
-                _logger.LogWarning("🔍 Parsed event - Op: {Op}, Table: {Table}, Source: {Source}",
-                    changeEvent.Payload.Op, changeEvent.Payload.Source?.Table, changeEvent.Payload.Source?.Name);
+                _logger.LogWarning("🔍 Parsed event - Op: {Op}, Table: {Table}, Source: {Source}, Database: {Database}",
+                    changeEvent.Payload.Op, changeEvent.Payload.Source?.Table, changeEvent.Payload.Source?.Name, changeEvent.Payload.Source?.Db);
+
+                // ✨ Filtro elegante: Solo procesar eventos de la base de datos objetivo
+                var sourceDatabaseName = changeEvent.Payload.Source?.Db;
+                if (!IsValidDatabaseSource(sourceDatabaseName))
+                {
+                    _logger.LogDebug("⏭️ Skipping event from database '{Database}' - not target database '{Target}'", 
+                        sourceDatabaseName, _cdcOptions.TargetDatabase);
+                    return true; // No es error, simplemente no procesamos este evento
+                }
 
                 // Procesar evento según operación
                 return changeEvent.Payload.Op switch
@@ -250,138 +280,5 @@ namespace HexagonalSkeleton.Infrastructure.CDC
             await Task.CompletedTask;
             return true;
         }
-    }
-
-    /// <summary>
-    /// Modelo del evento de cambio de Debezium (wrapper completo)
-    /// </summary>
-    public class DebeziumChangeEvent
-    {
-        [JsonPropertyName("schema")]
-        public object? Schema { get; set; } // Schema de Debezium (no lo procesamos)
-        
-        [JsonPropertyName("payload")]
-        public DebeziumPayload? Payload { get; set; }
-    }
-
-    /// <summary>
-    /// Payload del evento de Debezium
-    /// </summary>
-    public class DebeziumPayload
-    {
-        [JsonPropertyName("before")]
-        public UserChangeData? Before { get; set; }
-        
-        [JsonPropertyName("after")]
-        public UserChangeData? After { get; set; }
-        
-        [JsonPropertyName("source")]
-        public DebeziumSource? Source { get; set; }
-        
-        [JsonPropertyName("op")]
-        public string Op { get; set; } = string.Empty; // c=create, u=update, d=delete, r=read
-        
-        [JsonPropertyName("ts_ms")]
-        public long? TsMs { get; set; }
-        
-        [JsonPropertyName("transaction")]
-        public object? Transaction { get; set; }
-    }
-
-    /// <summary>
-    /// Información de origen del evento
-    /// </summary>
-    public class DebeziumSource
-    {
-        [JsonPropertyName("version")]
-        public string? Version { get; set; }
-        
-        [JsonPropertyName("connector")]
-        public string? Connector { get; set; }
-        
-        [JsonPropertyName("name")]
-        public string? Name { get; set; }
-        
-        [JsonPropertyName("ts_ms")]
-        public long? TsMs { get; set; }
-        
-        [JsonPropertyName("snapshot")]
-        public string? Snapshot { get; set; }
-        
-        [JsonPropertyName("db")]
-        public string? Db { get; set; }
-        
-        [JsonPropertyName("sequence")]
-        public string? Sequence { get; set; }
-        
-        [JsonPropertyName("schema")]
-        public string? Schema { get; set; }
-        
-        [JsonPropertyName("table")]
-        public string? Table { get; set; }
-        
-        [JsonPropertyName("txId")]
-        public long? TxId { get; set; }
-        
-        [JsonPropertyName("lsn")]
-        public long? Lsn { get; set; }
-        
-        [JsonPropertyName("xmin")]
-        public long? Xmin { get; set; }
-    }
-
-    /// <summary>
-    /// Datos de cambio del usuario
-    /// </summary>
-    public class UserChangeData
-    {
-        [JsonPropertyName("Id")]
-        public Guid Id { get; set; }
-        
-        [JsonPropertyName("FirstName")]
-        public string FirstName { get; set; } = string.Empty;
-        
-        [JsonPropertyName("LastName")]
-        public string LastName { get; set; } = string.Empty;
-        
-        [JsonPropertyName("Email")]
-        public string Email { get; set; } = string.Empty;
-        
-        [JsonPropertyName("PhoneNumber")]
-        public string PhoneNumber { get; set; } = string.Empty;
-        
-        [JsonPropertyName("Birthdate")]
-        public string? BirthdateString { get; set; }
-        
-        [JsonPropertyName("Latitude")]
-        public double? Latitude { get; set; }
-        
-        [JsonPropertyName("Longitude")]
-        public double? Longitude { get; set; }
-        
-        [JsonPropertyName("AboutMe")]
-        public string? AboutMe { get; set; }
-        
-        [JsonPropertyName("CreatedAt")]
-        public string CreatedAtString { get; set; } = string.Empty;
-        
-        [JsonPropertyName("UpdatedAt")]
-        public string? UpdatedAtString { get; set; }
-        
-        [JsonPropertyName("LastLogin")]
-        public string? LastLoginString { get; set; }
-        
-        [JsonPropertyName("IsDeleted")]
-        public bool IsDeleted { get; set; }
-        
-        [JsonPropertyName("DeletedAt")]
-        public string? DeletedAtString { get; set; }
-        
-        // Métodos para convertir strings a DateTime
-        public DateTime GetCreatedAt() => DateTime.TryParse(CreatedAtString, out var result) ? result : DateTime.UtcNow;
-        public DateTime GetUpdatedAt() => DateTime.TryParse(UpdatedAtString, out var result) ? result : DateTime.UtcNow;
-        public DateTime? GetLastLogin() => DateTime.TryParse(LastLoginString, out var result) ? result : null;
-        public DateTime? GetDeletedAt() => DateTime.TryParse(DeletedAtString, out var result) ? result : null;
-        public DateTime? GetBirthdate() => DateTime.TryParse(BirthdateString, out var result) ? result : null;
     }
 }

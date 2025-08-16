@@ -1,6 +1,7 @@
 using AutoMapper;
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.Ports;
+using HexagonalSkeleton.Domain.Ports.Dtos;
 using HexagonalSkeleton.Domain.ValueObjects;
 using HexagonalSkeleton.Infrastructure.Persistence.Command.Entities;
 using HexagonalSkeleton.Infrastructure.Persistence.Query.Documents;
