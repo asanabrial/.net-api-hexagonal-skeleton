@@ -1,4 +1,5 @@
 using FluentValidation;
+using HexagonalSkeleton.Test.TestHelpers;
 using FluentValidation.Results;
 using HexagonalSkeleton.Application.Features.UserManagement.Queries;
 using HexagonalSkeleton.Application.Exceptions;
@@ -66,7 +67,7 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
         {
             // Arrange
             var userId = Guid.NewGuid();
-            var user = TestHelper.CreateTestUser(userId);
+            var user = UserTestDataBuilder.CreateTestUser(userId);
             var query = new GetUserQuery(userId);
 
             // Usuario activo (no borrado)

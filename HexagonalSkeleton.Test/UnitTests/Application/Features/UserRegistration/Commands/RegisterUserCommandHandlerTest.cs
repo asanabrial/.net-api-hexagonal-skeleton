@@ -1,4 +1,5 @@
 using Xunit;
+using HexagonalSkeleton.Test.TestHelpers;
 using Moq;
 using FluentValidation;
 using HexagonalSkeleton.Application.Features.UserAuthentication.Dto;
@@ -34,7 +35,7 @@ public class RegisterUserCommandHandlerTest
     public async Task Handle_ValidCommand_ShouldCreateUserSuccessfully()
     {
         // Arrange
-        var command = TestHelper.CreateRegisterUserCommand();
+        var command = CommandTestDataBuilder.CreateRegisterUserCommand();
         var cancellationToken = CancellationToken.None;
         var salt = "salt";
         var hash = "hash";
@@ -85,7 +86,7 @@ public class RegisterUserCommandHandlerTest
     public async Task Handle_InvalidCommand_ShouldThrowValidationException()
     {
         // Arrange
-        var command = TestHelper.CreateRegisterUserCommand();
+        var command = CommandTestDataBuilder.CreateRegisterUserCommand();
         var cancellationToken = CancellationToken.None;
         var validationResult = new FluentValidation.Results.ValidationResult();
         validationResult.Errors.Add(new FluentValidation.Results.ValidationFailure("Email", "Email is required"));
@@ -105,7 +106,7 @@ public class RegisterUserCommandHandlerTest
     public async Task Handle_EmailAlreadyExists_ShouldThrowConflictException()
     {
         // Arrange
-        var command = TestHelper.CreateRegisterUserCommand();
+        var command = CommandTestDataBuilder.CreateRegisterUserCommand();
         var cancellationToken = CancellationToken.None;
 
         _mockValidator
@@ -128,7 +129,7 @@ public class RegisterUserCommandHandlerTest
     public async Task Handle_PhoneNumberAlreadyExists_ShouldThrowConflictException()
     {
         // Arrange
-        var command = TestHelper.CreateRegisterUserCommand();
+        var command = CommandTestDataBuilder.CreateRegisterUserCommand();
         var cancellationToken = CancellationToken.None;
 
         _mockValidator
@@ -155,7 +156,7 @@ public class RegisterUserCommandHandlerTest
     public async Task Handle_WeakPassword_ShouldThrowValidationException()
     {
         // Arrange
-        var command = TestHelper.CreateRegisterUserCommand(password: "weak");
+        var command = CommandTestDataBuilder.CreateRegisterUserCommand(password: "weak");
         var cancellationToken = CancellationToken.None;
 
         _mockValidator

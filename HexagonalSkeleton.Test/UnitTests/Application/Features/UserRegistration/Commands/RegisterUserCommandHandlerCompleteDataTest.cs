@@ -1,4 +1,5 @@
 using Xunit;
+using HexagonalSkeleton.Test.TestHelpers;
 using Moq;
 using FluentValidation;
 using HexagonalSkeleton.Application.Features.UserRegistration.Dto;
@@ -36,7 +37,7 @@ namespace HexagonalSkeleton.Test.Application.Features.UserRegistration.Commands
         public async Task Handle_ValidCommand_ShouldReturnCompleteUserData()
         {
             // Arrange
-            var command = TestHelper.CreateRegisterUserCommand(
+            var command = CommandTestDataBuilder.CreateRegisterUserCommand(
                 email: "complete.test@example.com",
                 name: "John",
                 surname: "Doe",
@@ -76,7 +77,7 @@ namespace HexagonalSkeleton.Test.Application.Features.UserRegistration.Commands
                 .ReturnsAsync(userId);
 
             // Create a complete user with all data
-            var createdUser = TestHelper.CreateTestUser(
+            var createdUser = UserTestDataBuilder.CreateTestUser(
                 id: userId,
                 email: command.Email,
                 firstName: command.FirstName,

@@ -1,4 +1,5 @@
 using Xunit;
+using HexagonalSkeleton.Test.TestHelpers;
 using Moq;
 using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 using HexagonalSkeleton.Domain.Ports;
@@ -57,8 +58,8 @@ public class GetAllUsersManagementQueryHandlerTest
 
         var users = new List<User>
         {
-            TestHelper.CreateTestUser(),
-            TestHelper.CreateTestUser(id: Guid.NewGuid(), email: "user2@example.com")
+            UserTestDataBuilder.CreateTestUser(),
+            UserTestDataBuilder.CreateTestUser(id: Guid.NewGuid(), email: "user2@example.com")
         };
 
         var pagination = PaginationParams.Create(1, 10);
@@ -99,7 +100,7 @@ public class GetAllUsersManagementQueryHandlerTest
         
         var users = new List<User>
         {
-            TestHelper.CreateTestUser()
+            UserTestDataBuilder.CreateTestUser()
         };
 
         var pagination = PaginationParams.Create(1, 10);
@@ -170,7 +171,7 @@ public class GetAllUsersManagementQueryHandlerTest
 
         var users = new List<User>
         {
-            TestHelper.CreateTestUser(phoneNumber: phoneNumber)
+            UserTestDataBuilder.CreateTestUser(phoneNumber: phoneNumber)
         };
 
         var pagination = PaginationParams.Create(1, 10);
@@ -210,7 +211,7 @@ public class GetAllUsersManagementQueryHandlerTest
 
         var users = new List<User>
         {
-            TestHelper.CreateTestUser(email: email)
+            UserTestDataBuilder.CreateTestUser(email: email)
         };
 
         var pagination = PaginationParams.Create(1, 10);

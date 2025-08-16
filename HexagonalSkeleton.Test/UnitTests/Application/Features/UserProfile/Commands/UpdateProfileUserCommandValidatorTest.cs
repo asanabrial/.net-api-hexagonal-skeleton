@@ -1,6 +1,7 @@
 using Xunit;
 using FluentValidation.TestHelper;
 using HexagonalSkeleton.Application.Features.UserProfile.Commands;
+using HexagonalSkeleton.Test.TestHelpers;
 
 namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands;
 
@@ -17,7 +18,7 @@ public class UpdateProfileUserCommandValidatorTest
     public void Validate_ValidCommand_ShouldNotHaveValidationError()
     {
         // Arrange
-        var command = TestHelper.CreateUpdateProfileUserCommand();
+        var command = CommandTestDataBuilder.CreateValidUpdateProfileCommand();
 
         // Act & Assert
         var result = _validator.TestValidate(command);
@@ -31,7 +32,7 @@ public class UpdateProfileUserCommandValidatorTest
     public void Validate_InvalidAboutMe_ShouldHaveValidationError(string invalidAboutMe)
     {
         // Arrange
-        var command = TestHelper.CreateUpdateProfileUserCommand(aboutMe: invalidAboutMe);
+        var command = CommandTestDataBuilder.CreateValidUpdateProfileCommand(aboutMe: invalidAboutMe);
 
         // Act & Assert
         var result = _validator.TestValidate(command);
@@ -42,7 +43,7 @@ public class UpdateProfileUserCommandValidatorTest
     public void Validate_NullAboutMe_ShouldHaveValidationError()
     {
         // Arrange
-        var command = TestHelper.CreateUpdateProfileUserCommand(aboutMe: null!);
+        var command = CommandTestDataBuilder.CreateValidUpdateProfileCommand(aboutMe: null!);
 
         // Act & Assert
         var result = _validator.TestValidate(command);
@@ -55,7 +56,7 @@ public class UpdateProfileUserCommandValidatorTest
     public void Validate_InvalidFirstName_ShouldHaveValidationError(string invalidFirstName)
     {
         // Arrange
-        var command = TestHelper.CreateUpdateProfileUserCommand(firstName: invalidFirstName);
+        var command = CommandTestDataBuilder.CreateValidUpdateProfileCommand(firstName: invalidFirstName);
 
         // Act & Assert
         var result = _validator.TestValidate(command);
@@ -66,7 +67,7 @@ public class UpdateProfileUserCommandValidatorTest
     public void Validate_NullFirstName_ShouldHaveValidationError()
     {
         // Arrange
-        var command = TestHelper.CreateUpdateProfileUserCommand(firstName: null!);
+        var command = CommandTestDataBuilder.CreateValidUpdateProfileCommand(firstName: null!);
 
         // Act & Assert
         var result = _validator.TestValidate(command);
@@ -79,7 +80,7 @@ public class UpdateProfileUserCommandValidatorTest
     public void Validate_InvalidLastName_ShouldHaveValidationError(string invalidLastName)
     {
         // Arrange
-        var command = TestHelper.CreateUpdateProfileUserCommand(lastName: invalidLastName);
+        var command = CommandTestDataBuilder.CreateValidUpdateProfileCommand(lastName: invalidLastName);
 
         // Act & Assert
         var result = _validator.TestValidate(command);
@@ -90,7 +91,7 @@ public class UpdateProfileUserCommandValidatorTest
     public void Validate_NullLastName_ShouldHaveValidationError()
     {
         // Arrange
-        var command = TestHelper.CreateUpdateProfileUserCommand(lastName: null!);
+        var command = CommandTestDataBuilder.CreateValidUpdateProfileCommand(lastName: null!);
 
         // Act & Assert
         var result = _validator.TestValidate(command);

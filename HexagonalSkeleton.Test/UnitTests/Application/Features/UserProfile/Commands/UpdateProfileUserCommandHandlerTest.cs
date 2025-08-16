@@ -1,4 +1,5 @@
 using FluentValidation;
+using HexagonalSkeleton.Test.TestHelpers;
 using FluentValidation.Results;
 using HexagonalSkeleton.Application.Features.UserProfile.Dto;
 using HexagonalSkeleton.Application.Exceptions;
@@ -41,7 +42,7 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
                 phoneNumber: "+1234567890",
                 birthdate: new DateTime(1985, 5, 15));
             
-            var user = TestHelper.CreateTestUser();
+            var user = UserTestDataBuilder.CreateTestUser();
 
             _mockValidator.Setup(x => x.ValidateAsync(command, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResult());
@@ -152,7 +153,7 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
                 phoneNumber: "+1234567890",
                 birthdate: new DateTime(1990, 1, 1));
             
-            var user = TestHelper.CreateTestUser();
+            var user = UserTestDataBuilder.CreateTestUser();
 
             _mockValidator.Setup(x => x.ValidateAsync(command, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResult());
@@ -193,7 +194,7 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
                 phoneNumber: "+1234567890",
                 birthdate: new DateTime(1985, 5, 15));
             
-            var user = TestHelper.CreateTestUser();
+            var user = UserTestDataBuilder.CreateTestUser();
 
             _mockValidator.Setup(x => x.ValidateAsync(command, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResult());
@@ -223,7 +224,7 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
                 phoneNumber: "+1234567890",
                 birthdate: new DateTime(1985, 5, 15));
             
-            var user = TestHelper.CreateTestUser();
+            var user = UserTestDataBuilder.CreateTestUser();
             var initialUpdatedAt = user.UpdatedAt;
 
             _mockValidator.Setup(x => x.ValidateAsync(command, It.IsAny<CancellationToken>()))

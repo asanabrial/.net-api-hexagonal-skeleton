@@ -1,4 +1,5 @@
 using Xunit;
+using HexagonalSkeleton.Test.TestHelpers;
 using Moq;
 using FluentValidation;
 using HexagonalSkeleton.Application.Features.UserManagement.Dto;
@@ -36,7 +37,7 @@ public class GetUserManagementQueryHandlerTest
         var userId = Guid.NewGuid();
         var query = new GetUserManagementQuery(userId);
         var cancellationToken = CancellationToken.None;
-        var user = TestHelper.CreateTestUser();
+        var user = UserTestDataBuilder.CreateTestUser();
 
         _mockValidator
             .Setup(v => v.ValidateAsync(It.IsAny<GetUserManagementQuery>(), cancellationToken))
@@ -134,7 +135,7 @@ public class GetUserManagementQueryHandlerTest
         var userId = Guid.NewGuid();
         var query = new GetUserManagementQuery(userId);
         var cancellationToken = CancellationToken.None;
-        var deletedUser = TestHelper.CreateTestUser();
+        var deletedUser = UserTestDataBuilder.CreateTestUser();
         
         // Mark user as deleted
         deletedUser.Delete();

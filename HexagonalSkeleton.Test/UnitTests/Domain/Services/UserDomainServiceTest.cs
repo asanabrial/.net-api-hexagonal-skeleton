@@ -1,4 +1,5 @@
 using Xunit;
+using HexagonalSkeleton.Test.TestHelpers;
 using Moq;
 using HexagonalSkeleton.Domain.Services;
 using HexagonalSkeleton.Domain.Ports;
@@ -101,7 +102,7 @@ public class UserDomainServiceTest
     public void CanUserUpdateProfile_SameUser_ShouldReturnTrue()
     {
         // Arrange
-        var user = TestHelper.CreateTestUser();
+        var user = UserTestDataBuilder.CreateTestUser();
 
         // Act
         var result = UserDomainService.CanUserUpdateProfile(user, user);
@@ -114,8 +115,8 @@ public class UserDomainServiceTest
     public void CanUserUpdateProfile_DifferentUsers_ShouldReturnFalse()
     {
         // Arrange
-        var user1 = TestHelper.CreateTestUser(id: Guid.NewGuid());
-        var user2 = TestHelper.CreateTestUser(id: Guid.NewGuid());
+        var user1 = UserTestDataBuilder.CreateTestUser(id: Guid.NewGuid());
+        var user2 = UserTestDataBuilder.CreateTestUser(id: Guid.NewGuid());
 
         // Act
         var result = UserDomainService.CanUserUpdateProfile(user1, user2);
@@ -128,7 +129,7 @@ public class UserDomainServiceTest
     public void CanUserUpdateProfile_DeletedUser_ShouldReturnFalse()
     {
         // Arrange
-        var user = TestHelper.CreateTestUser();
+        var user = UserTestDataBuilder.CreateTestUser();
         user.Delete();
 
         // Act
@@ -146,7 +147,7 @@ public class UserDomainServiceTest
     public void CanUsersInteract_BothAdultAndActive_ShouldReturnTrue()
     {
         // Arrange
-        var user1 = TestHelper.CreateTestUser();
+        var user1 = UserTestDataBuilder.CreateTestUser();
         var user2 = HexagonalSkeleton.Domain.User.Reconstitute(
             id: Guid.NewGuid(), email: "other@example.com", firstName: "Jane", lastName: "Smith",
             birthdate: DateTime.UtcNow.AddYears(-30), phoneNumber: "+9876543210",
@@ -165,7 +166,7 @@ public class UserDomainServiceTest
     public void CanUsersInteract_OneUserDeleted_ShouldReturnFalse()
     {
         // Arrange
-        var activeUser = TestHelper.CreateTestUser();
+        var activeUser = UserTestDataBuilder.CreateTestUser();
         var deletedUser = HexagonalSkeleton.Domain.User.Reconstitute(
             id: Guid.NewGuid(), email: "deleted@example.com", firstName: "Jane", lastName: "Smith",
             birthdate: DateTime.UtcNow.AddYears(-30), phoneNumber: "+9876543210",
@@ -185,7 +186,7 @@ public class UserDomainServiceTest
     public void CanUsersInteract_OneUserMinor_ShouldReturnFalse()
     {
         // Arrange
-        var adultUser = TestHelper.CreateTestUser();
+        var adultUser = UserTestDataBuilder.CreateTestUser();
         var minorUser = HexagonalSkeleton.Domain.User.Reconstitute(
             id: Guid.NewGuid(), email: "minor@example.com", firstName: "Teen", lastName: "User",
             birthdate: DateTime.UtcNow.AddYears(-16), phoneNumber: "+9876543210",
@@ -313,7 +314,7 @@ public class UserDomainServiceTest
     public void IsProfileComplete_CompleteProfile_ShouldReturnTrue()
     {
         // Arrange
-        var user = TestHelper.CreateTestUser();
+        var user = UserTestDataBuilder.CreateTestUser();
 
         // Act
         var result = UserDomainService.IsProfileComplete(user);
@@ -326,7 +327,7 @@ public class UserDomainServiceTest
     public void IsProfileComplete_IncompleteProfile_ShouldReturnFalse()
     {
         // Arrange
-        var user = TestHelper.CreateTestUser();
+        var user = UserTestDataBuilder.CreateTestUser();
         // The test helper creates users with AboutMe set, so we need to create one manually without it
         var incompleteUser = HexagonalSkeleton.Domain.User.Reconstitute(
             id: Guid.NewGuid(),
@@ -361,7 +362,7 @@ public class UserDomainServiceTest
     public void FindNearbyUsers_WithUsersInRange_ShouldReturnNearbyUsers()
     {
         // Arrange
-        var centerUser = TestHelper.CreateTestUser();
+        var centerUser = UserTestDataBuilder.CreateTestUser();
         var nearbyUser = HexagonalSkeleton.Domain.User.Reconstitute(
             id: Guid.NewGuid(), email: "nearby@example.com", firstName: "Near", lastName: "User",
             birthdate: DateTime.UtcNow.AddYears(-30), phoneNumber: "+9876543210",
@@ -398,7 +399,7 @@ public class UserDomainServiceTest
             createdAt: DateTime.UtcNow, updatedAt: null, 
             deletedAt: DateTime.UtcNow, isDeleted: true);
         
-        var otherUser = TestHelper.CreateTestUser();
+        var otherUser = UserTestDataBuilder.CreateTestUser();
         var allUsers = new[] { deletedUser, otherUser };
 
         // Act
@@ -412,7 +413,7 @@ public class UserDomainServiceTest
     public void FindNearbyUsers_ExcludesDeletedUsers_ShouldFilterCorrectly()
     {
         // Arrange
-        var centerUser = TestHelper.CreateTestUser();
+        var centerUser = UserTestDataBuilder.CreateTestUser();
         var deletedNearbyUser = HexagonalSkeleton.Domain.User.Reconstitute(
             id: Guid.NewGuid(), email: "deleted@example.com", firstName: "Deleted", lastName: "User",
             birthdate: DateTime.UtcNow.AddYears(-30), phoneNumber: "+9876543210",
@@ -438,7 +439,7 @@ public class UserDomainServiceTest
     public void CalculateCompatibilityScore_CannotInteract_ShouldReturnZero()
     {
         // Arrange
-        var adultUser = TestHelper.CreateTestUser();
+        var adultUser = UserTestDataBuilder.CreateTestUser();
         var minorUser = HexagonalSkeleton.Domain.User.Reconstitute(
             id: Guid.NewGuid(), email: "minor@example.com", firstName: "Teen", lastName: "User",
             birthdate: DateTime.UtcNow.AddYears(-16), phoneNumber: "+9876543210",
@@ -457,7 +458,7 @@ public class UserDomainServiceTest
     public void CalculateCompatibilityScore_PerfectMatch_ShouldReturnHighScore()
     {
         // Arrange
-        var user1 = TestHelper.CreateTestUser();
+        var user1 = UserTestDataBuilder.CreateTestUser();
         var user2 = HexagonalSkeleton.Domain.User.Reconstitute(
             id: Guid.NewGuid(), email: "match@example.com", firstName: "Perfect", lastName: "Match",
             birthdate: user1.Birthdate!.Value.AddYears(2), // Within 5 years
@@ -504,7 +505,7 @@ public class UserDomainServiceTest
     {
         // This test ensures the score doesn't exceed 100 even with perfect matches
         // Act with same user (perfect match in all criteria)
-        var user = TestHelper.CreateTestUser();
+        var user = UserTestDataBuilder.CreateTestUser();
         
         // We can't test with the same user due to ID check in CanUsersInteract
         // So we create a duplicate with different ID
@@ -530,7 +531,7 @@ public class UserDomainServiceTest
     public void CalculateDistanceBetweenUsers_ValidUsers_ShouldReturnDistance()
     {
         // Arrange
-        var user1 = TestHelper.CreateTestUser();
+        var user1 = UserTestDataBuilder.CreateTestUser();
         var user2 = HexagonalSkeleton.Domain.User.Reconstitute(
             id: Guid.NewGuid(), email: "other@example.com", firstName: "Other", lastName: "User",
             birthdate: DateTime.UtcNow.AddYears(-30), phoneNumber: "+9876543210",
@@ -549,7 +550,7 @@ public class UserDomainServiceTest
     public void CalculateDistanceBetweenUsers_NullUser_ShouldThrowArgumentNullException()
     {
         // Arrange
-        var user = TestHelper.CreateTestUser();
+        var user = UserTestDataBuilder.CreateTestUser();
 
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() =>
@@ -560,7 +561,7 @@ public class UserDomainServiceTest
     public void AreUsersNearby_WithinDefaultRadius_ShouldReturnTrue()
     {
         // Arrange - Create users very close to each other
-        var user1 = TestHelper.CreateTestUser();
+        var user1 = UserTestDataBuilder.CreateTestUser();
         var user2 = HexagonalSkeleton.Domain.User.Reconstitute(
             id: Guid.NewGuid(), email: "nearby@example.com", firstName: "Near", lastName: "User",
             birthdate: DateTime.UtcNow.AddYears(-30), phoneNumber: "+9876543210",
@@ -579,7 +580,7 @@ public class UserDomainServiceTest
     public void AreUsersNearby_OutsideCustomRadius_ShouldReturnFalse()
     {
         // Arrange
-        var user1 = TestHelper.CreateTestUser();
+        var user1 = UserTestDataBuilder.CreateTestUser();
         var user2 = HexagonalSkeleton.Domain.User.Reconstitute(
             id: Guid.NewGuid(), email: "far@example.com", firstName: "Far", lastName: "User",
             birthdate: DateTime.UtcNow.AddYears(-30), phoneNumber: "+9876543210",

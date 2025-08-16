@@ -1,4 +1,5 @@
 using Xunit;
+using HexagonalSkeleton.Test.TestHelpers;
 using HexagonalSkeleton.Domain.Specifications.Users;
 using HexagonalSkeleton.Test;
 using DomainUser = HexagonalSkeleton.Domain.User;
@@ -15,7 +16,7 @@ namespace HexagonalSkeleton.Test.Unit.Domain.Specifications
         public void ActiveUserSpecification_WithActiveUser_ShouldReturnTrue()
         {
             // Arrange
-            var user = TestHelper.CreateTestUser(); // Active user by default
+            var user = UserTestDataBuilder.CreateTestUser(); // Active user by default
             var specification = new ActiveUserSpecification();
 
             // Act
@@ -29,7 +30,7 @@ namespace HexagonalSkeleton.Test.Unit.Domain.Specifications
         public void ActiveUserSpecification_WithDeletedUser_ShouldReturnFalse()
         {
             // Arrange
-            var user = TestHelper.CreateTestUser();
+            var user = UserTestDataBuilder.CreateTestUser();
             user.Delete(); // Soft delete the user
             var specification = new ActiveUserSpecification();
 
@@ -44,7 +45,7 @@ namespace HexagonalSkeleton.Test.Unit.Domain.Specifications
         public void UserEmailSpecification_WithMatchingEmail_ShouldReturnTrue()
         {
             // Arrange
-            var user = TestHelper.CreateTestUser();
+            var user = UserTestDataBuilder.CreateTestUser();
             var specification = new UserEmailSpecification(user.Email.Value);
 
             // Act
@@ -58,7 +59,7 @@ namespace HexagonalSkeleton.Test.Unit.Domain.Specifications
         public void UserEmailSpecification_WithDifferentEmail_ShouldReturnFalse()
         {
             // Arrange
-            var user = TestHelper.CreateTestUser();
+            var user = UserTestDataBuilder.CreateTestUser();
             var specification = new UserEmailSpecification("different@example.com");
 
             // Act
@@ -72,7 +73,7 @@ namespace HexagonalSkeleton.Test.Unit.Domain.Specifications
         public void UserTextSearchSpecification_WithMatchingName_ShouldReturnTrue()
         {
             // Arrange
-            var user = TestHelper.CreateTestUser(); // Default name is "John"
+            var user = UserTestDataBuilder.CreateTestUser(); // Default name is "John"
             var specification = new UserTextSearchSpecification("john");
 
             // Act
@@ -86,7 +87,7 @@ namespace HexagonalSkeleton.Test.Unit.Domain.Specifications
         public void UserTextSearchSpecification_WithMatchingEmail_ShouldReturnTrue()
         {
             // Arrange
-            var user = TestHelper.CreateTestUser();
+            var user = UserTestDataBuilder.CreateTestUser();
             var specification = new UserTextSearchSpecification("test");
 
             // Act

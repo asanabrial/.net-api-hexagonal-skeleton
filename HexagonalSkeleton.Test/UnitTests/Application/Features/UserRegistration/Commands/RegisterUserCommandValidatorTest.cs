@@ -1,4 +1,5 @@
 using Xunit;
+using HexagonalSkeleton.Test.TestHelpers;
 using FluentValidation.TestHelper;
 using HexagonalSkeleton.Application.Features.UserRegistration.Commands;
 
@@ -17,7 +18,7 @@ public class RegisterUserCommandValidatorTest
     public void Should_Have_Error_When_Email_Is_Empty()
     {
         // Arrange
-        var command = TestHelper.CreateRegisterUserCommand(email: string.Empty);
+        var command = CommandTestDataBuilder.CreateRegisterUserCommand(email: string.Empty);
 
         // Act & Assert
         var result = _validator.TestValidate(command);
@@ -28,7 +29,7 @@ public class RegisterUserCommandValidatorTest
     public void Should_Have_Error_When_Email_Is_Invalid()
     {
         // Arrange
-        var command = TestHelper.CreateRegisterUserCommand(email: "invalid-email");
+        var command = CommandTestDataBuilder.CreateRegisterUserCommand(email: "invalid-email");
 
         // Act & Assert
         var result = _validator.TestValidate(command);
@@ -39,7 +40,7 @@ public class RegisterUserCommandValidatorTest
     public void Should_Have_Error_When_Password_Is_Too_Short()
     {
         // Arrange
-        var command = TestHelper.CreateRegisterUserCommand(password: "123");
+        var command = CommandTestDataBuilder.CreateRegisterUserCommand(password: "123");
 
         // Act & Assert
         var result = _validator.TestValidate(command);
@@ -50,7 +51,7 @@ public class RegisterUserCommandValidatorTest
     public void Should_Have_Error_When_Password_Is_Too_Long()
     {
         // Arrange
-        var command = TestHelper.CreateRegisterUserCommand(password: new string('a', 101));
+        var command = CommandTestDataBuilder.CreateRegisterUserCommand(password: new string('a', 101));
 
         // Act & Assert
         var result = _validator.TestValidate(command);
@@ -61,7 +62,7 @@ public class RegisterUserCommandValidatorTest
     public void Should_Have_Error_When_Name_Is_Empty()
     {
         // Arrange
-        var command = TestHelper.CreateRegisterUserCommand(name: string.Empty);
+        var command = CommandTestDataBuilder.CreateRegisterUserCommand(name: string.Empty);
 
         // Act & Assert
         var result = _validator.TestValidate(command);
@@ -72,7 +73,7 @@ public class RegisterUserCommandValidatorTest
     public void Should_Have_Error_When_Name_Is_Too_Long()
     {
         // Arrange
-        var command = TestHelper.CreateRegisterUserCommand(name: new string('a', 51));
+        var command = CommandTestDataBuilder.CreateRegisterUserCommand(name: new string('a', 51));
 
         // Act & Assert
         var result = _validator.TestValidate(command);
@@ -83,7 +84,7 @@ public class RegisterUserCommandValidatorTest
     public void Should_Have_Error_When_Surname_Is_Empty()
     {
         // Arrange
-        var command = TestHelper.CreateRegisterUserCommand(surname: string.Empty);
+        var command = CommandTestDataBuilder.CreateRegisterUserCommand(surname: string.Empty);
 
         // Act & Assert
         var result = _validator.TestValidate(command);
@@ -94,7 +95,7 @@ public class RegisterUserCommandValidatorTest
     public void Should_Have_Error_When_Surname_Is_Too_Long()
     {
         // Arrange
-        var command = TestHelper.CreateRegisterUserCommand(surname: new string('a', 51));
+        var command = CommandTestDataBuilder.CreateRegisterUserCommand(surname: new string('a', 51));
 
         // Act & Assert
         var result = _validator.TestValidate(command);
@@ -105,7 +106,7 @@ public class RegisterUserCommandValidatorTest
     public void Should_Have_Error_When_PhoneNumber_Is_Empty()
     {
         // Arrange
-        var command = TestHelper.CreateRegisterUserCommand(phoneNumber: string.Empty);
+        var command = CommandTestDataBuilder.CreateRegisterUserCommand(phoneNumber: string.Empty);
 
         // Act & Assert
         var result = _validator.TestValidate(command);
@@ -116,7 +117,7 @@ public class RegisterUserCommandValidatorTest
     public void Should_Have_Error_When_PhoneNumber_Is_Invalid()
     {
         // Arrange
-        var command = TestHelper.CreateRegisterUserCommand(phoneNumber: "invalid");
+        var command = CommandTestDataBuilder.CreateRegisterUserCommand(phoneNumber: "invalid");
 
         // Act & Assert
         var result = _validator.TestValidate(command);
@@ -127,7 +128,7 @@ public class RegisterUserCommandValidatorTest
     public void Should_Have_Error_When_Passwords_Do_Not_Match()
     {
         // Arrange
-        var command = TestHelper.CreateRegisterUserCommand(
+        var command = CommandTestDataBuilder.CreateRegisterUserCommand(
             password: "Password123!",
             passwordConfirmation: "DifferentPassword123!");
 
@@ -140,7 +141,7 @@ public class RegisterUserCommandValidatorTest
     public void Should_Have_Error_When_AboutMe_Is_Too_Long()
     {
         // Arrange
-        var command = TestHelper.CreateRegisterUserCommand();
+        var command = CommandTestDataBuilder.CreateRegisterUserCommand();
         command.AboutMe = new string('a', 501);
 
         // Act & Assert
@@ -152,7 +153,7 @@ public class RegisterUserCommandValidatorTest
     public void Should_Not_Have_Errors_When_All_Fields_Are_Valid()
     {
         // Arrange
-        var command = TestHelper.CreateRegisterUserCommand();
+        var command = CommandTestDataBuilder.CreateRegisterUserCommand();
 
         // Act & Assert
         var result = _validator.TestValidate(command);
@@ -163,7 +164,7 @@ public class RegisterUserCommandValidatorTest
     public void Should_Have_Error_When_Latitude_Is_Out_Of_Range()
     {
         // Arrange
-        var command = TestHelper.CreateRegisterUserCommand(latitude: 91.0);
+        var command = CommandTestDataBuilder.CreateRegisterUserCommand(latitude: 91.0);
 
         // Act & Assert
         var result = _validator.TestValidate(command);
@@ -174,7 +175,7 @@ public class RegisterUserCommandValidatorTest
     public void Should_Have_Error_When_Longitude_Is_Out_Of_Range()
     {
         // Arrange
-        var command = TestHelper.CreateRegisterUserCommand(longitude: 181.0);
+        var command = CommandTestDataBuilder.CreateRegisterUserCommand(longitude: 181.0);
 
         // Act & Assert
         var result = _validator.TestValidate(command);

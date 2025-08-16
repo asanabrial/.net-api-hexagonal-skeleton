@@ -1,4 +1,5 @@
 using Xunit;
+using HexagonalSkeleton.Test.TestHelpers;
 using Moq;
 using FluentValidation;
 using HexagonalSkeleton.Application.Features.UserManagement.Dto;
@@ -34,7 +35,7 @@ public class GetUserQueryHandlerTest
         var userId = Guid.NewGuid();
         var query = new GetUserQuery(userId);
         var cancellationToken = CancellationToken.None;
-        var user = TestHelper.CreateTestUser();
+        var user = UserTestDataBuilder.CreateTestUser();
 
         _mockValidator
             .Setup(v => v.ValidateAsync(It.IsAny<GetUserQuery>(), cancellationToken))

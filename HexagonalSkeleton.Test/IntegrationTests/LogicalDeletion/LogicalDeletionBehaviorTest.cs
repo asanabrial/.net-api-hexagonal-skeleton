@@ -1,4 +1,5 @@
 using FluentValidation;
+using HexagonalSkeleton.Test.TestHelpers;
 using FluentValidation.Results;
 using HexagonalSkeleton.Application.Features.UserProfile.Commands;
 using HexagonalSkeleton.Application.Features.UserManagement.Commands;
@@ -45,7 +46,7 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
         {
             // Arrange
             var userId = Guid.NewGuid();
-            var user = TestHelper.CreateTestUser(userId);
+            var user = UserTestDataBuilder.CreateTestUser(userId);
             
             // Simular que el usuario está borrado lógicamente
             user.Delete(); // Esto marca IsDeleted = true
@@ -79,7 +80,7 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
         {
             // Arrange
             var userId = Guid.NewGuid();
-            var user = TestHelper.CreateTestUser(userId);
+            var user = UserTestDataBuilder.CreateTestUser(userId);
             
             // Usuario ya está borrado lógicamente
             user.Delete();
@@ -114,7 +115,7 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
         {
             // Arrange
             var userId = Guid.NewGuid();
-            var user = TestHelper.CreateTestUser(userId);
+            var user = UserTestDataBuilder.CreateTestUser(userId);
             
             // Usuario activo (no borrado)
             Assert.False(user.IsDeleted);
@@ -164,7 +165,7 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
         {
             // Arrange
             var userId = Guid.NewGuid();
-            var user = TestHelper.CreateTestUser(userId);
+            var user = UserTestDataBuilder.CreateTestUser(userId);
             user.Delete(); // Marcar como borrado lógicamente
             
             _mockUserWriteRepository.Setup(x => x.GetByIdUnfilteredAsync(userId, It.IsAny<CancellationToken>()))

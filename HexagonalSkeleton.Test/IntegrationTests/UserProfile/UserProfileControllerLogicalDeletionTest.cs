@@ -5,7 +5,7 @@ using FluentAssertions;
 using HexagonalSkeleton.API.Models.Users;
 using HexagonalSkeleton.API.Models.Auth;
 using HexagonalSkeleton.Domain.Ports;
-using HexagonalSkeleton.Test.TestInfrastructure.Base;
+using HexagonalSkeleton.Test.Integration.Infrastructure;
 using HexagonalSkeleton.Test.TestInfrastructure.Factories;
 using HexagonalSkeleton.Test.TestInfrastructure.Helpers;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +16,7 @@ using AutoMapper;
 namespace HexagonalSkeleton.Test.Integration.UserProfile;
 
 [Collection("Integration Collection")]
-public class UserProfileControllerLogicalDeletionTest : BaseIntegrationTest, IClassFixture<ConfiguredTestWebApplicationFactory>
+public class UserProfileControllerLogicalDeletionTest : BaseWebIntegrationTest, IClassFixture<ConfiguredTestWebApplicationFactory>
 {
     public UserProfileControllerLogicalDeletionTest(ConfiguredTestWebApplicationFactory factory) 
         : base(factory)

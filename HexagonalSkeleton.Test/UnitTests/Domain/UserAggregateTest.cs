@@ -1,6 +1,7 @@
 using Xunit;
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.Events;
+using HexagonalSkeleton.Test.TestHelpers;
 
 namespace HexagonalSkeleton.Test.Unit.User.Domain;
 
@@ -77,7 +78,7 @@ public class UserAggregateTest
     public void UpdateProfile_ValidData_ShouldUpdateSuccessfully()
     {
         // Arrange
-        var user = TestHelper.CreateTestUser();
+        var user = UserTestDataBuilder.CreateTestUser();
         var newFirstName = "Jane";
         var newLastName = "Smith";
         var newBirthdate = DateTime.UtcNow.AddYears(-30);
@@ -103,7 +104,7 @@ public class UserAggregateTest
     public void Delete_ShouldMarkAsDeleted()
     {
         // Arrange
-        var user = TestHelper.CreateTestUser();
+        var user = UserTestDataBuilder.CreateTestUser();
 
         // Act
         user.Delete();
@@ -118,7 +119,7 @@ public class UserAggregateTest
     public void UpdateProfile_DeletedUser_ShouldThrowException()
     {
         // Arrange
-        var user = TestHelper.CreateTestUser();
+        var user = UserTestDataBuilder.CreateTestUser();
         user.Delete();
 
         // Act & Assert
@@ -130,7 +131,7 @@ public class UserAggregateTest
     public void RecordLogin_ShouldUpdateLastLoginAndRaiseEvent()
     {
         // Arrange
-        var user = TestHelper.CreateTestUser();
+        var user = UserTestDataBuilder.CreateTestUser();
         var oldLastLogin = user.LastLogin;
 
         // Act
@@ -147,7 +148,7 @@ public class UserAggregateTest
     public void RecordLogin_DeletedUser_ShouldThrowException()
     {
         // Arrange
-        var user = TestHelper.CreateTestUser();
+        var user = UserTestDataBuilder.CreateTestUser();
         user.Delete();
 
         // Act & Assert
@@ -158,7 +159,7 @@ public class UserAggregateTest
     public void UpdateLocation_ValidCoordinates_ShouldUpdateSuccessfully()
     {
         // Arrange
-        var user = TestHelper.CreateTestUser();
+        var user = UserTestDataBuilder.CreateTestUser();
         var newLatitude = 34.0522;
         var newLongitude = -118.2437;
 
@@ -175,7 +176,7 @@ public class UserAggregateTest
     public void UpdatePhoneNumber_ValidPhoneNumber_ShouldUpdateSuccessfully()
     {
         // Arrange
-        var user = TestHelper.CreateTestUser();
+        var user = UserTestDataBuilder.CreateTestUser();
         var newPhoneNumber = "+1987654321";
 
         // Act
@@ -191,7 +192,7 @@ public class UserAggregateTest
     {
         // Arrange
         var birthdate = DateTime.UtcNow.AddYears(-25);
-        var user = TestHelper.CreateTestUser(birthdate: birthdate);
+        var user = UserTestDataBuilder.CreateTestUser(birthdate: birthdate);
 
         // Act
         var age = user.GetAge();
@@ -205,7 +206,7 @@ public class UserAggregateTest
     {
         // Arrange
         var birthdate = DateTime.UtcNow.AddYears(-25);
-        var user = TestHelper.CreateTestUser(birthdate: birthdate);
+        var user = UserTestDataBuilder.CreateTestUser(birthdate: birthdate);
 
         // Act
         var isAdult = user.IsAdult();
@@ -219,7 +220,7 @@ public class UserAggregateTest
     {
         // Arrange
         var birthdate = DateTime.UtcNow.AddYears(-16);
-        var user = TestHelper.CreateTestUser(birthdate: birthdate);
+        var user = UserTestDataBuilder.CreateTestUser(birthdate: birthdate);
 
         // Act
         var isAdult = user.IsAdult();
@@ -245,7 +246,7 @@ public class UserAggregateTest
     public void ChangePassword_ValidCredentials_ShouldUpdatePassword()
     {
         // Arrange
-        var user = TestHelper.CreateTestUser();
+        var user = UserTestDataBuilder.CreateTestUser();
         var newSalt = "newSalt";
         var newHash = "newHash";
 
@@ -262,7 +263,7 @@ public class UserAggregateTest
     public void CalculateDistanceTo_SameUser_ShouldReturnZero()
     {
         // Arrange
-        var user = TestHelper.CreateTestUser();
+        var user = UserTestDataBuilder.CreateTestUser();
 
         // Act
         var distance = user.CalculateDistanceTo(user);
@@ -275,8 +276,8 @@ public class UserAggregateTest
     public void CalculateDistanceTo_DifferentUsers_ShouldReturnCorrectDistance()
     {
         // Arrange
-        var user1 = TestHelper.CreateTestUser(latitude: 40.7128, longitude: -74.0060); // NYC
-        var user2 = TestHelper.CreateTestUser(id: Guid.NewGuid(), email: "user2@example.com", phoneNumber: "+1234567891",
+        var user1 = UserTestDataBuilder.CreateTestUser(latitude: 40.7128, longitude: -74.0060); // NYC
+        var user2 = UserTestDataBuilder.CreateTestUser(id: Guid.NewGuid(), email: "user2@example.com", phoneNumber: "+1234567891",
                                               latitude: 51.5074, longitude: -0.1278); // London
 
         // Act
@@ -290,8 +291,8 @@ public class UserAggregateTest
     public void IsNearby_UsersWithinRadius_ShouldReturnTrue()
     {
         // Arrange
-        var user1 = TestHelper.CreateTestUser(latitude: 40.7128, longitude: -74.0060);
-        var user2 = TestHelper.CreateTestUser(id: Guid.NewGuid(), email: "user2@example.com", phoneNumber: "+1234567891",
+        var user1 = UserTestDataBuilder.CreateTestUser(latitude: 40.7128, longitude: -74.0060);
+        var user2 = UserTestDataBuilder.CreateTestUser(id: Guid.NewGuid(), email: "user2@example.com", phoneNumber: "+1234567891",
                                               latitude: 40.7589, longitude: -73.9851); // Times Square (nearby)
 
         // Act
@@ -305,8 +306,8 @@ public class UserAggregateTest
     public void IsNearby_UsersOutsideRadius_ShouldReturnFalse()
     {
         // Arrange
-        var user1 = TestHelper.CreateTestUser(latitude: 40.7128, longitude: -74.0060); // NYC
-        var user2 = TestHelper.CreateTestUser(id: Guid.NewGuid(), email: "user2@example.com", phoneNumber: "+1234567891",
+        var user1 = UserTestDataBuilder.CreateTestUser(latitude: 40.7128, longitude: -74.0060); // NYC
+        var user2 = UserTestDataBuilder.CreateTestUser(id: Guid.NewGuid(), email: "user2@example.com", phoneNumber: "+1234567891",
                                               latitude: 51.5074, longitude: -0.1278); // London
 
         // Act
@@ -320,7 +321,7 @@ public class UserAggregateTest
     public void ChangePassword_EmptyCredentials_ShouldThrowException()
     {
         // Arrange
-        var user = TestHelper.CreateTestUser();
+        var user = UserTestDataBuilder.CreateTestUser();
 
         // Act & Assert
         Assert.Throws<ArgumentException>(() => user.ChangePassword("", "hash"));
@@ -331,7 +332,7 @@ public class UserAggregateTest
     public void UpdateLocation_DeletedUser_ShouldThrowException()
     {
         // Arrange
-        var user = TestHelper.CreateTestUser();
+        var user = UserTestDataBuilder.CreateTestUser();
         user.Delete();
 
         // Act & Assert
@@ -342,7 +343,7 @@ public class UserAggregateTest
     public void UpdatePhoneNumber_DeletedUser_ShouldThrowException()
     {
         // Arrange
-        var user = TestHelper.CreateTestUser();
+        var user = UserTestDataBuilder.CreateTestUser();
         user.Delete();
 
         // Act & Assert
@@ -353,7 +354,7 @@ public class UserAggregateTest
     public void ChangePassword_DeletedUser_ShouldThrowException()
     {
         // Arrange
-        var user = TestHelper.CreateTestUser();
+        var user = UserTestDataBuilder.CreateTestUser();
         user.Delete();
 
         // Act & Assert
