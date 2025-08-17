@@ -9,7 +9,7 @@ namespace HexagonalSkeleton.API.Models.Users
     /// Supports multiple filter criteria that can be combined for powerful searches
     /// Follows Request-Response pattern with clear validation rules
     /// </summary>
-    [AutoMap(typeof(GetAllUsersQuery), ReverseMap = true)]
+    [AutoMap(typeof(GetAllUsersManagementQuery), ReverseMap = true)]
     public class GetAllUsersRequest
     {
         /// <summary>

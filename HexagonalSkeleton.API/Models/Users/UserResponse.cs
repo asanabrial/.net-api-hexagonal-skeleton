@@ -1,5 +1,6 @@
 using AutoMapper;
 using HexagonalSkeleton.Application.Features.UserManagement.Dto;
+using HexagonalSkeleton.Application.Features.UserProfile.Dto;
 
 namespace HexagonalSkeleton.API.Models.Users
 {
@@ -9,6 +10,7 @@ namespace HexagonalSkeleton.API.Models.Users
     /// </summary>
     [AutoMap(typeof(GetUserDto), ReverseMap = true)]
     [AutoMap(typeof(GetAllUsersDto), ReverseMap = true)]
+    [AutoMap(typeof(UserProfileDto), ReverseMap = true)]
     public class UserResponse
     {
         /// <summary>
@@ -58,11 +60,6 @@ namespace HexagonalSkeleton.API.Models.Users
         /// User's about me description
         /// </summary>
         public string? AboutMe { get; set; }
-
-        /// <summary>
-        /// User's profile image file name
-        /// </summary>
-        public string? ProfileImageName { get; set; }
 
         /// <summary>
         /// Last login timestamp

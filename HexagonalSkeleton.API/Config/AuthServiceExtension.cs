@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using System.Text;
 
 namespace HexagonalSkeleton.API.Config
@@ -47,6 +48,66 @@ namespace HexagonalSkeleton.API.Config
                     ClockSkew = TimeSpan.Zero, // Remove default 5 minute clock skew
                     RequireExpirationTime = true,
                     RequireSignedTokens = true
+                };
+
+                // Enable detailed logging for JWT authentication in development
+                o.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = context =>
+                    {
+                        // Log authentication failures with details
+                        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
+                        logger.LogError("JWT Authentication failed: {Exception}", context.Exception.Message);
+                        return Task.CompletedTask;
+                    },
+                    OnTokenValidated = async context =>
+                    {
+                        // Log successful token validation
+                        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
+                        var userIdClaim = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                        
+                        if (userIdClaim != null && Guid.TryParse(userIdClaim, out var userId))
+                        {
+                            logger.LogInformation("JWT Token validated successfully for user: {UserId}", userId);
+                            
+                            // Verify user still exists and is active
+                            using var scope = context.HttpContext.RequestServices.CreateScope();
+                            var userReadRepository = scope.ServiceProvider.GetRequiredService<HexagonalSkeleton.Domain.Ports.IUserReadRepository>();
+                            
+                            try
+                            {
+                                var user = await userReadRepository.GetByIdAsync(userId, context.HttpContext.RequestAborted);
+                                
+                                if (user == null)
+                                {
+                                    logger.LogWarning("JWT Token validation failed: User {UserId} no longer exists or has been deleted", userId);
+                                    context.Fail("User no longer exists or has been deleted");
+                                    return;
+                                }
+                                
+                                logger.LogDebug("User {UserId} validation successful: user is active", userId);
+                            }
+                            catch (Exception ex)
+                            {
+                                logger.LogError(ex, "Error validating user status for JWT token: {UserId}", userId);
+                                context.Fail("Error validating user status");
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            logger.LogWarning("JWT Token validation failed: Invalid or missing user ID claim");
+                            context.Fail("Invalid user ID in token");
+                        }
+                    },
+                    OnChallenge = context =>
+                    {
+                        // Log authorization challenges
+                        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<JwtBearerEvents>>();
+                        logger.LogWarning("JWT Authentication challenge: {Error} - {ErrorDescription}", 
+                            context.Error, context.ErrorDescription);
+                        return Task.CompletedTask;
+                    }
                 };
             });
 

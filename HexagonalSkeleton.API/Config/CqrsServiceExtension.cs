@@ -2,7 +2,6 @@ using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Infrastructure.Adapters.Command;
 using HexagonalSkeleton.Infrastructure.Adapters.Query;
 using HexagonalSkeleton.Infrastructure.Services.Sync;
-using HexagonalSkeleton.Application.Services.Features;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace HexagonalSkeleton.API.Config
@@ -36,18 +35,12 @@ namespace HexagonalSkeleton.API.Config
                 provider.GetRequiredService<IUserReadRepository>() as UserReadRepositoryMongoAdapter 
                 ?? throw new InvalidOperationException("UserReadRepositoryMongoAdapter not registered"));
             
-            services.AddScoped<IUserBasicReader>(provider => 
+            services.AddScoped<IUserReader>(provider => 
                 provider.GetRequiredService<IUserReadRepository>() as UserReadRepositoryMongoAdapter 
                 ?? throw new InvalidOperationException("UserReadRepositoryMongoAdapter not registered"));
 
-            // === EVENTUAL CONSISTENCY ===
-            // Sync service for maintaining read model consistency via domain events
+            // Eventual consistency sync service for maintaining read model consistency
             services.AddScoped<HexagonalSkeleton.Domain.Services.IUserSyncService, UserSyncService>();
-
-            // === APPLICATION SERVICES (Screaming Architecture) ===
-            // Business feature-focused services that orchestrate domain operations
-            services.AddScoped<IUserRegistrationApplicationService, UserRegistrationApplicationService>();
-            services.AddScoped<IUserProfileApplicationService, UserProfileApplicationService>();
 
             return services;
         }

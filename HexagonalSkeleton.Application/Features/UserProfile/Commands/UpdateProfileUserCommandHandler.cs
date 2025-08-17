@@ -1,16 +1,13 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FluentValidation;
 using HexagonalSkeleton.Application.Exceptions;
-using HexagonalSkeleton.Application.Extensions;
 using HexagonalSkeleton.Application.Features.UserProfile.Dto;
 using HexagonalSkeleton.Domain.Ports;
-using HexagonalSkeleton.Domain.Services;
 using MediatR;
 
 namespace HexagonalSkeleton.Application.Features.UserProfile.Commands
 {    public class UpdateProfileUserCommandHandler(
         IValidator<UpdateProfileUserCommand> validator,
-        IUserReadRepository userReadRepository,
         IUserWriteRepository userWriteRepository,
         IMapper mapper)
         : IRequestHandler<UpdateProfileUserCommand, UserProfileDto>
@@ -20,9 +17,19 @@ namespace HexagonalSkeleton.Application.Features.UserProfile.Commands
             if (!result.IsValid)
                 throw new Exceptions.ValidationException(result.ToDictionary());
 
-            var user = await userReadRepository.GetByIdAsync(id: request.Id, cancellationToken: cancellationToken);
+            // Get the user (including deleted ones for domain validation)
+            var user = await userWriteRepository.GetByIdUnfilteredAsync(request.Id, cancellationToken);
             if (user is null) 
-                throw new NotFoundException("User", request.Id);            user.UpdateProfile(request.FirstName, request.LastName, request.Birthdate, request.AboutMe);
+                throw new NotFoundException("User", request.Id);
+
+            user.UpdateProfile(request.FirstName, request.LastName, request.Birthdate, request.AboutMe);
+            
+            // Update phone number separately if provided
+            if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
+            {
+                user.UpdatePhoneNumber(request.PhoneNumber);
+            }
+            
             await userWriteRepository.UpdateAsync(user, cancellationToken);
             
             // Map user data to DTO using AutoMapper

@@ -1,4 +1,4 @@
-﻿namespace HexagonalSkeleton.API.Config
+namespace HexagonalSkeleton.API.Config
 {
     /// <summary>
     /// This class holds extension methods for the WebApplication type.

@@ -43,5 +43,26 @@ namespace HexagonalSkeleton.API.Controllers.Features
             var result = await _mediator.Send(command);
             return Ok(_mapper.Map<LoginResponse>(result));
         }
+
+        /// <summary>
+        /// Register a new user with immediate authentication
+        /// Core business operation: User Registration + Authentication
+        /// Returns authentication token for immediate use
+        /// </summary>
+        /// <param name="request">User registration data</param>
+        /// <returns>Created user information with authentication token</returns>
+        [HttpPost("register")]
+        [ProducesResponseType(typeof(AuthenticatedRegistrationResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> Register(CreateUserRequest request)
+        {
+            var command = _mapper.Map<RegisterUserCommand>(request);
+            var result = await _mediator.Send(command);
+            
+            var response = _mapper.Map<AuthenticatedRegistrationResponse>(result);
+            
+            return Created($"/api/users/{result.User.Id}", response);
+        }
     }
 }

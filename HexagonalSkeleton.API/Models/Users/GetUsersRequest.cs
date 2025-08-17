@@ -1,4 +1,5 @@
 using HexagonalSkeleton.API.Models.Common;
+using HexagonalSkeleton.Domain.ValueObjects;
 
 namespace HexagonalSkeleton.API.Models.Users
 {
@@ -31,15 +32,5 @@ namespace HexagonalSkeleton.API.Models.Users
         /// Filter by registration date range end
         /// </summary>
         public DateTime? RegisteredBefore { get; set; }
-    }
-
-    /// <summary>
-    /// User status enumeration
-    /// </summary>
-    public enum UserStatus
-    {
-        Active,
-        Inactive,
-        Suspended
     }
 }

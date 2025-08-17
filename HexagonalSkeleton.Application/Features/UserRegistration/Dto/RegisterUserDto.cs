@@ -10,7 +10,7 @@ namespace HexagonalSkeleton.Application.Features.UserRegistration.Dto
     {        /// <summary>
         /// JWT access token for the registered user
         /// </summary>
-        public required string AccessToken { get; set; } = string.Empty;
+        public string AccessToken { get; set; } = string.Empty;
 
         /// <summary>
         /// Token type (usually "Bearer")

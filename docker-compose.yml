@@ -1,6 +1,11 @@
+networks:
+    hexagonal-network:
+        driver: bridge
+
 services:
+    # PostgreSQL with CDC using Debezium image (latest stable)
     postgresql:
-        image: postgres:17
+        image: debezium/postgres:16
         container_name: hexagonal-postgresql
         environment:
             POSTGRES_DB: HexagonalSkeleton
@@ -10,14 +15,16 @@ services:
             - "5432:5432"
         volumes:
             - postgresql_data:/var/lib/postgresql/data
+        networks:
+            - hexagonal-network
         healthcheck:
             test: ["CMD-SHELL", "pg_isready -U hexagonal_user -d HexagonalSkeleton"]
             interval: 10s
             timeout: 5s
-            retries: 3
+            retries: 5
             start_period: 30s
-        restart: unless-stopped
 
+    # MongoDB for read models (latest stable)
     mongodb:
         image: mongo:8.0
         container_name: hexagonal-mongodb
@@ -29,35 +36,93 @@ services:
             - "27017:27017"
         volumes:
             - mongodb_data:/data/db
+        networks:
+            - hexagonal-network
+
+    # Zookeeper (latest Confluent Platform)
+    zookeeper:
+        image: confluentinc/cp-zookeeper:7.8.0
+        container_name: hexagonal-zookeeper
+        environment:
+            ZOOKEEPER_CLIENT_PORT: 2181
+            ZOOKEEPER_TICK_TIME: 2000
+        ports:
+            - "2181:2181"
+        networks:
+            - hexagonal-network
+
+    # Kafka (latest Confluent Platform)
+    kafka:
+        image: confluentinc/cp-kafka:7.8.0
+        container_name: hexagonal-kafka
+        depends_on:
+            - zookeeper
+            - postgresql
+        environment:
+            KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+            KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_INTERNAL://0.0.0.0:29092
+            KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+            KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+            KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+            KAFKA_BROKER_ID: 1
+            KAFKA_MIN_INSYNC_REPLICAS: 1
+            KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
+        ports:
+            - "9092:9092"
+        networks:
+            - hexagonal-network
+
+    # Schema Registry (latest Confluent Platform)
+    schema-registry:
+        image: confluentinc/cp-schema-registry:7.8.0
+        container_name: hexagonal-schema-registry
+        depends_on:
+            - kafka
+        environment:
+            SCHEMA_REGISTRY_HOST_NAME: schema-registry
+            SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka:29092
+            SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+            SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 1
+            SCHEMA_REGISTRY_DEBUG: true
+        ports:
+            - "8081:8081"
+        networks:
+            - hexagonal-network
+
+    # Debezium Connect (stable version)
+    debezium-connect:
+        image: debezium/connect:2.5
+        container_name: hexagonal-debezium-connect
+        depends_on:
+            - kafka
+            - postgresql
+            - schema-registry
+        environment:
+            GROUP_ID: 1
+            CONFIG_STORAGE_TOPIC: my_connect_configs
+            OFFSET_STORAGE_TOPIC: my_connect_offsets
+            STATUS_STORAGE_TOPIC: my_connect_status
+            BOOTSTRAP_SERVERS: kafka:29092
+            KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+            VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+            CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: false
+            CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: true
+            INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+            INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+            CONNECT_REST_ADVERTISED_HOST_NAME: debezium-connect
+        ports:
+            - "8083:8083"
+        networks:
+            - hexagonal-network
         healthcheck:
-            test: ["CMD-SHELL", 'mongosh --eval ''db.adminCommand("ping")''']
+            test: ["CMD", "curl", "-f", "http://localhost:8083/connectors"]
             interval: 10s
             timeout: 5s
-            retries: 3
-            start_period: 30s
-        restart: unless-stopped
-
-    rabbitmq:
-        image: rabbitmq:4.0-management
-        container_name: hexagonal-rabbitmq
-        environment:
-            RABBITMQ_DEFAULT_USER: hexagonal_user
-            RABBITMQ_DEFAULT_PASS: hexagonal_password
-            RABBITMQ_DEFAULT_VHOST: hexagonal_vhost
-        ports:
-            - "5672:5672" # AMQP port
-            - "15672:15672" # Management UI port
-        volumes:
-            - rabbitmq_data:/var/lib/rabbitmq
-        healthcheck:
-            test: ["CMD-SHELL", "rabbitmq-diagnostics check_port_connectivity"]
-            interval: 30s
-            timeout: 10s
-            retries: 3
-            start_period: 60s
-        restart: unless-stopped
+            retries: 5
 
 volumes:
     postgresql_data:
     mongodb_data:
-    rabbitmq_data:

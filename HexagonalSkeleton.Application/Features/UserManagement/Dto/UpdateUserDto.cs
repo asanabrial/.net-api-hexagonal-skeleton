@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,7 +18,6 @@ namespace HexagonalSkeleton.Application.Features.UserManagement.Dto
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
         public string? AboutMe { get; set; }
-        public string? ProfileImageName { get; set; }
         public DateTime? LastLogin { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }

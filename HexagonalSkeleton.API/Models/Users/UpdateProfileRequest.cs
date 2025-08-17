@@ -34,5 +34,11 @@ namespace HexagonalSkeleton.API.Models.Users
         /// </summary>
         [DataType(DataType.Date)]
         public DateTime? Birthdate { get; set; }
+
+        /// <summary>
+        /// User's about me section
+        /// </summary>
+        [StringLength(500, ErrorMessage = "About me cannot exceed 500 characters")]
+        public string? AboutMe { get; set; }
     }
 }

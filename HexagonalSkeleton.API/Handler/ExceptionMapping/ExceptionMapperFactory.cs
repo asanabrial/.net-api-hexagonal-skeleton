@@ -2,16 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HexagonalSkeleton.API.Handler.ExceptionMapping
 {
-    /// <summary>
-    /// Factory for creating exception mappers
-    /// Follows Open/Closed Principle - open for extension, closed for modification
-    /// </summary>
-    public interface IExceptionMapperFactory
-    {
-        IExceptionMapper CreateMapper(Type exceptionType);
-        void RegisterMapper<TException>(IExceptionMapper mapper) where TException : Exception;
-    }
-
     public class ExceptionMapperFactory : IExceptionMapperFactory
     {
         private readonly Dictionary<Type, IExceptionMapper> _mappers = new();
@@ -60,26 +50,6 @@ namespace HexagonalSkeleton.API.Handler.ExceptionMapping
         public void RegisterMapper<TException>(IExceptionMapper mapper) where TException : Exception
         {
             _mappers[typeof(TException)] = mapper;
-        }
-    }
-
-    /// <summary>
-    /// Default exception mapper for unhandled exception types
-    /// Follows Open/Closed Principle by providing safe fallback behavior
-    /// </summary>
-    public class DefaultExceptionMapper : IExceptionMapper
-    {
-        public bool CanHandle(Exception exception) => true;
-
-        public ProblemDetails MapToProblemDetails(Exception exception, string requestPath)
-        {
-            return new ProblemDetails
-            {
-                Status = StatusCodes.Status500InternalServerError,
-                Title = "Internal Server Error",
-                Detail = "An unexpected error occurred. Please try again later.",
-                Instance = requestPath
-            };
         }
     }
 }

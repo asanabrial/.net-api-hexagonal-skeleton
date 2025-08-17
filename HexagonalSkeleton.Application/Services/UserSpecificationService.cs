@@ -16,7 +16,7 @@ namespace HexagonalSkeleton.Application.Services
         /// Builds a user specification from query parameters
         /// Uses the builder pattern for clean and readable specification construction
         /// </summary>
-        public ISpecification<User> BuildSpecification(GetAllUsersQuery query)
+        public ISpecification<User> BuildSpecification(GetAllUsersManagementQuery query)
         {
             var builder = UserSpecificationBuilder.Create();
 
@@ -32,7 +32,7 @@ namespace HexagonalSkeleton.Application.Services
         /// <summary>
         /// Applies the active user filter (business rule: exclude deleted users by default)
         /// </summary>
-        private static void ApplyActiveFilter(UserSpecificationBuilder builder, GetAllUsersQuery query)
+        private static void ApplyActiveFilter(UserSpecificationBuilder builder, GetAllUsersManagementQuery query)
         {
             if (query.OnlyActive == true)
             {
@@ -44,7 +44,7 @@ namespace HexagonalSkeleton.Application.Services
         /// Applies search term filter for text-based searches
         /// Covers name, lastname, email, and phone number
         /// </summary>
-        private static void ApplySearchFilter(UserSpecificationBuilder builder, GetAllUsersQuery query)
+        private static void ApplySearchFilter(UserSpecificationBuilder builder, GetAllUsersManagementQuery query)
         {
             if (!string.IsNullOrWhiteSpace(query.SearchTerm))
             {
@@ -55,7 +55,7 @@ namespace HexagonalSkeleton.Application.Services
         /// <summary>
         /// Applies age-related filters (range and adult status)
         /// </summary>
-        private static void ApplyAgeFilters(UserSpecificationBuilder builder, GetAllUsersQuery query)
+        private static void ApplyAgeFilters(UserSpecificationBuilder builder, GetAllUsersManagementQuery query)
         {
             // Apply age range filter if both min and max are provided
             if (query.MinAge.HasValue && query.MaxAge.HasValue)
@@ -73,7 +73,7 @@ namespace HexagonalSkeleton.Application.Services
         /// <summary>
         /// Applies status-based filters (complete profiles)
         /// </summary>
-        private static void ApplyStatusFilters(UserSpecificationBuilder builder, GetAllUsersQuery query)
+        private static void ApplyStatusFilters(UserSpecificationBuilder builder, GetAllUsersManagementQuery query)
         {
             if (query.OnlyCompleteProfiles == true)
             {
@@ -85,7 +85,7 @@ namespace HexagonalSkeleton.Application.Services
         /// Applies location-based filter using coordinates and radius
         /// All three parameters (latitude, longitude, radius) must be provided
         /// </summary>
-        private static void ApplyLocationFilter(UserSpecificationBuilder builder, GetAllUsersQuery query)
+        private static void ApplyLocationFilter(UserSpecificationBuilder builder, GetAllUsersManagementQuery query)
         {
             if (HasLocationParameters(query))
             {
@@ -99,7 +99,7 @@ namespace HexagonalSkeleton.Application.Services
         /// <summary>
         /// Checks if all required location parameters are provided
         /// </summary>
-        private static bool HasLocationParameters(GetAllUsersQuery query)
+        private static bool HasLocationParameters(GetAllUsersManagementQuery query)
         {
             return query.Latitude.HasValue && 
                    query.Longitude.HasValue && 

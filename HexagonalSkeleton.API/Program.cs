@@ -12,7 +12,6 @@ builder.Services.AddDomainServices();
 
 // Infrastructure Services (Outer Layer) 
 builder.Services.AddSingletons();
-builder.Services.AddTransients();
 
 // API Layer Configuration
 builder.Services.AddSwagger();
@@ -42,15 +41,14 @@ builder.Services.AddCqrsDatabases(builder.Configuration);
 // CQRS services configuration
 builder.Services.AddCqrsServices();
 
-// Simple MassTransit configuration
-builder.Services.AddMassTransitWithRabbitMQ(builder.Configuration);
+// CDC Configuration with Debezium + Kafka (Enterprise-grade)
+builder.Services.AddDebeziumCdc(builder.Configuration);
 
 builder.Services.AddRouting(opt =>
 {
     opt.LowercaseUrls = true;
 });
 
-builder.Services.AddOptions();
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();

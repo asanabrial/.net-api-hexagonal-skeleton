@@ -40,9 +40,10 @@ namespace HexagonalSkeleton.API.Config
                 throw new InvalidOperationException("Connection string 'HexagonalSkeleton' not found in configuration.");
             }
 
-            // En un patrón CQRS bien implementado, solo necesitamos un contexto para comandos (escritura)
-            // CommandDbContext será el único contexto para operaciones de escritura usando PostgreSQL
-            services.AddDbContextPool<CommandDbContext>(
+            // In a well-implemented CQRS pattern, we only need one context for commands (write)
+            // CommandDbContext will be the only context for write operations using PostgreSQL
+            // Using AddDbContext instead of AddDbContextPool due to custom constructor with IMediator
+            services.AddDbContext<CommandDbContext>(
                 dbContextOptions =>
                     dbContextOptions.UseNpgsql(
                         connectionStr, 
@@ -65,11 +66,14 @@ namespace HexagonalSkeleton.API.Config
             var connectionString = configuration.GetConnectionString("HexagonalSkeletonRead");
             var databaseName = configuration["MongoDb:DatabaseName"];
 
-            if (string.IsNullOrEmpty(connectionString) || string.IsNullOrEmpty(databaseName))
+            if (string.IsNullOrEmpty(connectionString))
             {
-                // Use default values for missing configuration
-                connectionString ??= "mongodb://localhost:27017";
-                databaseName ??= "HexagonalSkeletonRead";
+                throw new InvalidOperationException("Connection string 'HexagonalSkeletonRead' not found in configuration.");
+            }
+
+            if (string.IsNullOrEmpty(databaseName))
+            {
+                throw new InvalidOperationException("MongoDb:DatabaseName not found in configuration.");
             }
 
             // Register MongoDB client as singleton

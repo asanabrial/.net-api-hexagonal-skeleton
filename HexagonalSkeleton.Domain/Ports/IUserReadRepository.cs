@@ -16,6 +16,11 @@ namespace HexagonalSkeleton.Domain.Ports
         Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
         
         /// <summary>
+        /// Get a single user by ID without filtering deleted users (for management purposes)
+        /// </summary>
+        Task<User?> GetByIdUnfilteredAsync(Guid id, CancellationToken cancellationToken = default);
+        
+        /// <summary>
         /// Get a single user by email (for login/validation)
         /// </summary>
         Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);

@@ -11,13 +11,4 @@ namespace HexagonalSkeleton.Application.Ports
     {
         Task HandleAsync(TDomainEvent domainEvent, CancellationToken cancellationToken = default);
     }
-
-    /// <summary>
-    /// Pure domain event dispatcher - no external dependencies
-    /// </summary>
-    public interface IDomainEventDispatcher
-    {
-        Task DispatchAsync(DomainEvent domainEvent, CancellationToken cancellationToken = default);
-        Task DispatchAsync(IEnumerable<DomainEvent> domainEvents, CancellationToken cancellationToken = default);
-    }
 }

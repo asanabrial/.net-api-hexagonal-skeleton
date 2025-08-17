@@ -13,6 +13,13 @@ namespace HexagonalSkeleton.Domain.Ports
         Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
         Task SetLastLoginAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<User?> GetTrackedByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        
+        /// <summary>
+        /// Get user by ID without filtering deleted users for command operations
+        /// This allows domain logic to handle business rules about deleted users
+        /// </summary>
+        Task<User?> GetByIdUnfilteredAsync(Guid id, CancellationToken cancellationToken = default);
+        
         Task SaveChangesAsync(CancellationToken cancellationToken = default);
         
         /// <summary>

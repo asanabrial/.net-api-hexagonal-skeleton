@@ -93,19 +93,13 @@ namespace HexagonalSkeleton.MigrationDb.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedAt");
-
                     b.HasIndex("Email")
                         .IsUnique();
-
-                    b.HasIndex("IsDeleted");
-
-                    b.HasIndex("LastLogin");
 
                     b.HasIndex("PhoneNumber")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("users", (string)null);
                 });
 #pragma warning restore 612, 618
         }

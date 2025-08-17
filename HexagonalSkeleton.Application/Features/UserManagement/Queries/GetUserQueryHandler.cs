@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
@@ -16,6 +16,7 @@ namespace HexagonalSkeleton.Application.Features.UserManagement.Queries
             if (!result.IsValid)
                 throw new Exceptions.ValidationException(result.ToDictionary());
 
+            // Use standard read repository (filters deleted users - normal CQRS behavior)
             var user = await userReadRepository.GetByIdAsync(
                 id: request.Id,
                 cancellationToken: cancellationToken);

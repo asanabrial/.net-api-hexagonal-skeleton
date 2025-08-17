@@ -5,7 +5,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using HexagonalSkeleton.Application.Features.UserProfile.Commands;
-using HexagonalSkeleton.Application.Features.UserManagement.Queries;
+using HexagonalSkeleton.Application.Features.UserProfile.Queries;
 
 namespace HexagonalSkeleton.API.Controllers.Features
 {
@@ -39,7 +39,7 @@ namespace HexagonalSkeleton.API.Controllers.Features
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetMyProfile()
         {
-            var result = await _mediator.Send(new GetUserQuery(User.GetUserId()));
+            var result = await _mediator.Send(new GetMyProfileQuery(User.GetUserId()));
             return Ok(_mapper.Map<UserResponse>(result));
         }
 
