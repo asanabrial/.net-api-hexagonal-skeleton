@@ -23,13 +23,13 @@
 -   **CQRS Implementation**: Separate Command (PostgreSQL) and Query (MongoDB) stores
 -   **Change Data Capture**: Real-time synchronization using Debezium + Kafka
 -   **Domain-Driven Design**: Rich domain models with business rules enforcement
--   **🧪 Testing**: 60+ test files with unit and integration coverage
 -   **JWT Authentication**: Secure API with password hashing and validation
 -   **Dual Database Strategy**: PostgreSQL for writes, MongoDB for optimized reads
 -   **Complete Stack**: PostgreSQL, MongoDB, Kafka, Debezium fully containerized
 -   **API Documentation**: Interactive Swagger/OpenAPI with detailed schemas
 -   **Event Streaming**: Kafka-based CDC for instant data synchronization
 -   **Clean Code Principles**: DRY, KISS, YAGNI compliant with centralized utilities
+-   **🧪 Testing**: 60+ test files with unit and integration coverage
 
 ## Technology Stack
 
@@ -66,8 +66,6 @@ graph LR
     E --> F[MongoDB]
     F --> G[Optimized Queries]
 ```
-
-    F --> G[Optimized Queries]
 
 ````
 
@@ -149,13 +147,25 @@ docker-compose up -d --wait
 dotnet run --project HexagonalSkeleton.API
 ```
 
-**Ready to go!**
+### Access Points
 
--   **API**: http://localhost:5000/swagger
+-   **API Documentation**: http://localhost:5000/swagger
 -   **PostgreSQL**: localhost:5432 (Commands/Writes)
 -   **MongoDB**: localhost:27017 (Queries/Reads)
 -   **Kafka**: localhost:9092 (Event Streaming)
 -   **Debezium Connect**: localhost:8083 (CDC Management)
+
+### Test the Flow
+
+```bash
+# Register a new user (writes to PostgreSQL)
+curl -X POST http://localhost:5000/api/registration \
+  -H "Content-Type: application/json" \
+  -d '{"email": "test@example.com", "password": "Test123!", "firstName": "John", "lastName": "Doe"}'
+
+# Query users (reads from MongoDB - synced via CDC)
+curl http://localhost:5000/api/users
+```
 
 ## Architecture
 
@@ -211,7 +221,7 @@ graph TB
 
 -   **Hexagonal Architecture**: Ports & Adapters with clean dependency inversion
 -   **CQRS Pattern**: Separate optimized stores for commands and queries
--   **Event-Driven Architecture**: Async messaging with MassTransit and RabbitMQ
+-   **Change Data Capture**: Real-time synchronization using Debezium + Kafka
 -   **Eventual Consistency**: Automated synchronization between data stores
 -   **Repository Pattern**: Clean data access abstraction layer
 -   **Specification Pattern**: Reusable and composable business rules
@@ -342,56 +352,39 @@ The codebase follows standard Clean Architecture patterns:
 
 This template demonstrates **production-ready** enterprise software development with a modern twist on data synchronization:
 
-### Technical Excellence
+### Enterprise Benefits
+
+This architecture demonstrates advanced concepts valued in enterprise software development:
 
 -   **Scalability**: CQRS enables independent scaling of read/write operations
 -   **Performance**: Dual databases optimized for specific access patterns
 -   **Reliability**: CDC provides guaranteed data consistency without application-level event handling
 -   **Real-time**: Debezium streams database changes instantly, no polling or delays
 -   **Maintainability**: Clean Architecture with clear separation of concerns
--   **Testability**: Comprehensive test coverage with dependency injection
--   **Resilience**: Database-level change capture ensures no missed events
--   **Code Quality**: DRY, KISS, YAGNI principles with centralized utilities
+-   **Testability**: Comprehensive test coverage with dependency injection and Testcontainers
 -   **Business Logic**: Domain-driven design with rich business rules enforcement
 
-### 💡 Why CDC over Domain Events?
-
-While domain events are excellent for business workflows, **Change Data Capture offers superior data synchronization**:
-
--   **Zero Application Impact**: Database changes are captured transparently
--   **Guaranteed Delivery**: No risk of events being lost due to application failures
--   **Schema Evolution**: Handles database changes automatically
--   **Operational Simplicity**: Less application code to maintain and debug
--   **Better Performance**: No additional database writes for event publishing
-
-### 💼 Enterprise Benefits
-
--   **Team Productivity**: Multiple teams can work on different bounded contexts
--   **Technology Flexibility**: Easy to swap databases or messaging systems
--   **Monitoring & Observability**: Built-in logging, health checks, and event tracking
--   **Deployment Ready**: Docker containerization for any cloud platform
--   **Data Consistency**: ACID transactions for commands, eventual consistency for queries
-
-### 🚀 Interview-Ready Features
+### Interview-Ready Features
 
 Perfect for demonstrating expertise in:
 
--   **Modern .NET Development** (9.0 with latest packages and C# 13 features)
+-   **Modern .NET Development** (.NET 9 with latest C# 13 features)
 -   **Distributed Systems** (CQRS + Change Data Capture patterns)
--   **Event Streaming Architecture** (Kafka + Debezium for real-time synchronization)
+-   **Event Streaming Architecture** (Kafka + Debezium for real-time sync)
 -   **Database Design** (PostgreSQL + MongoDB optimization strategies)
 -   **Enterprise Patterns** (Hexagonal Architecture, DDD, SOLID principles)
--   **Clean Code Principles** (DRY, KISS, YAGNI with practical examples)
--   **Domain-Driven Design** (Business rules, age calculations, specifications)
 -   **Advanced Testing** (Unit, integration, CDC testing with 60+ test files)
 -   **DevOps & Containers** (Docker Compose, automated setup scripts)
--   **Performance Engineering** (Database-level synchronization vs application events)
 
----
+## CQRS & CDC Flow
 
-## 🔄 CQRS & CDC Flow
+### Why CDC Over Other Sync Strategies?
 
-### How it Works
+**CDC vs Domain Events**: No application code changes needed, captures direct SQL modifications  
+**CDC vs API Polling**: Real-time latency without rate limiting headaches  
+**CDC vs ETL/DevOps Jobs**: Sub-second sync instead of scheduled batch processes
+
+Used by Netflix, Uber, LinkedIn, and many others for real-time data synchronization.
 
 ```mermaid
 sequenceDiagram
@@ -446,8 +439,8 @@ cp appsettings.json appsettings.Production.json
 services.AddDbContextPool<CommandDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-# Configure RabbitMQ clustering
-# In docker-compose.yml or appsettings.json
+# Configure database connections and CDC settings
+# In appsettings.json or environment variables
 ```
 
 ---
@@ -481,7 +474,7 @@ services:
 ### Advanced Scenarios
 
 -   **Multi-tenant**: Add tenant isolation to both command and query stores
--   **Saga Patterns**: Implement distributed transactions with MassTransit
+-   **Event Sourcing**: Implement full event sourcing with Kafka event store
 -   **API Versioning**: Add versioned endpoints with backward compatibility
 -   **GraphQL**: Replace REST controllers with GraphQL endpoints
 -   **Real-time**: Add SignalR for real-time notifications
@@ -501,7 +494,7 @@ services:
 
 -   **Hexagonal Architecture** implementation with ports & adapters in .NET
 -   **CQRS Pattern** with separate optimized data stores (PostgreSQL + MongoDB)
--   **Event-Driven Architecture** with reliable messaging using RabbitMQ + MassTransit
+-   **Change Data Capture** with reliable streaming using Kafka + Debezium
 -   **Domain-Driven Design** with rich domain models and business logic encapsulation
 -   **Enterprise Testing** strategies including unit, integration, and end-to-end tests
 -   **Modern .NET** development practices with dependency injection and clean code
