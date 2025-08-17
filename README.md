@@ -29,7 +29,7 @@
 -   **API Documentation**: Interactive Swagger/OpenAPI with detailed schemas
 -   **Event Streaming**: Kafka-based CDC for instant data synchronization
 -   **Clean Code Principles**: DRY, KISS, YAGNI compliant with centralized utilities
--   **🧪 Testing**: 60+ test files with unit and integration coverage
+-   **Testing**: 60+ test files with unit and integration coverage
 
 ## Technology Stack
 
@@ -483,13 +483,6 @@ services:
 
 ## Learning Resources
 
-### Recommended Reading
-
--   [Clean Architecture (Robert C. Martin)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
--   [Implementing Domain-Driven Design (Vaughn Vernon)](https://www.oreilly.com/library/view/implementing-domain-driven-design/9780133039900/)
--   [Building Event-Driven Microservices (Adam Bellemare)](https://www.oreilly.com/library/view/building-event-driven-microservices/9781492057888/)
--   [.NET Microservices Architecture Guide](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/)
-
 ### What You'll Learn
 
 -   **Hexagonal Architecture** implementation with ports & adapters in .NET
@@ -509,9 +502,9 @@ services:
 
 ### Built with passion for enterprise-grade software architecture
 
-**[⭐ Star this repo](https://github.com/asanabrialopez/.net-api-hexagonal-skeleton)** if it demonstrates valuable patterns for your projects!
+**[⭐ Star this repo](https://github.com/asanabrial/.net-api-hexagonal-skeleton)** if it demonstrates valuable patterns for your projects!
 
 _This template showcases enterprise-grade .NET development with modern architectural patterns.<br/>
-Perfect for technical interviews and production-ready applications._
+Perfect for production-ready applications._
 
 </div>
