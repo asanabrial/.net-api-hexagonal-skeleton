@@ -1,4 +1,10 @@
-<p align="center"><img src="https://github.com/user-attachments/assets/5d55f501-ed98-4245-a0ef-b620991c35df" alt="dotnet-icon" width="150" /></p>
+<p align="center"## Key Features
+
+-   **Clean Architecture**: Ports & Adapters pattern with dependency inversion
+-   **CQRS + CDC**: Real-time sync between PostgreSQL (commands) and MongoDB (queries)
+-   **Domain-Driven Design**: Business rules live in the domain, not scattered across layers
+-   **Comprehensive Testing**: 60+ tests including integration tests with Testcontainers
+-   **Modern .NET Stack**: .NET 9, JWT auth, automated Docker setuptps://github.com/user-attachments/assets/5d55f501-ed98-4245-a0ef-b620991c35df" alt="dotnet-icon" width="150" /></p>
 
 <p align="center">
   <strong>Production-ready API template implementing Clean Architecture, DDD, CQRS with Change Data Capture</strong><br/>
@@ -47,23 +53,13 @@
 | **Logging**        | Serilog                |
 | **Testing**        | xUnit + Testcontainers |
 
-### 🔥 Advanced Change Data Capture Features
+### Change Data Capture with Debezium
 
-#### **📡 Debezium + Kafka Integration**
+**Real-time sync**: PostgreSQL changes stream directly to MongoDB via Kafka  
+**Zero downtime**: Schema changes handled automatically  
+**Reliable**: Built-in failure recovery with offset tracking
 
--   **Real-time CDC**: Database changes streamed instantly to Kafka topics
--   **Schema Evolution**: Automatic handling of database schema changes
--   **Fault Tolerance**: Built-in resilience with offset tracking and replay
--   **Enterprise-Grade**: Production-ready connector configuration
-
-#### **🗄️ Dual Database Architecture**
-
--   **PostgreSQL (Commands)**: ACID transactions for data consistency
--   **MongoDB (Queries)**: Optimized schemas for complex filtering and search
--   **CDC Synchronization**: Real-time event streaming maintains consistency
--   **Performance**: Read/write operations use optimal data stores
-
-#### **⚡ Real-Time Data Flow**
+**How it works**: Write to PostgreSQL → Debezium captures WAL changes → Kafka streams → MongoDB gets updated
 
 ```mermaid
 graph LR
@@ -75,11 +71,23 @@ graph LR
     F --> G[Optimized Queries]
 ```
 
+    F --> G[Optimized Queries]
+
+````
+
 **Key CDC Events:**
 
 -   `user.created` → Syncs new user to read model
 -   `user.updated` → Maintains profile consistency
 -   `user.deleted` → Handles logical deletion synchronization
+
+### Why CDC Over Other Sync Strategies?
+
+**CDC vs Domain Events**: No application code changes needed, captures direct SQL modifications
+**CDC vs API Polling**: Real-time latency without rate limiting headaches
+**CDC vs ETL/DevOps Jobs**: Sub-second sync instead of scheduled batch processes
+
+Used by Netflix, Uber, LinkedIn, and many others for real-time data synchronization.
 
 ## � Development Experience
 
@@ -103,7 +111,7 @@ The `setup.ps1` script handles all initialization tasks:
 # 4. Validates all services are running correctly
 
 ./setup.ps1  # One command to rule them all
-```
+````
 
 ### Database Management
 
@@ -321,9 +329,9 @@ graph TB
 
 ````
 
-## 🧪 Testing
+## Testing
 
-**60+ Test Files** covering all architectural layers:
+60+ tests covering the full stack. Integration tests use Testcontainers for real PostgreSQL, MongoDB, and Kafka instances.
 
 ```bash
 # Run all tests
@@ -339,25 +347,20 @@ dotnet test --filter "Category=Integration"
 ### Test Categories
 
 -   **Unit Tests**: Domain logic, business rules, and value objects (including AgeCalculator)
--   **Integration Tests**: End-to-end API workflows with test infrastructure
--   **CQRS Tests**: Command and query handler validation
--   **Event Tests**: Integration event publishing and consumption
--   **Repository Tests**: Data access layer with in-memory databases
--   **Authentication Tests**: JWT token generation and validation
-
--   **Unit Tests**: Domain logic, business rules, and value objects
--   **Integration Tests**: End-to-end API workflows with test infrastructure
--   **CQRS Tests**: Command and query handler validation
--   **Event Tests**: Integration event publishing and consumption
--   **Repository Tests**: Data access layer with in-memory databases
+-   **Integration Tests**: End-to-end API workflows with Testcontainers (PostgreSQL + MongoDB + Kafka)
+-   **CDC Integration Tests**: Complete Change Data Capture flow validation with real containers
+-   **CQRS Tests**: Command and query handler validation with containerized databases
+-   **Repository Tests**: Data access layer with real database containers
 -   **Authentication Tests**: JWT token generation and validation
 
 ### Test Infrastructure
 
--   **TestWebApplicationFactory**: Custom factory replacing production dependencies
--   **In-Memory Databases**: SQLite for commands, in-memory MongoDB for queries
+-   **Testcontainers**: Real PostgreSQL, MongoDB, and Kafka containers for integration tests
+-   **TestWebApplicationFactory**: Custom factory replacing production dependencies with containerized services
+-   **Isolated Test Environments**: Each test class gets its own Docker container instances
+-   **CDC Testing**: Full end-to-end validation of Change Data Capture flows
 -   **AutoFixture**: Automated test data generation for comprehensive scenarios
--   **Test Containers**: Docker-based integration testing when needed
+-   **Container Orchestration**: Automatic setup/teardown of complete infrastructure stack
 -   **Centralized Test Utilities**: DRY-compliant test data creation with `TestHelper.cs`
 -   **Domain Utility Testing**: Comprehensive coverage of `AgeCalculator` with edge cases
 -   **Postman Collection**: 66 automated API tests covering all endpoints and business rules
@@ -371,45 +374,16 @@ dotnet test --filter "Category=Integration"
 -   **CORS** configuration for secure cross-origin requests
 -   **Authorization Attributes** for role-based endpoint protection
 
-## ✨ Clean Code Principles Implementation
+## Code Organization
 
-### 🎯 DRY (Don't Repeat Yourself)
+The codebase follows standard Clean Architecture patterns:
 
--   **Centralized Age Calculation**: `AgeCalculator` utility eliminates duplicate age logic across domain, validation, and mapping layers
--   **Unified Test Utilities**: `TestHelper.cs` provides consistent test data creation methods
--   **Shared Domain Logic**: Business rules centralized in domain services and specifications
+-   **Domain logic** stays in the domain layer (business rules, validations)
+-   **Shared utilities** like `AgeCalculator` prevent duplication across layers
+-   **Simple, descriptive naming** - methods do what their names say
+-   **Minimal dependencies** - no unnecessary abstractions or complexity
 
-### 💎 KISS (Keep It Simple, Stupid)
-
--   **Clear Method Names**: `CalculateAge()`, `IsAtLeastAge()`, `IsWithinAgeRange()` with obvious intent
--   **Single Responsibility**: Each utility class focuses on one specific domain concern
--   **Readable Business Logic**: Age validation expressed in natural, domain-friendly terms
-
-### 🚀 YAGNI (You Aren't Gonna Need It)
-
--   **Focused Implementation**: Only essential age calculation methods without over-engineering
--   **Minimal Dependencies**: Clean utilities with zero external dependencies
--   **Pragmatic Design**: Business rules implemented as needed, not speculatively
-
-## � Development Experience
-
-### Visual Studio / VS Code
-
--   **F5 Debugging**: Full debugging with automatic Docker setup
--   **Hot Reload**: Real-time code changes with `dotnet watch`
--   **IntelliSense**: Full code completion and error detection
-
-### Database Management
-
-```bash
-# Create new migration
-dotnet ef migrations add MigrationName --project HexagonalSkeleton.MigrationDb
-
-# Update database
-dotnet ef database update --project HexagonalSkeleton.MigrationDb
-```
-
-## 📊 API Endpoints
+## API Endpoints
 
 ### 🔐 Authentication & Registration
 
