@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 namespace HexagonalSkeleton.Test.Integration.UserProfile
 {
     /// <summary>
-    /// Tests de integración REALES para operaciones de usuario
-    /// Usando contenedores reales sin mocks
+    /// REAL integration tests for user operations
+    /// Using real containers without mocks
     /// </summary>
     [Collection("Integration Collection")]
     public class UserOperationsIntegrationTest : BaseIntegrationTest
@@ -19,7 +19,7 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
         public async Task CreateUser_ShouldPersist_InPostgreSQL()
         {
             // Arrange
-            Console.WriteLine("🧪 Test REAL: Crear usuario en PostgreSQL");
+            Console.WriteLine("REAL Test: Create user in PostgreSQL");
             
             using var scope = CreateScope();
             var commandDb = scope.ServiceProvider.GetRequiredService<CommandDbContext>();
@@ -49,7 +49,7 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
             // Assert
             Assert.Equal(1, result);
             
-            // Verificar que se persistió correctamente
+            // Verify that it persisted correctly
             var savedUser = await commandDb.Users.FindAsync(userId);
             Assert.NotNull(savedUser);
             Assert.Equal("real.user@integration.com", savedUser.Email);
@@ -58,19 +58,19 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
             Assert.Equal("+1234567890", savedUser.PhoneNumber);
             Assert.False(savedUser.IsDeleted);
             
-            Console.WriteLine($"✅ Usuario creado exitosamente: {savedUser.Id}");
+            Console.WriteLine($" User created successfully: {savedUser.Id}");
         }
 
         [Fact]
         public async Task UpdateUser_ShouldModify_ExistingRecord()
         {
             // Arrange
-            Console.WriteLine("🧪 Test REAL: Actualizar usuario existente");
+            Console.WriteLine("REAL Test: Update existing user");
             
             using var scope = CreateScope();
             var commandDb = scope.ServiceProvider.GetRequiredService<CommandDbContext>();
             
-            // Crear usuario inicial
+            // Create initial user
             var userId = Guid.NewGuid();
             var user = new UserCommandEntity
             {
@@ -92,7 +92,7 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
             commandDb.Users.Add(user);
             await commandDb.SaveChangesAsync();
 
-            // Act - Actualizar usuario
+                        // Act - Update user
             user.FirstName = "Updated";
             user.LastName = "NewName";
             user.AboutMe = "Updated description";
@@ -103,7 +103,7 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
             // Assert
             Assert.Equal(1, updateResult);
             
-            // Verificar actualización
+            // Verify update
             var updatedUser = await commandDb.Users.FindAsync(userId);
             Assert.NotNull(updatedUser);
             Assert.Equal("Updated", updatedUser.FirstName);
@@ -111,19 +111,19 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
             Assert.Equal("Updated description", updatedUser.AboutMe);
             Assert.NotNull(updatedUser.UpdatedAt);
             
-            Console.WriteLine($"✅ Usuario actualizado: {updatedUser.FirstName} {updatedUser.LastName}");
+            Console.WriteLine($" User updated: {updatedUser.FirstName} {updatedUser.LastName}");
         }
 
         [Fact]
         public async Task DeleteUser_ShouldMarkAsDeleted_SoftDelete()
         {
             // Arrange
-            Console.WriteLine("🧪 Test REAL: Eliminación suave de usuario");
+            Console.WriteLine("REAL Test: Soft delete user");
             
             using var scope = CreateScope();
             var commandDb = scope.ServiceProvider.GetRequiredService<CommandDbContext>();
             
-            // Crear usuario
+            // Create user
             var userId = Guid.NewGuid();
             var user = new UserCommandEntity
             {
@@ -145,7 +145,7 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
             commandDb.Users.Add(user);
             await commandDb.SaveChangesAsync();
 
-            // Act - Eliminar (soft delete)
+            // Act - Delete (soft delete)
             user.IsDeleted = true;
             user.DeletedAt = DateTime.UtcNow;
             
@@ -154,21 +154,21 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
             // Assert
             Assert.Equal(1, deleteResult);
             
-            // Verificar que sigue existiendo pero marcado como eliminado
+            // Verify that it still exists but marked as deleted
             var deletedUser = await commandDb.Users.FindAsync(userId);
             Assert.NotNull(deletedUser);
             Assert.True(deletedUser.IsDeleted);
             Assert.NotNull(deletedUser.DeletedAt);
             Assert.Equal("delete.test@integration.com", deletedUser.Email);
             
-            Console.WriteLine($"✅ Usuario eliminado (soft delete): {deletedUser.Email}");
+            Console.WriteLine($" User deleted (soft delete): {deletedUser.Email}");
         }
 
         [Fact]
         public async Task CreateMultipleUsers_ShouldPersist_AllRecords()
         {
             // Arrange
-            Console.WriteLine("🧪 Test REAL: Crear múltiples usuarios");
+            Console.WriteLine("REAL Test: Create multiple users");
             
             using var scope = CreateScope();
             var commandDb = scope.ServiceProvider.GetRequiredService<CommandDbContext>();
@@ -232,7 +232,7 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
             // Assert
             Assert.Equal(3, result);
             
-            // Verificar que todos se crearon
+            // Verify that all were created
             foreach (var user in users)
             {
                 var savedUser = await commandDb.Users.FindAsync(user.Id);
@@ -241,7 +241,7 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
                 Assert.False(savedUser.IsDeleted);
             }
             
-            Console.WriteLine($"✅ {users.Length} usuarios creados en lote exitosamente");
+            Console.WriteLine($" {users.Length} users created en lote successfully");
         }
     }
 }

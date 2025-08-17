@@ -167,7 +167,7 @@ namespace HexagonalSkeleton.Infrastructure.Services
                             }
                             else
                             {
-                                _logger.LogDebug("🔍 No messages available, continuing to poll...");
+                                _logger.LogDebug("No messages available, continuing to poll...");
                             }
                         }
                         catch (ConsumeException ex)

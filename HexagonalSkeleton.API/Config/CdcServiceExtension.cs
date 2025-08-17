@@ -10,9 +10,9 @@ using Microsoft.Extensions.Options;
 namespace HexagonalSkeleton.API.Config
 {
     /// <summary>
-    /// Extension para configurar servicios CDC con Debezium + Kafka
-    /// Reemplaza MassTransit con una implementación enterprise-grade basada en WAL
-    /// Implementa patrones CDC usados por Netflix, Uber, LinkedIn
+    /// Extension to configure CDC services with Debezium + Kafka
+    /// Replaces MassTransit with an enterprise-grade implementation based on WAL
+    /// Implements CDC patterns used by Netflix, Uber, LinkedIn
     /// </summary>
     public static class CdcServiceExtension
     {
@@ -22,16 +22,16 @@ namespace HexagonalSkeleton.API.Config
         /// </summary>
         public static IServiceCollection AddDebeziumCdc(this IServiceCollection services, IConfiguration configuration)
         {
-            // Configurar opciones CDC
+            // Configure CDC options
             services.Configure<CdcOptions>(configuration.GetSection(CdcOptions.SectionName));
             
-        // Configurar Kafka Producer desde configuración CDC
+        // Configure Kafka Producer from CDC configuration
         services.Configure<ProducerConfig>(options =>
         {
             // This configuration will be evaluated at DI resolution time, not registration time
             // However, for test scenarios, we need to ensure dynamic config is available
             // We'll implement delayed configuration in the service constructor instead
-        });        // Configurar Kafka Consumer desde configuración CDC
+        });        // Configure Kafka Consumer from CDC configuration
         services.Configure<ConsumerConfig>(options =>
         {
             // This configuration will be evaluated at DI resolution time, not registration time
@@ -45,66 +45,75 @@ namespace HexagonalSkeleton.API.Config
         }
 
         /// <summary>
-        /// Configura tópicos y conectores Debezium mediante API calls
-        /// Se ejecuta durante el startup de la aplicación
+        /// Configures topics and Debezium connectors via API calls
+        /// Runs during application startup
         /// </summary>
         public static async Task<IServiceCollection> ConfigureDebeziumConnectors(
             this IServiceCollection services, 
             IConfiguration configuration,
             ILogger logger)
         {
-            var debeziumApiUrl = configuration["CDC:DebeziumConnectUrl"] ?? "http://localhost:8083";
+            var debeziumApiUrl = configuration["CDC:DebeziumConnectUrl"]
+                ?? throw new InvalidOperationException("CDC:DebeziumConnectUrl configuration is required");
             
             try
             {
                 using var httpClient = new HttpClient();
                 
-                // Configuración del conector PostgreSQL
+                // PostgreSQL connector configuration
                 var postgresConnectorConfig = new
                 {
                     name = "hexagonal-postgres-connector",
                     config = new
                     {
-                        // Configuración del conector
+                        // Connector configuration
                         connector_class = "io.debezium.connector.postgresql.PostgresConnector",
-                        plugin_name = "pgoutput", // Plugin nativo de PostgreSQL 10+
+                        plugin_name = "pgoutput", // Native PostgreSQL 10+ plugin
                         
-                        // Conexión a base de datos (desde docker-compose)
-                        database_hostname = configuration["CDC:PostgreSQL:Host"] ?? "postgresql",
-                        database_port = configuration["CDC:PostgreSQL:Port"] ?? "5432",
-                        database_user = configuration["CDC:PostgreSQL:User"] ?? "hexagonal_user",
-                        database_password = configuration["CDC:PostgreSQL:Password"] ?? "hexagonal_password",
-                        database_dbname = configuration["CDC:PostgreSQL:Database"] ?? "HexagonalSkeleton",
-                        database_server_name = configuration["CDC:PostgreSQL:ServerName"] ?? "hexagonal-postgres",
+                        // Connection to database (using configuration)
+                        database_hostname = configuration["CDC:PostgreSQL:Host"] 
+                            ?? throw new InvalidOperationException("CDC:PostgreSQL:Host configuration is required"),
+                        database_port = configuration["CDC:PostgreSQL:Port"] 
+                            ?? throw new InvalidOperationException("CDC:PostgreSQL:Port configuration is required"),
+                        database_user = configuration["CDC:PostgreSQL:User"] 
+                            ?? throw new InvalidOperationException("CDC:PostgreSQL:User configuration is required"),
+                        database_password = configuration["CDC:PostgreSQL:Password"] 
+                            ?? throw new InvalidOperationException("CDC:PostgreSQL:Password configuration is required"),
+                        database_dbname = configuration["CDC:PostgreSQL:Database"] 
+                            ?? throw new InvalidOperationException("CDC:PostgreSQL:Database configuration is required"),
+                        database_server_name = configuration["CDC:PostgreSQL:ServerName"] 
+                            ?? throw new InvalidOperationException("CDC:PostgreSQL:ServerName configuration is required"),
                         
-                        // Configuración de tablas
-                        table_include_list = configuration["CDC:TableIncludeList"] ?? "public.users",
+                        // Table and topic configuration
+                        table_include_list = configuration["CDC:TableIncludeList"] 
+                            ?? throw new InvalidOperationException("CDC:TableIncludeList configuration is required"),
                         
-                        // Configuración de tópicos
-                        topic_prefix = configuration["CDC:TopicPrefix"] ?? "hexagonal",
+                        // Topic configuration
+                        topic_prefix = configuration["CDC:TopicPrefix"] 
+                            ?? throw new InvalidOperationException("CDC:TopicPrefix configuration is required"),
                         
-                        // Configuración de transformaciones
+                        // Transformations configuration
                         transforms = "route",
                         transforms_route_type = "org.apache.kafka.connect.transforms.RegexRouter",
                         transforms_route_regex = "([^.]+)\\.([^.]+)\\.([^.]+)",
                         transforms_route_replacement = "hexagonal.cdc.$3",
                         
-                        // Configuración de snapshots
+                        // Snapshots configuration
                         snapshot_mode = "initial",
                         
-                        // Configuración de formato
+                        // Format configuration
                         key_converter = "org.apache.kafka.connect.json.JsonConverter",
                         value_converter = "org.apache.kafka.connect.json.JsonConverter",
                         key_converter_schemas_enable = false,
                         value_converter_schemas_enable = false,
                         
-                        // Configuración de slots de replicación
+                        // Replication slots configuration
                         slot_name = configuration["CDC:PostgreSQL:SlotName"] ?? "hexagonal_slot",
                         publication_name = configuration["CDC:PostgreSQL:PublicationName"] ?? "hexagonal_publication"
                     }
                 };
 
-                // Enviar configuración del conector
+                // Send connector configuration
                 var connectorJson = System.Text.Json.JsonSerializer.Serialize(postgresConnectorConfig);
                 var content = new StringContent(connectorJson, System.Text.Encoding.UTF8, "application/json");
                 
@@ -112,18 +121,18 @@ namespace HexagonalSkeleton.API.Config
                 
                 if (response.IsSuccessStatusCode)
                 {
-                    logger.LogInformation("✅ Debezium PostgreSQL connector configurado exitosamente");
+                    logger.LogInformation("Debezium PostgreSQL connector configured successfully");
                 }
                 else
                 {
                     var error = await response.Content.ReadAsStringAsync();
-                    logger.LogWarning("⚠️ Error configurando Debezium connector: {Error}", error);
+                    logger.LogWarning("Error configuring Debezium connector: {Error}", error);
                 }
             }
             catch (Exception ex)
             {
-                logger.LogWarning("⚠️ No se pudo conectar a Debezium Connect: {Message}", ex.Message);
-                logger.LogInformation("💡 Asegúrate de que los servicios CDC estén ejecutándose: docker-compose -f docker-compose.debezium.yml up -d");
+                logger.LogWarning("Could not connect to Debezium Connect: {Message}", ex.Message);
+                logger.LogInformation("Make sure CDC services are running: docker-compose -f docker-compose.debezium.yml up -d");
             }
 
             return services;

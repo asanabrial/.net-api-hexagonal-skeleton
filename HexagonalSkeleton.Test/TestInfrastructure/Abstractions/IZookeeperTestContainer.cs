@@ -5,37 +5,37 @@ using System.Threading.Tasks;
 namespace HexagonalSkeleton.Test.TestInfrastructure.Abstractions
 {
     /// <summary>
-    /// Interfaz para contenedor de test de Zookeeper
+    /// Interface for Zookeeper test container
     /// </summary>
     public interface IZookeeperTestContainer : IAsyncDisposable
     {
         /// <summary>
-        /// Puerto público mapeado de Zookeeper
+        /// Gets the port number for Zookeeper
         /// </summary>
         int Port { get; }
         
         /// <summary>
-        /// Nombre del contenedor
+        /// Container name
         /// </summary>
         string ContainerName { get; }
         
         /// <summary>
-        /// Indica si el contenedor está corriendo
+        /// Indicates if the container is running
         /// </summary>
         bool IsRunning { get; }
 
         /// <summary>
-        /// Inicia el contenedor
+        /// Starts the container
         /// </summary>
         Task StartAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Detiene el contenedor
+        /// Stops the container
         /// </summary>
         Task StopAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Verifica el estado de salud del Zookeeper
+        /// Checks the health status of Zookeeper
         /// </summary>
         Task<bool> IsHealthyAsync(CancellationToken cancellationToken = default);
     }

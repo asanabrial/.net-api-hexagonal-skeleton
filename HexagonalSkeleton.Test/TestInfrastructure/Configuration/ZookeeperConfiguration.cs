@@ -8,4 +8,5 @@ public class ZookeeperConfiguration
     public bool CleanupAfterTest { get; set; }
     public int WaitTimeoutSeconds { get; set; }
     public string LogLevel { get; set; } = string.Empty;
+    public ZookeeperEnvironmentConfiguration Environment { get; set; } = new();
 }

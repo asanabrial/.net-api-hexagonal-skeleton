@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace HexagonalSkeleton.Test.Integration.UserProfile
 {
     /// <summary>
-    /// Tests de integración COMPLETOS que validan todo el sistema
+    /// COMPLETE integration tests that validate the entire system
     /// - PostgreSQL (Command database)
     /// - MongoDB (Query database) 
     /// - Kafka (Event streaming)
@@ -25,15 +25,15 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
         public async Task CompleteWorkflow_ShouldWork_EndToEnd()
         {
             // Arrange
-            Console.WriteLine("🧪 TEST COMPLETO: Workflow End-to-End");
+            Console.WriteLine("COMPLETE TEST: End-to-End Workflow");
             Console.WriteLine("📋 Validando: PostgreSQL + MongoDB + Kafka + Entity Framework + Testcontainers");
             
             using var scope = CreateScope();
             var commandDb = scope.ServiceProvider.GetRequiredService<CommandDbContext>();
             var queryDb = scope.ServiceProvider.GetRequiredService<QueryDbContext>();
             
-            // Test 1: Crear usuario en PostgreSQL
-            Console.WriteLine("\n1️⃣ Creando usuario en PostgreSQL...");
+            // Test 1: Create user in PostgreSQL
+            Console.WriteLine("\n1. Creating user in PostgreSQL...");
             var userId = Guid.NewGuid();
             var user = new UserCommandEntity
             {
@@ -56,10 +56,10 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
             var createResult = await commandDb.SaveChangesAsync();
             
             Assert.Equal(1, createResult);
-            Console.WriteLine($"✅ Usuario creado: {user.Email}");
+            Console.WriteLine($" User created: {user.Email}");
             
-            // Test 2: Verificar persistencia en PostgreSQL
-            Console.WriteLine("\n2️⃣ Verificando persistencia en PostgreSQL...");
+            // Test 2: Verify persistence in PostgreSQL
+            Console.WriteLine("\n2. Verifying persistence in PostgreSQL...");
             var savedUser = await commandDb.Users.FindAsync(userId);
             
             Assert.NotNull(savedUser);
@@ -68,10 +68,10 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
             Assert.Equal("Integration", savedUser.LastName);
             Assert.False(savedUser.IsDeleted);
             
-            Console.WriteLine($"✅ Usuario verificado en PostgreSQL: {savedUser.Id}");
+            Console.WriteLine($" User verified in PostgreSQL: {savedUser.Id}");
             
-            // Test 3: Actualizar usuario
-            Console.WriteLine("\n3️⃣ Actualizando usuario...");
+            // Test 3: Update user
+            Console.WriteLine("\n3. Updating user...");
             savedUser.FirstName = "Updated";
             savedUser.AboutMe = "Updated via complete integration test";
             savedUser.UpdatedAt = DateTime.UtcNow;
@@ -84,17 +84,17 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
             Assert.Equal("Updated via complete integration test", updatedUser.AboutMe);
             Assert.NotNull(updatedUser.UpdatedAt);
             
-            Console.WriteLine($"✅ Usuario actualizado: {updatedUser.FirstName}");
+            Console.WriteLine($" User updated: {updatedUser.FirstName}");
             
-            // Test 4: Verificar MongoDB disponible
-            Console.WriteLine("\n4️⃣ Verificando MongoDB...");
+            // Test 4: Verify MongoDB available
+            Console.WriteLine("\n4. Verifying MongoDB...");
             var mongoCount = await queryDb.Users.CountDocumentsAsync(FilterDefinition<UserQueryDocument>.Empty);
             
             Assert.True(mongoCount >= 0);
-            Console.WriteLine($"✅ MongoDB disponible con {mongoCount} documentos");
+            Console.WriteLine($" MongoDB disponible con {mongoCount} documentos");
             
             // Test 5: Soft Delete
-            Console.WriteLine("\n5️⃣ Realizando soft delete...");
+            Console.WriteLine("\n5. Performing soft delete...");
             updatedUser.IsDeleted = true;
             updatedUser.DeletedAt = DateTime.UtcNow;
             
@@ -106,55 +106,55 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
             Assert.True(deletedUser.IsDeleted);
             Assert.NotNull(deletedUser.DeletedAt);
             
-            Console.WriteLine($"✅ Usuario eliminado (soft): {deletedUser.Email}");
+            Console.WriteLine($" User deleted (soft): {deletedUser.Email}");
             
-            // Test 6: Verificar infraestructura completa
-            Console.WriteLine("\n6️⃣ Verificando infraestructura completa...");
+            // Test 6: Verify complete infrastructure
+            Console.WriteLine("\n6. Verifying complete infrastructure...");
             
             // PostgreSQL
             var pgConnection = PostgreSqlConnectionString;
             Assert.NotNull(pgConnection);
             Assert.Contains("hexagonal_test", pgConnection);
-            Console.WriteLine($"✅ PostgreSQL: {pgConnection.Substring(0, 50)}...");
+            Console.WriteLine($" PostgreSQL: {pgConnection.Substring(0, 50)}...");
             
             // MongoDB  
             var mongoConnection = MongoDbConnectionString;
             Assert.NotNull(mongoConnection);
             Assert.Contains("127.0.0.1", mongoConnection);
-            Console.WriteLine($"✅ MongoDB: {mongoConnection.Substring(0, 50)}...");
+            Console.WriteLine($" MongoDB: {mongoConnection.Substring(0, 50)}...");
             
             // Kafka
             var kafkaServers = KafkaBootstrapServers;
             Assert.NotNull(kafkaServers);
             Assert.Contains("127.0.0.1", kafkaServers);
-            Console.WriteLine($"✅ Kafka: {kafkaServers}");
+            Console.WriteLine($" Kafka: {kafkaServers}");
             
-            // Test 7: Verificar conectividad real
-            Console.WriteLine("\n7️⃣ Verificando conectividad real...");
+            // Test 7: Verify real connectivity
+            Console.WriteLine("\n7. Verifying real connectivity...");
             
             var canConnectPg = await commandDb.Database.CanConnectAsync();
             Assert.True(canConnectPg);
-            Console.WriteLine("✅ PostgreSQL conexión activa");
+            Console.WriteLine(" PostgreSQL conexión activa");
             
             var mongoCollections = await queryDb.Users.Database.ListCollectionNamesAsync();
             var collectionsList = await mongoCollections.ToListAsync();
             Assert.NotNull(collectionsList);
-            Console.WriteLine($"✅ MongoDB conexión activa ({collectionsList.Count} colecciones)");
+            Console.WriteLine($" MongoDB conexión activa ({collectionsList.Count} colecciones)");
             
-            Console.WriteLine("\n🎉 TODOS LOS TESTS COMPLETADOS EXITOSAMENTE");
-            Console.WriteLine("📊 RESUMEN:");
-            Console.WriteLine($"   - Usuario creado y verificado: {userId}");
-            Console.WriteLine($"   - Operaciones PostgreSQL: CREATE, READ, UPDATE, DELETE ✅");
-            Console.WriteLine($"   - Conectividad MongoDB: ✅");
-            Console.WriteLine($"   - Infraestructura Kafka: ✅");
-            Console.WriteLine($"   - Testcontainers funcionando: ✅");
+            Console.WriteLine("\nALL TESTS COMPLETED SUCCESSFULLY");
+            Console.WriteLine(" RESUMEN:");
+            Console.WriteLine($"   - User created y verificado: {userId}");
+            Console.WriteLine($"   - Operaciones PostgreSQL: CREATE, READ, UPDATE, DELETE ");
+            Console.WriteLine($"   - Conectividad MongoDB: ");
+            Console.WriteLine($"   - Infraestructura Kafka: ");
+            Console.WriteLine($"   - Testcontainers funcionando: ");
         }
 
         [Fact]
         public async Task MultipleUsers_ShouldWork_ConcurrentOperations()
         {
             // Arrange
-            Console.WriteLine("🧪 TEST MÚLTIPLE: Operaciones concurrentes");
+            Console.WriteLine("MULTIPLE TEST: Concurrent operations");
             
             using var scope = CreateScope();
             var commandDb = scope.ServiceProvider.GetRequiredService<CommandDbContext>();
@@ -211,26 +211,26 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
                 }
             };
 
-            // Act - Crear múltiples usuarios
-            Console.WriteLine("📝 Creando 3 usuarios simultáneamente...");
+            // Act - Create múltiples usuarios
+            Console.WriteLine("Creating 3 users simultaneously...");
             commandDb.Users.AddRange(users);
             var result = await commandDb.SaveChangesAsync();
 
             // Assert
             Assert.Equal(3, result);
-            Console.WriteLine($"✅ {result} usuarios creados exitosamente");
+            Console.WriteLine($" {result} users created successfully");
 
-            // Verificar cada usuario
+            // Verify each user
             foreach (var user in users)
             {
                 var savedUser = await commandDb.Users.FindAsync(user.Id);
                 Assert.NotNull(savedUser);
                 Assert.Equal(user.Email, savedUser.Email);
                 Assert.False(savedUser.IsDeleted);
-                Console.WriteLine($"✅ Verificado: {savedUser.Email}");
+                Console.WriteLine($" Verificado: {savedUser.Email}");
             }
 
-            Console.WriteLine("🎉 Test concurrente completado exitosamente");
+            Console.WriteLine("Concurrent test completed successfully");
         }
     }
 }

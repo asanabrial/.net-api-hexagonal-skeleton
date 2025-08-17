@@ -1,4 +1,5 @@
 using HexagonalSkeleton.Test.TestInfrastructure.Abstractions;
+using HexagonalSkeleton.Test.TestInfrastructure.Configuration;
 using Testcontainers.PostgreSql;
 using System;
 using System.Threading;
@@ -19,33 +20,30 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
         private bool _disposed = false;
 
         public TestcontainersPostgreSqlContainer(
-            string image = "debezium/postgres", // ✅ Usar imagen exacta del ejemplo Docker Compose
-            string database = "hexagonal_test",
-            string username = "appuser", // ✅ Use same user as in the example
-            string password = "qwerty", // ✅ Usar misma contraseña del ejemplo
+            TestContainersOptions options,
+            DockerConfiguration dockerConfig,
             INetwork? network = null)
         {
-            _database = database;
-            _username = username;
+            _database = options.Database;
+            _username = options.Username;
             
             var builder = new PostgreSqlBuilder()
-                .WithImage(image)
-                .WithDatabase(database)
-                .WithUsername(username)
-                .WithPassword(password)
-                .WithPortBinding(6532, 6532)
-                .WithCleanUp(true)
-                .WithEnvironment("POSTGRES_PASSWORD", password)
-                .WithEnvironment("POSTGRES_USER", username)
+                .WithImage(dockerConfig.Images.PostgreSQL)
+                .WithDatabase(options.Database)
+                .WithUsername(options.Username)
+                .WithPassword(options.Password)
+                .WithCleanUp(options.CleanUp)
+                .WithEnvironment("POSTGRES_PASSWORD", options.Password)
+                .WithEnvironment("POSTGRES_USER", options.Username)
                 // PostgreSQL configuration for CDC with Debezium
                 .WithCommand("-c", "wal_level=logical", "-c", "max_replication_slots=4", "-c", "max_wal_senders=4")
                 .WithWaitStrategy(Wait.ForUnixContainer()
-                    .UntilCommandIsCompleted("pg_isready", "-U", username));
+                    .UntilCommandIsCompleted("pg_isready", "-U", options.Username));
                 
             if (network != null)
             {
                 builder = builder.WithNetwork(network)
-                    .WithNetworkAliases("postgres");
+                    .WithNetworkAliases(dockerConfig.NetworkAliases.PostgreSQL);
             }
             
             _container = builder.Build();
@@ -61,7 +59,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
         
         public string Username => _username;
         
-        public int Port => 6532; // ✅ Puerto fijo como en el ejemplo
+        public int Port => 6532;
 
         public async Task StartAsync(CancellationToken cancellationToken = default)
         {
@@ -77,7 +75,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
         {
             try
             {
-                // ✅ Usar las credenciales correctas del ejemplo (appuser)
+                // Use correct credentials (appuser)
                 var result = await _container.ExecAsync(new[] { "pg_isready", "-U", "appuser" }, cancellationToken);
                 return result.ExitCode == 0;
             }

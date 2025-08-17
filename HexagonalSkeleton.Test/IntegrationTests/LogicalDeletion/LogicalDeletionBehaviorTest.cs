@@ -48,7 +48,7 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
             var userId = Guid.NewGuid();
             var user = UserTestDataBuilder.CreateTestUser(userId);
             
-            // Simular que el usuario está borrado lógicamente
+            // Simulate that the user is logically deleted
             user.Delete(); // Esto marca IsDeleted = true
             
             var updateCommand = new UpdateProfileUserCommand(
@@ -71,7 +71,7 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
 
             Assert.Contains("UpdateProfile", exception.Message);
             
-            // Verificar que el repositorio nunca se llamó para actualizar
+            // Verify that the repository was never called to update
             _mockUserWriteRepository.Verify(x => x.UpdateAsync(It.IsAny<DomainUser>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
@@ -82,7 +82,7 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
             var userId = Guid.NewGuid();
             var user = UserTestDataBuilder.CreateTestUser(userId);
             
-            // Usuario ya está borrado lógicamente
+            // User is already logically deleted
             user.Delete();
             var initialDeletedAt = user.DeletedAt;
             
@@ -104,7 +104,7 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
             Assert.NotNull(result);
             Assert.True(user.IsDeleted);
             
-            // El timestamp de borrado puede haberse actualizado
+            // The deletion timestamp may have been updated
             Assert.True(user.DeletedAt >= initialDeletedAt);
             
             _mockUserWriteRepository.Verify(x => x.UpdateAsync(user, It.IsAny<CancellationToken>()), Times.Once);
@@ -117,7 +117,7 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
             var userId = Guid.NewGuid();
             var user = UserTestDataBuilder.CreateTestUser(userId);
             
-            // Usuario activo (no borrado)
+            // Active user (not deleted)
             Assert.False(user.IsDeleted);
             
             var updateCommand = new UpdateProfileUserCommand(
@@ -137,7 +137,7 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
             _mockUserWriteRepository.Setup(x => x.UpdateAsync(user, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            // Configurar el mapper mock para devolver algo válido
+            // Configure el mapper mock para devolver algo válido
             _mockMapper.Setup(x => x.Map<HexagonalSkeleton.Application.Features.UserProfile.Dto.UserProfileDto>(It.IsAny<DomainUser>()))
                 .Returns(new HexagonalSkeleton.Application.Features.UserProfile.Dto.UserProfileDto
                 {
@@ -155,7 +155,7 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
             Assert.NotNull(result);
             Assert.Equal("Jane", user.FullName.FirstName);
             Assert.Equal("Smith", user.FullName.LastName);
-            Assert.False(user.IsDeleted); // Sigue siendo activo
+            Assert.False(user.IsDeleted); // Still active
             
             _mockUserWriteRepository.Verify(x => x.UpdateAsync(user, It.IsAny<CancellationToken>()), Times.Once);
         }
@@ -166,7 +166,7 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
             // Arrange
             var userId = Guid.NewGuid();
             var user = UserTestDataBuilder.CreateTestUser(userId);
-            user.Delete(); // Marcar como borrado lógicamente
+            user.Delete(); // Mark as logically deleted
             
             _mockUserWriteRepository.Setup(x => x.GetByIdUnfilteredAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);

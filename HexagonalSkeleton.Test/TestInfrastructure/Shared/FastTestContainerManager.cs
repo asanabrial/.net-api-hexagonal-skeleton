@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 namespace HexagonalSkeleton.Test.TestInfrastructure.Shared
 {
     /// <summary>
-    /// Gestor optimizado que solo usa PostgreSQL + MongoDB + Kafka para tests rápidos
-    /// Simula Schema Registry y Debezium Connect en memoria para máximo rendimiento
+    /// Optimized manager that only uses PostgreSQL + MongoDB + Kafka for fast tests
+    /// Simulates Schema Registry and Debezium Connect in memory for maximum performance
     /// </summary>
     public sealed class FastTestContainerManager : IAsyncDisposable
     {
@@ -29,22 +29,22 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Shared
         }
 
         /// <summary>
-        /// Obtiene la instancia singleton del gestor rápido
+        /// Gets the singleton instance of the fast manager
         /// </summary>
         public static FastTestContainerManager Instance => _instance.Value;
 
         /// <summary>
-        /// Obtiene el contenedor PostgreSQL
+        /// Gets the PostgreSQL container
         /// </summary>
         public IPostgreSqlTestContainer PostgreSql => _postgresql ?? throw new InvalidOperationException("Contenedores no inicializados");
 
         /// <summary>
-        /// Obtiene el contenedor MongoDB
+        /// Gets the MongoDB container
         /// </summary>
         public IMongoDbTestContainer MongoDb => _mongodb ?? throw new InvalidOperationException("Contenedores no inicializados");
 
         /// <summary>
-        /// Obtiene el contenedor Kafka
+        /// Gets the Kafka container
         /// </summary>
         public IKafkaTestContainer Kafka => _kafka ?? throw new InvalidOperationException("Contenedores no inicializados");
 
@@ -62,12 +62,12 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Shared
                 if (_isInitialized || _disposed)
                     return;
 
-                Console.WriteLine("🚀 Iniciando contenedores RÁPIDOS para desarrollo...");
-                Console.WriteLine("⚡ Solo PostgreSQL + MongoDB + Kafka (60-90 segundos)");
+                Console.WriteLine(" Starting FAST containers for development...");
+                Console.WriteLine("Only PostgreSQL + MongoDB + Kafka (60-90 seconds)");
                 
                 var startTime = DateTime.UtcNow;
 
-                // Inicializar contenedores en paralelo para máxima velocidad
+                // Initialize containers in parallel for maximum speed
                 _postgresql = _factory.CreatePostgreSqlContainer();
                 _mongodb = _factory.CreateMongoDbContainer();
                 _kafka = _factory.CreateKafkaContainer();
@@ -94,12 +94,12 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Shared
                 if (results[0] && results[1] && results[2])
                 {
                     var elapsed = DateTime.UtcNow - startTime;
-                    Console.WriteLine($"✅ Contenedores rápidos listos en {elapsed.TotalSeconds:F1}s");
+                    Console.WriteLine($" Fast containers ready in {elapsed.TotalSeconds:F1}s");
                     _isInitialized = true;
                 }
                 else
                 {
-                    throw new InvalidOperationException("Algunos contenedores no están saludables");
+                    throw new InvalidOperationException("Some containers are not healthy");
                 }
             }
             finally
@@ -109,7 +109,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Shared
         }
 
         /// <summary>
-        /// Verifica si los contenedores están saludables
+        /// Verifies if containers are healthy
         /// </summary>
         public async Task<bool> AreContainersHealthyAsync(CancellationToken cancellationToken = default)
         {
@@ -138,7 +138,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Shared
                 if (_disposed)
                     return;
 
-                Console.WriteLine("🛑 Deteniendo contenedores rápidos...");
+                Console.WriteLine(" Stopping fast containers...");
                 
                 if (_isInitialized && _postgresql != null && _mongodb != null && _kafka != null)
                 {
@@ -153,7 +153,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Shared
                 }
                 
                 _disposed = true;
-                Console.WriteLine("✅ Contenedores rápidos detenidos");
+                Console.WriteLine(" Contenedores rápidos detenidos");
             }
             finally
             {

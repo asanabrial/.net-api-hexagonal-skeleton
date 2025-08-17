@@ -105,11 +105,11 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Factories
                     connectorName, 
                     ContainerOrchestrator.PostgreSql.ConnectionString);
                 
-                Console.WriteLine("✅ Debezium Connect configurado para tests CDC");
+                Console.WriteLine(" Debezium Connect configurado para tests CDC");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"⚠️ Warning: Failed to configure Debezium connector: {ex.Message}");
+                Console.WriteLine($" Warning: Failed to configure Debezium connector: {ex.Message}");
                 // Continue with tests - TestCdcEventPublisher will be used as fallback
             }
         }
@@ -275,7 +275,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Factories
         private void ConfigureTestCdcServices(IServiceCollection services)
         {
             // CDC is always enabled in this CQRS architecture
-            Console.WriteLine("✅ CDC enabled for integration tests");
+            Console.WriteLine(" CDC enabled for integration tests");
             
             // Do NOT configure ProducerConfig here - use the one from CdcServiceExtension.cs
             // which gets the correct configuration from in-memory config overrides

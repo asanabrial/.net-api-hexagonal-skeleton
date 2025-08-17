@@ -1,9 +1,11 @@
 using HexagonalSkeleton.Test.TestInfrastructure.Abstractions;
+using HexagonalSkeleton.Test.TestInfrastructure.Configuration;
 using Testcontainers.MongoDb;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNet.Testcontainers.Networks;
+using Microsoft.Extensions.Configuration;
 
 namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
 {
@@ -18,24 +20,23 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
         private bool _disposed = false;
 
         public TestcontainersMongoDbContainer(
-            string image = "mongo:7",
-            string database = "hexagonal_test",
-            string username = "test_user",
-            string password = "test_password",
+            TestContainersOptions options,
+            DockerConfiguration dockerConfig,
             INetwork? network = null)
         {
-            _database = database;
-            _username = username;
+            _database = options.Database;
+            _username = options.Username;
             
             var builder = new MongoDbBuilder()
-                .WithImage(image)
-                .WithUsername(username)
-                .WithPassword(password)
-                .WithCleanUp(true);
+                .WithImage(dockerConfig.Images.MongoDB)
+                .WithUsername(options.Username)
+                .WithPassword(options.Password)
+                .WithCleanUp(options.CleanUp);
                 
             if (network != null)
             {
-                builder = builder.WithNetwork(network);
+                builder = builder.WithNetwork(network)
+                               .WithNetworkAliases(dockerConfig.NetworkAliases.MongoDB);
             }
             
             _container = builder.Build();

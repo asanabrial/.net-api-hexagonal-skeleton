@@ -12,4 +12,5 @@ public class DebeziumConnectConfiguration
     public string PluginPath { get; set; } = string.Empty;
     public int ConnectorRetryAttempts { get; set; }
     public int ConnectorRetryDelayMs { get; set; }
+    public DebeziumConnectEnvironmentConfiguration Environment { get; set; } = new();
 }

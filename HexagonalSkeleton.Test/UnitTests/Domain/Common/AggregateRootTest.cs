@@ -3,40 +3,6 @@ using HexagonalSkeleton.Domain.Common;
 
 namespace HexagonalSkeleton.Test.Unit.Domain.Common;
 
-// Test implementation of AggregateRoot for testing
-public class TestAggregate : AggregateRoot
-{
-    public TestAggregate()
-    {
-        CreatedAt = DateTime.UtcNow;
-    }
-
-    public void AddTestEvent(DomainEvent domainEvent)
-    {
-        AddDomainEvent(domainEvent);
-    }
-
-    public void RemoveTestEvent(DomainEvent domainEvent)
-    {
-        RemoveDomainEvent(domainEvent);
-    }
-
-    public void SetUpdated()
-    {
-        MarkAsUpdated();
-    }
-}
-
-public class TestDomainEvent : DomainEvent
-{
-    public string Message { get; }
-    
-    public TestDomainEvent(string message)
-    {
-        Message = message;
-    }
-}
-
 public class AggregateRootTest
 {
     [Fact]

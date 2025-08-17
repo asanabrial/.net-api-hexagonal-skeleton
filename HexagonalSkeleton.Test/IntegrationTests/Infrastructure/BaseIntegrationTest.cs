@@ -14,6 +14,7 @@ using HexagonalSkeleton.Infrastructure.Persistence.Query;
 using MongoDB.Driver;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using HexagonalSkeleton.Test.TestInfrastructure.Configuration;
 
 namespace HexagonalSkeleton.Test.Integration.Infrastructure
 {
@@ -28,46 +29,58 @@ namespace HexagonalSkeleton.Test.Integration.Infrastructure
         protected readonly MongoDbContainer _mongodb;
         protected readonly KafkaContainer _kafka;
         protected ServiceProvider? _serviceProvider;
+        private readonly TestContainersOptions _options;
 
         protected BaseIntegrationTest()
         {
-            Console.WriteLine("🔥 Configurando contenedores para integración...");
+            Console.WriteLine("Configuring containers for integration...");
             
-            // Crear red compartida para comunicación entre contenedores
+            // Load configuration
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.Test.json")
+                .Build();
+            
+            _options = new TestContainersOptions();
+            configuration.GetSection(TestContainersOptions.SectionName).Bind(_options);
+            
+            var dockerConfig = new DockerConfiguration();
+            configuration.GetSection($"{TestContainersOptions.SectionName}:Docker").Bind(dockerConfig);
+            
+            // Create red compartida para comunicación entre contenedores
             _network = new NetworkBuilder()
                 .WithName($"integration-network-{Guid.NewGuid():N}")
                 .Build();
             
             _postgres = new PostgreSqlBuilder()
-                .WithImage("postgres:15-alpine")
-                .WithDatabase("hexagonal_test")
-                .WithUsername("test_user")
-                .WithPassword("test_pass")
+                .WithImage(dockerConfig.Images.PostgreSQL)
+                .WithDatabase(_options.Database)
+                .WithUsername(_options.Username)
+                .WithPassword(_options.Password)
                 .WithNetwork(_network)
-                .WithNetworkAliases("postgres")
+                .WithNetworkAliases(dockerConfig.NetworkAliases.PostgreSQL)
                 .Build();
 
             _mongodb = new MongoDbBuilder()
-                .WithImage("mongo:7")
+                .WithImage(dockerConfig.Images.MongoDB)
                 .WithNetwork(_network)
-                .WithNetworkAliases("mongodb")
+                .WithNetworkAliases(dockerConfig.NetworkAliases.MongoDB)
                 .Build();
                 
             _kafka = new KafkaBuilder()
-                .WithImage("confluentinc/cp-kafka:7.4.0")
+                .WithImage(dockerConfig.Images.Kafka)
                 .WithNetwork(_network)
-                .WithNetworkAliases("kafka")
+                .WithNetworkAliases(dockerConfig.NetworkAliases.Kafka)
                 .Build();
         }
 
         public virtual async Task InitializeAsync()
         {
             var startTime = DateTime.UtcNow;
-            Console.WriteLine("⚡ Iniciando red y contenedores...");
+            Console.WriteLine("Starting network and containers...");
             
-            // Primero crear la red
+            // First create the network
             await _network.CreateAsync();
-            Console.WriteLine("🌐 Red Docker creada");
+            Console.WriteLine(" Red Docker creada");
             
             // Luego iniciar contenedores básicos en la red compartida
             await Task.WhenAll(
@@ -77,7 +90,7 @@ namespace HexagonalSkeleton.Test.Integration.Infrastructure
             );
             
             var elapsed = DateTime.UtcNow - startTime;
-            Console.WriteLine($"✅ Contenedores listos en {elapsed.TotalSeconds:F1}s");
+            Console.WriteLine($" Contenedores listos en {elapsed.TotalSeconds:F1}s");
             
             await ConfigureServicesAsync();
         }
@@ -172,25 +185,25 @@ namespace HexagonalSkeleton.Test.Integration.Infrastructure
             try
             {
                 await Task.WhenAll(disposeTasks).WaitAsync(cts.Token);
-                Console.WriteLine("✅ Contenedores eliminados");
+                Console.WriteLine(" Contenedores eliminados");
             }
             catch (OperationCanceledException)
             {
-                Console.WriteLine("⚠️ Timeout en cleanup - forzando limpieza");
+                Console.WriteLine(" Timeout en cleanup - forzando limpieza");
             }
             
             // Limpiar la red al final
             try
             {
                 await _network.DisposeAsync();
-                Console.WriteLine("✅ Red Docker eliminada");
+                Console.WriteLine(" Red Docker eliminada");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"⚠️ Error limpiando red: {ex.Message}");
+                Console.WriteLine($" Error limpiando red: {ex.Message}");
             }
             
-            Console.WriteLine("✅ Limpieza completa");
+            Console.WriteLine(" Limpieza completa");
         }
     }
 }

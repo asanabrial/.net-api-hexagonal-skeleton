@@ -1,4 +1,5 @@
 using HexagonalSkeleton.Test.TestInfrastructure.Abstractions;
+using HexagonalSkeleton.Test.TestInfrastructure.Configuration;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Configurations;
@@ -11,59 +12,59 @@ using System.Threading.Tasks;
 namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
 {
     /// <summary>
-    /// Testcontainer para Confluent Schema Registry oficial
+    /// Testcontainer for Confluent Schema Registry
     /// </summary>
     public class TestcontainersSchemaRegistryContainer : ISchemaRegistryTestContainer
     {
         private readonly IContainer _container;
         private readonly HttpClient _httpClient;
         private bool _disposed = false;
-        private readonly int _port = 8081;
+        private readonly DockerConfiguration _dockerConfig;
+        private readonly SchemaRegistryConfiguration _schemaRegistryConfig;
 
         public TestcontainersSchemaRegistryContainer(
-            string image = "confluentinc/cp-schema-registry:6.2.0",
+            DockerConfiguration dockerConfig,
+            SchemaRegistryConfiguration schemaRegistryConfig,
             INetwork? network = null)
         {
-            Console.WriteLine($"🔧 Configurando Schema Registry oficial con imagen: {image}");
+            _dockerConfig = dockerConfig;
+            _schemaRegistryConfig = schemaRegistryConfig;
             
             var builder = new ContainerBuilder()
-                .WithImage(image)
-                .WithPortBinding(_port, true)
-                // Configuración oficial de Schema Registry
-                .WithEnvironment("SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS", "kafka:29092")
-                .WithEnvironment("SCHEMA_REGISTRY_HOST_NAME", "schema-registry")
-                .WithEnvironment("SCHEMA_REGISTRY_LISTENERS", "http://0.0.0.0:8081")
-                .WithEnvironment("SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR", "1")
-                // Health check específico para Schema Registry
+                .WithImage(_schemaRegistryConfig.Image)
+                .WithPortBinding(_dockerConfig.Ports.SchemaRegistry, true)
+                // Schema Registry configuration from settings
+                .WithEnvironment("SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS", _schemaRegistryConfig.Environment.KafkastoreBootstrapServers)
+                .WithEnvironment("SCHEMA_REGISTRY_HOST_NAME", _schemaRegistryConfig.Environment.HostName)
+                .WithEnvironment("SCHEMA_REGISTRY_LISTENERS", _schemaRegistryConfig.Environment.Listeners)
+                .WithEnvironment("SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR", _schemaRegistryConfig.Environment.KafkastoreTopicReplicationFactor)
+                // Health check specific for Schema Registry
                 .WithWaitStrategy(Wait.ForUnixContainer()
-                    .UntilPortIsAvailable(8081)
-                    .UntilHttpRequestIsSucceeded(r => r.ForPort(8081).ForPath("/subjects")))
-                .WithCleanUp(true);
+                    .UntilPortIsAvailable((ushort)_dockerConfig.Ports.SchemaRegistry)
+                    .UntilHttpRequestIsSucceeded(r => r.ForPort((ushort)_dockerConfig.Ports.SchemaRegistry).ForPath("/subjects")))
+                .WithCleanUp(_schemaRegistryConfig.CleanupAfterTest);
                 
             if (network != null)
             {
-                Console.WriteLine($"🌐 Schema Registry usando red compartida con alias 'schema-registry'");
                 builder = builder.WithNetwork(network)
-                    .WithNetworkAliases("schema-registry");
+                    .WithNetworkAliases(_dockerConfig.NetworkAliases.SchemaRegistry);
             }
                 
             _container = builder.Build();
             _httpClient = new HttpClient();
         }
 
-        public string SchemaRegistryUrl => $"http://localhost:{_container.GetMappedPublicPort(_port)}";
+        public string SchemaRegistryUrl => $"http://localhost:{_container.GetMappedPublicPort(_dockerConfig.Ports.SchemaRegistry)}";
         
         public string ContainerName => _container.Name;
         
         public bool IsRunning => _container.State == DotNet.Testcontainers.Containers.TestcontainersStates.Running;
 
-        public int Port => _container.GetMappedPublicPort(_port);
+        public int Port => _container.GetMappedPublicPort(_dockerConfig.Ports.SchemaRegistry);
 
         public async Task StartAsync(CancellationToken cancellationToken = default)
         {
-            Console.WriteLine($"🚀 Iniciando Schema Registry...");
             await _container.StartAsync(cancellationToken);
-            Console.WriteLine($"✅ Schema Registry iniciado - URL: {SchemaRegistryUrl}");
         }
 
         public async Task StopAsync(CancellationToken cancellationToken = default)
@@ -78,7 +79,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
                 if (_container.State != DotNet.Testcontainers.Containers.TestcontainersStates.Running)
                     return false;
 
-                // Health check: conectar a Schema Registry REST API
+                // Health check: connect to Schema Registry REST API
                 using var httpClient = new HttpClient();
                 httpClient.Timeout = TimeSpan.FromSeconds(5);
                 

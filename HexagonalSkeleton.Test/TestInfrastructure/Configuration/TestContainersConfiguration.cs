@@ -14,6 +14,8 @@ public class TestContainersConfiguration
     public SchemaRegistryConfiguration SchemaRegistry { get; set; } = new();
     public DebeziumConnectConfiguration DebeziumConnect { get; set; } = new();
     public CdcConfiguration CDC { get; set; } = new();
+    public DockerConfiguration Docker { get; set; } = new();
+    public ConnectorsConfiguration Connectors { get; set; } = new();
 
     public static TestContainersConfiguration LoadFromConfiguration(IConfiguration configuration)
     {

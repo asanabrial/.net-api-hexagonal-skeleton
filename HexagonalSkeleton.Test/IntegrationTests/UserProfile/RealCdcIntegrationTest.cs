@@ -26,7 +26,7 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
         public async Task CDC_ShouldSyncUser_FromPostgresToMongo_Real()
         {
             // Arrange - Test CDC WITHOUT Schema Registry (like other tests)
-            Console.WriteLine("🧪 Real CDC Test: PostgreSQL → MongoDB with shared network");
+            Console.WriteLine("Real CDC Test: PostgreSQL → MongoDB with shared network");
             // NO llamar a ConfigureCdcAsync() - usar solo la infraestructura base
             
             using var scope = CreateScope();
@@ -52,14 +52,14 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
             };
 
             // Act - Insert into PostgreSQL
-            Console.WriteLine($"📝 Creating user in PostgreSQL: {userId}");
+            
             commandDb.Users.Add(userEntity);
             await commandDb.SaveChangesAsync();
             
             // Verify in PostgreSQL
             var pgUser = await commandDb.Users.FindAsync(userId);
             Assert.NotNull(pgUser);
-            Console.WriteLine($"✅ User in PostgreSQL: {pgUser.Email}");
+            Console.WriteLine($" User in PostgreSQL: {pgUser.Email}");
 
             // Verify CDC synchronization to MongoDB
             using var mongoScope = CreateScope();
@@ -68,13 +68,13 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
             
             if (cdcSuccess)
             {
-                Console.WriteLine($"✅ CDC synchronization completed for user: {userId}");
+                Console.WriteLine($" CDC synchronization completed for user: {userId}");
             }
             else
             {
                 // Still verify MongoDB is accessible even if CDC isn't fully working
                 var mongoUserCount = await queryDb.Users.CountDocumentsAsync(FilterDefinition<UserQueryDocument>.Empty);
-                Console.WriteLine($"📊 Documents in MongoDB: {mongoUserCount}");
+                Console.WriteLine($" Documents in MongoDB: {mongoUserCount}");
             }
             
             // Assert - Verify infrastructure works
@@ -87,7 +87,7 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
         public async Task CDC_ShouldUpdateUser_InBothDatabases_Real()
         {
             // Arrange
-            Console.WriteLine("🧪 Real CDC Test: User Update");
+            Console.WriteLine("Real CDC Test: User Update");
             
             using var scope = CreateScope();
             var commandDb = scope.ServiceProvider.GetRequiredService<CommandDbContext>();
@@ -130,20 +130,20 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
             Assert.Equal("CDC", updatedUser.LastName);
             Assert.Equal("User updated via CDC", updatedUser.AboutMe);
             
-            Console.WriteLine($"✅ User updated in PostgreSQL: {updatedUser.FirstName} {updatedUser.LastName}");
+            Console.WriteLine($" User updated in PostgreSQL: {updatedUser.FirstName} {updatedUser.LastName}");
             
             // Verify MongoDB available
             var mongoCount = await queryDb.Users.CountDocumentsAsync(FilterDefinition<UserQueryDocument>.Empty);
             Assert.True(mongoCount >= 0);
             
-            Console.WriteLine($"📊 MongoDB accessible with {mongoCount} documents");
+            Console.WriteLine($" MongoDB accessible with {mongoCount} documents");
         }
 
         [Fact]
         public async Task CDC_ShouldDeleteUser_FromBothDatabases_Real()
         {
             // Arrange
-            Console.WriteLine("🧪 Real CDC Test: User Deletion");
+            Console.WriteLine("Real CDC Test: User Deletion");
             
             using var scope = CreateScope();
             var commandDb = scope.ServiceProvider.GetRequiredService<CommandDbContext>();
@@ -182,39 +182,39 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
             Assert.True(deletedUser.IsDeleted);
             Assert.NotNull(deletedUser.DeletedAt);
             
-            Console.WriteLine($"✅ User marked as deleted in PostgreSQL: {deletedUser.Email}");
+            Console.WriteLine($" User marked as deleted in PostgreSQL: {deletedUser.Email}");
             
             // Verify MongoDB available
             var mongoCount = await queryDb.Users.CountDocumentsAsync(FilterDefinition<UserQueryDocument>.Empty);
             Assert.True(mongoCount >= 0);
             
-            Console.WriteLine($"📊 MongoDB accessible - CDC deletion pending verification");
+            Console.WriteLine($" MongoDB accessible - CDC deletion pending verification");
         }
 
         [Fact]
         public async Task CDC_Infrastructure_ShouldBe_FullyFunctional()
         {
             // Arrange & Act
-            Console.WriteLine("🧪 Verificación completa de infraestructura CDC");
+            Console.WriteLine("Complete CDC infrastructure verification");
             
-            // Verificar PostgreSQL
+            // Verify PostgreSQL
             var pgConnection = PostgreSqlConnectionString;
             Assert.NotNull(pgConnection);
             Assert.Contains("hexagonal_test", pgConnection);
-            Console.WriteLine($"✅ PostgreSQL: {pgConnection}");
+            Console.WriteLine($" PostgreSQL: {pgConnection}");
             
-            // Verificar MongoDB
+            // Verify MongoDB
             var mongoConnection = MongoDbConnectionString;
             Assert.NotNull(mongoConnection);
-            Console.WriteLine($"✅ MongoDB: {mongoConnection}");
+            Console.WriteLine($" MongoDB: {mongoConnection}");
             
-            // Verificar Kafka
+            // Verify Kafka
             var kafkaServers = KafkaBootstrapServers;
             Assert.NotNull(kafkaServers);
             Assert.Contains("127.0.0.1", kafkaServers);
-            Console.WriteLine($"✅ Kafka: {kafkaServers}");
+            Console.WriteLine($" Kafka: {kafkaServers}");
             
-            // Verificar servicios
+            // Verify servicios
             using var scope = CreateScope();
             var commandDb = scope.ServiceProvider.GetRequiredService<CommandDbContext>();
             var queryDb = scope.ServiceProvider.GetRequiredService<QueryDbContext>();
@@ -222,14 +222,14 @@ namespace HexagonalSkeleton.Test.Integration.UserProfile
             Assert.NotNull(commandDb);
             Assert.NotNull(queryDb);
             
-            // Verificar conectividad real
+            // Verify conectividad real
             var pgTablesExist = await commandDb.Database.CanConnectAsync();
-            Assert.True(pgTablesExist, "PostgreSQL debe estar conectado");
+            Assert.True(pgTablesExist, "PostgreSQL must be conectado");
             
             var mongoCount = await queryDb.Users.CountDocumentsAsync(FilterDefinition<UserQueryDocument>.Empty);
-            Assert.True(mongoCount >= 0, "MongoDB debe estar conectado");
+            Assert.True(mongoCount >= 0, "MongoDB must be conectado");
             
-            Console.WriteLine("🎉 Infraestructura CDC completamente funcional");
+            Console.WriteLine("CDC Infrastructure fully functional");
         }
     }
 }

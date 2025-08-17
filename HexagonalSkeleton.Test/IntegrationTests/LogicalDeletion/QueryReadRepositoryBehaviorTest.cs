@@ -44,7 +44,7 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
             _mockValidator.Setup(x => x.ValidateAsync(query, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResult());
 
-            // Simular que el read repository NO encuentra el usuario borrado (comportamiento correcto)
+            // Simulate that the read repository does NOT find the deleted user (correct behavior)
             _mockUserReadRepository.Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync((DomainUser?)null);
 
@@ -55,10 +55,10 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
             Assert.Contains("User", exception.Message);
             Assert.Contains(userId.ToString(), exception.Message);
             
-            // Verificar que el read repository fue llamado
+            // Verify that the read repository was called
             _mockUserReadRepository.Verify(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
             
-            // Verificar que el mapper nunca fue llamado porque no había usuario
+            // Verify that the mapper was never called because there was no user
             _mockMapper.Verify(x => x.Map<GetUserDto>(It.IsAny<DomainUser>()), Times.Never);
         }
 
@@ -70,13 +70,13 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
             var user = UserTestDataBuilder.CreateTestUser(userId);
             var query = new GetUserQuery(userId);
 
-            // Usuario activo (no borrado)
+            // Active user (not deleted)
             Assert.False(user.IsDeleted);
 
             _mockValidator.Setup(x => x.ValidateAsync(query, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ValidationResult());
 
-            // Read repository encuentra el usuario activo
+            // Read repository finds the active user
             _mockUserReadRepository.Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);
 
@@ -116,12 +116,12 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
             
             Assert.Contains(parameters, p => p.ParameterType == typeof(IUserReadRepository));
             
-            // Los handlers de comando deberían poder acceder a IUserWriteRepository
+            // Command handlers should be able to access IUserWriteRepository
             // (esto se verifica en los tests de comando que ya tenemos)
             
             // Esta separación asegura que:
             // - Queries de perfil NO ven usuarios borrados
-            // - Commands de gestión SÍ pueden acceder a usuarios borrados para validación
+            // - Management commands CAN access deleted users for validation
         }
     }
 }

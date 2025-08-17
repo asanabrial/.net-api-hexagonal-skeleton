@@ -23,7 +23,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Services
         /// </summary>
         /// <param name="userId">ID of the created user</param>
         /// <param name="timeout">Timeout opcional (default: 10 segundos)</param>
-        /// <returns>True si el evento fue procesado exitosamente</returns>
+        /// <returns>True si el evento fue procesado successfully</returns>
         public async Task<bool> WaitForUserCreatedAsync(Guid userId, TimeSpan? timeout = null)
         {
             var key = $"user_created_{userId}";
@@ -35,7 +35,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Services
         /// </summary>
         /// <param name="userId">ID of the updated user</param>
         /// <param name="timeout">Timeout opcional (default: 10 segundos)</param>
-        /// <returns>True si el evento fue procesado exitosamente</returns>
+        /// <returns>True si el evento fue procesado successfully</returns>
         public async Task<bool> WaitForUserUpdatedAsync(Guid userId, TimeSpan? timeout = null)
         {
             var key = $"user_updated_{userId}";
@@ -47,7 +47,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Services
         /// </summary>
         /// <param name="userId">ID of the deleted user</param>
         /// <param name="timeout">Timeout opcional (default: 10 segundos)</param>
-        /// <returns>True si el evento fue procesado exitosamente</returns>
+        /// <returns>True si el evento fue procesado successfully</returns>
         public async Task<bool> WaitForUserDeletedAsync(Guid userId, TimeSpan? timeout = null)
         {
             var key = $"user_deleted_{userId}";
@@ -90,7 +90,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Services
         /// <summary>
         /// Notifica que un evento ha fallado en el procesamiento
         /// </summary>
-        /// <param name="userId">ID del usuario</param>
+        /// <param name="userId">User ID</param>
         /// <param name="operation">Type of operation (created, updated, deleted)</param>
         public void NotifyOperationFailed(Guid userId, string operation)
         {
@@ -135,7 +135,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Services
         {
             if (_pendingOperations.TryRemove(operationKey, out var tcs))
             {
-                _logger.LogDebug("🔔 Notifying CDC operation completion: {OperationKey} -> {Success}", 
+                _logger.LogDebug(" Notifying CDC operation completion: {OperationKey} -> {Success}", 
                     operationKey, success);
                 tcs.SetResult(success);
             }

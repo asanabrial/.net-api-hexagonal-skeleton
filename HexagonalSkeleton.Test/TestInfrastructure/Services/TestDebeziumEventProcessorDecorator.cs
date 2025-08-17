@@ -47,14 +47,14 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "🚨 Error in TestDebeziumEventProcessorDecorator");
+                _logger.LogError(ex, "Error in TestDebeziumEventProcessorDecorator");
                 NotifyEventFailed(eventPayload);
                 throw;
             }
         }
 
         /// <summary>
-        /// Notifica al helper que un evento fue procesado exitosamente
+        /// Notifies the synchronization service that an event was processed successfully
         /// </summary>
         private void NotifyEventProcessed(string eventPayload)
         {
@@ -68,15 +68,15 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Services
                         case "c":
                         case "r": // create or read (snapshot)
                             _syncHelper.NotifyUserCreated(userId.Value);
-                            _logger.LogDebug("🔔 Notified CDC sync helper: User {UserId} created", userId.Value);
+                            _logger.LogDebug(" Notified CDC sync helper: User {UserId} created", userId.Value);
                             break;
                         case "u": // update
                             _syncHelper.NotifyUserUpdated(userId.Value);
-                            _logger.LogDebug("🔔 Notified CDC sync helper: User {UserId} updated", userId.Value);
+                            _logger.LogDebug(" Notified CDC sync helper: User {UserId} updated", userId.Value);
                             break;
                         case "d": // delete
                             _syncHelper.NotifyUserDeleted(userId.Value);
-                            _logger.LogDebug("🔔 Notified CDC sync helper: User {UserId} deleted", userId.Value);
+                            _logger.LogDebug(" Notified CDC sync helper: User {UserId} deleted", userId.Value);
                             break;
                     }
                 }
@@ -118,10 +118,10 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Services
                 using var doc = System.Text.Json.JsonDocument.Parse(eventPayload);
                 var root = doc.RootElement;
 
-                // Obtener operation
+                // Get operation
                 var operation = root.TryGetProperty("op", out var opElement) ? opElement.GetString() : null;
 
-                // Obtener userId del payload "after" o "before"
+                // Get userId del payload "after" o "before"
                 Guid? userId = null;
                 if (root.TryGetProperty("after", out var afterElement) && afterElement.ValueKind != System.Text.Json.JsonValueKind.Null)
                 {

@@ -37,7 +37,7 @@ namespace HexagonalSkeleton.Infrastructure.CDC
         /// </summary>
         private bool IsValidDatabaseSource(string? sourceDatabaseName)
         {
-            // Si no está configurado para filtrar, procesa todos los eventos
+            // If not configured to filter, process all events
             if (!_cdcOptions.ProcessOnlyTargetDatabase || string.IsNullOrEmpty(_cdcOptions.TargetDatabase))
                 return true;
                 
@@ -54,11 +54,11 @@ namespace HexagonalSkeleton.Infrastructure.CDC
             {
                 if (string.IsNullOrEmpty(eventPayload))
                 {
-                    _logger.LogWarning("🚨 Empty payload received");
+                    _logger.LogWarning("Empty payload received");
                     return false;
                 }
 
-                _logger.LogWarning("🔍 Raw Debezium payload: {Payload}", eventPayload);
+                _logger.LogWarning("Raw Debezium payload: {Payload}", eventPayload);
 
                 // Intentar deserializar con diferentes opciones para debugging
                 var options = new JsonSerializerOptions
@@ -70,20 +70,20 @@ namespace HexagonalSkeleton.Infrastructure.CDC
                 var changeEvent = JsonSerializer.Deserialize<DebeziumChangeEvent>(eventPayload, options);
                 if (changeEvent?.Payload == null)
                 {
-                    _logger.LogWarning("🚨 Parsed changeEvent is null or Payload is null");
-                    _logger.LogWarning("🔍 changeEvent?.Schema type: {SchemaType}", changeEvent?.Schema?.GetType().Name ?? "null");
-                    _logger.LogWarning("🔍 changeEvent?.Payload: {PayloadInfo}", changeEvent?.Payload?.ToString() ?? "null");
+                    _logger.LogWarning("Parsed changeEvent is null or Payload is null");
+                    _logger.LogWarning("changeEvent?.Schema type: {SchemaType}", changeEvent?.Schema?.GetType().Name ?? "null");
+                    _logger.LogWarning("changeEvent?.Payload: {PayloadInfo}", changeEvent?.Payload?.ToString() ?? "null");
                     return false;
                 }
 
-                _logger.LogWarning("🔍 Parsed event - Op: {Op}, Table: {Table}, Source: {Source}, Database: {Database}",
+                _logger.LogWarning("Parsed event - Op: {Op}, Table: {Table}, Source: {Source}, Database: {Database}",
                     changeEvent.Payload.Op, changeEvent.Payload.Source?.Table, changeEvent.Payload.Source?.Name, changeEvent.Payload.Source?.Db);
 
-                // ✨ Filtro elegante: Solo procesar eventos de la base de datos objetivo
+                // Elegant filter: Only process events from target database
                 var sourceDatabaseName = changeEvent.Payload.Source?.Db;
                 if (!IsValidDatabaseSource(sourceDatabaseName))
                 {
-                    _logger.LogDebug("⏭️ Skipping event from database '{Database}' - not target database '{Target}'", 
+                    _logger.LogDebug("Skipping event from database '{Database}' - not target database '{Target}'", 
                         sourceDatabaseName, _cdcOptions.TargetDatabase);
                     return true; // No es error, simplemente no procesamos este evento
                 }
@@ -100,24 +100,24 @@ namespace HexagonalSkeleton.Infrastructure.CDC
             }
             catch (JsonException jsonEx)
             {
-                _logger.LogError(jsonEx, "🚨 JSON parsing error: {Error}", jsonEx.Message);
+                _logger.LogError(jsonEx, "JSON parsing error: {Error}", jsonEx.Message);
                 return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "🚨 Error processing user change event: {Error}", ex.Message);
+                _logger.LogError(ex, "Error processing user change event: {Error}", ex.Message);
                 return false;
             }
         }
 
         /// <summary>
-        /// Maneja la creación de un usuario
+        /// Handles user creation
         /// </summary>
         private async Task<bool> HandleUserCreatedAsync(UserChangeData? userData, CancellationToken cancellationToken)
         {
             if (userData == null)
             {
-                _logger.LogWarning("🚨 User data is null for creation event");
+                _logger.LogWarning("User data is null for creation event");
                 return false;
             }
 
@@ -156,24 +156,24 @@ namespace HexagonalSkeleton.Infrastructure.CDC
                     new ReplaceOptions { IsUpsert = true },
                     cancellationToken);
 
-                _logger.LogInformation("✅ User created in MongoDB: {UserId}", userData.Id);
+                _logger.LogInformation("User created in MongoDB: {UserId}", userData.Id);
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "🚨 Error creating user in MongoDB: {UserId}, Error: {Error}", userData.Id, ex.Message);
+                _logger.LogError(ex, "Error creating user in MongoDB: {UserId}, Error: {Error}", userData.Id, ex.Message);
                 return false;
             }
         }
 
         /// <summary>
-        /// Maneja la actualización de un usuario
+        /// Handles user updates
         /// </summary>
         private async Task<bool> HandleUserUpdatedAsync(UserChangeData? userData, CancellationToken cancellationToken)
         {
             if (userData == null)
             {
-                _logger.LogWarning("🚨 User data is null for update event");
+                _logger.LogWarning("User data is null for update event");
                 return false;
             }
 
@@ -214,36 +214,36 @@ namespace HexagonalSkeleton.Infrastructure.CDC
 
                 if (result.MatchedCount > 0 || result.UpsertedId != null)
                 {
-                    _logger.LogInformation("✅ User updated in MongoDB: {UserId}", userData.Id);
+                    _logger.LogInformation("User updated in MongoDB: {UserId}", userData.Id);
                     return true;
                 }
                 else
                 {
-                    _logger.LogWarning("⚠️ User not found for update in MongoDB: {UserId}", userData.Id);
+                    _logger.LogWarning("User not found for update in MongoDB: {UserId}", userData.Id);
                     return false;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "🚨 Error updating user in MongoDB: {UserId}, Error: {Error}", userData.Id, ex.Message);
+                _logger.LogError(ex, "Error updating user in MongoDB: {UserId}, Error: {Error}", userData.Id, ex.Message);
                 return false;
             }
         }
 
         /// <summary>
-        /// Maneja la eliminación lógica de un usuario
+        /// Handles user logical deletion
         /// </summary>
         private async Task<bool> HandleUserDeletedAsync(UserChangeData? userData, CancellationToken cancellationToken)
         {
             if (userData == null)
             {
-                _logger.LogWarning("🚨 User data is null for deletion event");
+                _logger.LogWarning("User data is null for deletion event");
                 return false;
             }
 
             try
             {
-                _logger.LogInformation("🗑️ Marking user as deleted in MongoDB: {UserId}", userData.Id);
+                _logger.LogInformation("Marking user as deleted in MongoDB: {UserId}", userData.Id);
 
                 var filter = Builders<UserQueryDocument>.Filter.Eq(x => x.Id, userData.Id);
                 var update = Builders<UserQueryDocument>.Update.Set(x => x.IsDeleted, true);
@@ -252,18 +252,18 @@ namespace HexagonalSkeleton.Infrastructure.CDC
 
                 if (result.MatchedCount > 0)
                 {
-                    _logger.LogInformation("✅ User marked as deleted in MongoDB: {UserId}", userData.Id);
+                    _logger.LogInformation("User marked as deleted in MongoDB: {UserId}", userData.Id);
                     return true;
                 }
                 else
                 {
-                    _logger.LogWarning("⚠️ User not found for deletion in MongoDB: {UserId}", userData.Id);
+                    _logger.LogWarning("User not found for deletion in MongoDB: {UserId}", userData.Id);
                     return false;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "🚨 Error deleting user in MongoDB: {UserId}, Error: {Error}", userData.Id, ex.Message);
+                _logger.LogError(ex, "Error deleting user in MongoDB: {UserId}, Error: {Error}", userData.Id, ex.Message);
                 return false;
             }
         }

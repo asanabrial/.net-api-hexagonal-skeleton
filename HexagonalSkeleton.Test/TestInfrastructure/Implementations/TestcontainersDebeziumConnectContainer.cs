@@ -1,4 +1,5 @@
 using HexagonalSkeleton.Test.TestInfrastructure.Abstractions;
+using HexagonalSkeleton.Test.TestInfrastructure.Configuration;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using System;
@@ -13,64 +14,62 @@ using DotNet.Testcontainers.Networks;
 namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
 {
     /// <summary>
-    /// Testcontainer para Debezium Connect
-    /// Gestiona conectores CDC para PostgreSQL
+    /// Testcontainer for Debezium Connect
+    /// Manages CDC connectors for PostgreSQL
     /// </summary>
     public class TestcontainersDebeziumConnectContainer : IDebeziumConnectTestContainer
     {
         private readonly IContainer _container;
         private readonly HttpClient _httpClient;
         private bool _disposed = false;
-        private readonly int _port = 8083;
+        private readonly DockerConfiguration _dockerConfig;
+        private readonly DebeziumConnectConfiguration _debeziumConfig;
 
         public TestcontainersDebeziumConnectContainer(
-            string image = "debezium/connect:2.1", // Use specific version that exists
-            string? kafkaBootstrapServers = null,
-            string? schemaRegistryUrl = null,
+            DockerConfiguration dockerConfig,
+            DebeziumConnectConfiguration debeziumConfig,
+            string kafkaBootstrapServers,
             INetwork? network = null)
         {
-            var bootstrapServers = kafkaBootstrapServers ?? "kafka:9092";
-            
-            Console.WriteLine($"🔧 Debezium Connect configurando con:");
-            Console.WriteLine($"   📡 Kafka: {bootstrapServers}");
+            _dockerConfig = dockerConfig;
+            _debeziumConfig = debeziumConfig;
             
             var builder = new ContainerBuilder()
-                .WithImage(image)
-                .WithPortBinding(8083, 8083) // ✅ Puerto 8083:8083 como en el ejemplo
-                // ✅ Variables de entorno EXACTAS del Docker Compose
-                .WithEnvironment("GROUP_ID", "1")
-                .WithEnvironment("CONFIG_STORAGE_TOPIC", "my_connect_configs")
-                .WithEnvironment("OFFSET_STORAGE_TOPIC", "my_connect_offsets")
-                .WithEnvironment("BOOTSTRAP_SERVERS", bootstrapServers)
-                .WithEnvironment("CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN", "[%d] %p %X{connector.context}%m (%c:%L)%n")
-                .WithCleanUp(true);
+                .WithImage(_debeziumConfig.Image)
+                .WithPortBinding(_dockerConfig.Ports.DebeziumConnect, _debeziumConfig.InternalPort)
+                .WithEnvironment("GROUP_ID", _debeziumConfig.Environment.GroupId)
+                .WithEnvironment("CONFIG_STORAGE_TOPIC", _debeziumConfig.Environment.ConfigStorageTopic)
+                .WithEnvironment("OFFSET_STORAGE_TOPIC", _debeziumConfig.Environment.OffsetStorageTopic)
+                .WithEnvironment("STATUS_STORAGE_TOPIC", _debeziumConfig.Environment.StatusStorageTopic)
+                .WithEnvironment("BOOTSTRAP_SERVERS", kafkaBootstrapServers)
+                .WithEnvironment("CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN", _debeziumConfig.Environment.LogLayoutConversionPattern)
+                .WithCleanUp(_debeziumConfig.CleanupAfterTest);
             
             if (network != null)
             {
                 builder = builder.WithNetwork(network)
-                    .WithNetworkAliases("debezium-connect");
+                    .WithNetworkAliases(_dockerConfig.NetworkAliases.DebeziumConnect);
             }
             
             _container = builder.Build();
-
             _httpClient = new HttpClient();
         }
 
-        public string ConnectUrl => "http://localhost:8083"; // ✅ Puerto fijo como en el ejemplo
+        public string ConnectUrl => $"http://localhost:{_container.GetMappedPublicPort(_dockerConfig.Ports.DebeziumConnect)}";
         
         public string ContainerName => _container.Name;
         
         public bool IsRunning => _container.State == DotNet.Testcontainers.Containers.TestcontainersStates.Running;
 
-        public int Port => _container.GetMappedPublicPort(_port);
+        public int Port => _container.GetMappedPublicPort(_dockerConfig.Ports.DebeziumConnect);
 
         public async Task StartAsync(CancellationToken cancellationToken = default)
         {
             await _container.StartAsync(cancellationToken);
             
             // Manual health check - wait for Debezium Connect to be ready
-            Console.WriteLine("🔍 Waiting for Debezium Connect to be ready...");
-            Console.WriteLine($"🔗 URL de conexión: {ConnectUrl}");
+            Console.WriteLine("Waiting for Debezium Connect to be ready...");
+            
             
             var maxAttempts = 30; // 30 segundos
             for (int i = 0; i < maxAttempts; i++)
@@ -83,26 +82,26 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
                     
                     if (response.IsSuccessStatusCode)
                     {
-                        Console.WriteLine($"✅ Debezium Connect listo después de {i + 1} segundos");
+                        Console.WriteLine($" Debezium Connect ready after {i + 1} seconds");
                         return;
                     }
                     else
                     {
-                        Console.WriteLine($"⏳ Intento {i + 1}: HTTP {response.StatusCode}");
+                        Console.WriteLine($" Intento {i + 1}: HTTP {response.StatusCode}");
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"⏳ Intento {i + 1}: {ex.GetType().Name} - {ex.Message}");
+                    Console.WriteLine($" Intento {i + 1}: {ex.GetType().Name} - {ex.Message}");
                     
-                    // Mostrar logs del contenedor cada 5 intentos para debugging intensivo
+                    // Show container logs every 5 attempts for intensive debugging
                     if (i % 5 == 4)
                     {
                         try
                         {
                             var (stdout, stderr) = await _container.GetLogsAsync();
                             var recentLogs = stdout.Split('\n').TakeLast(10);
-                            Console.WriteLine($"📋 Últimos logs del contenedor:");
+                            
                             foreach (var logLine in recentLogs)
                             {
                                 if (!string.IsNullOrWhiteSpace(logLine))
@@ -110,13 +109,13 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
                             }
                             if (!string.IsNullOrWhiteSpace(stderr))
                             {
-                                Console.WriteLine($"📋 Errores:");
+                                
                                 Console.WriteLine($"    {stderr}");
                             }
                         }
                         catch (Exception logEx)
                         {
-                            Console.WriteLine($"❌ No se pudieron obtener logs: {logEx.Message}");
+                            Console.WriteLine($" Could not get logs: {logEx.Message}");
                         }
                     }
                 }
@@ -128,20 +127,20 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
             try
             {
                 var (stdout, stderr) = await _container.GetLogsAsync();
-                Console.WriteLine($"📋 Logs finales del contenedor Debezium Connect:");
+                
                 Console.WriteLine(stdout);
                 if (!string.IsNullOrWhiteSpace(stderr))
                 {
-                    Console.WriteLine($"📋 Errores finales:");
+                    
                     Console.WriteLine(stderr);
                 }
             }
             catch (Exception logEx)
             {
-                Console.WriteLine($"❌ No se pudieron obtener logs finales: {logEx.Message}");
+                Console.WriteLine($" Could not get final logs: {logEx.Message}");
             }
             
-            throw new TimeoutException($"Debezium Connect no respondió después de {maxAttempts} segundos");
+            throw new TimeoutException($"Debezium Connect did not respond after {maxAttempts} seconds");
         }
 
         public async Task StopAsync(CancellationToken cancellationToken = default)
@@ -197,7 +196,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
                 var configDict = new Dictionary<string, object>
                 {
                     ["connector.class"] = "io.debezium.connector.postgresql.PostgresConnector",
-                    ["database.hostname"] = "postgres", // Usar alias de red interno como en el ejemplo
+                    ["database.hostname"] = "postgres", 
                     ["database.port"] = "5432",
                     ["database.user"] = username,
                     ["database.password"] = password,
@@ -223,7 +222,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
                 await _httpClient.DeleteAsync($"{ConnectUrl}/connectors/{connectorName}", cancellationToken);
                 await Task.Delay(500, cancellationToken); // Reduced from 1000ms
                 
-                // Crear nuevo conector
+                // Create nuevo conector
                 var response = await _httpClient.PostAsync($"{ConnectUrl}/connectors", content, cancellationToken);
                 
                 if (!response.IsSuccessStatusCode)
@@ -232,7 +231,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
                     throw new InvalidOperationException($"Failed to create Debezium connector: {error}");
                 }
                 
-                Console.WriteLine($"✅ Conector PostgreSQL '{connectorName}' configurado exitosamente");
+                Console.WriteLine($" Conector PostgreSQL '{connectorName}' configurado successfully");
             }
             catch (HttpRequestException ex)
             {

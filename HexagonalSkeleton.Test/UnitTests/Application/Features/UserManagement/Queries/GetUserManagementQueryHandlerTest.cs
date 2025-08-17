@@ -80,7 +80,7 @@ public class GetUserManagementQueryHandlerTest
     [Fact]
     public async Task Handle_InvalidQuery_ShouldNotProceedToRepository()
     {
-        // Arrange - Este test verifica que la validación funciona correctamente
+        // Arrange - This test verifies that validation works correctly
         var query = new GetUserManagementQuery(Guid.Empty); // Invalid ID
         var cancellationToken = CancellationToken.None;
 

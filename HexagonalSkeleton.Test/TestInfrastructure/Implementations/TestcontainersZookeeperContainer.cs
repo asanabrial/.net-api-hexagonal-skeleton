@@ -1,4 +1,5 @@
 using HexagonalSkeleton.Test.TestInfrastructure.Abstractions;
+using HexagonalSkeleton.Test.TestInfrastructure.Configuration;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Configurations;
@@ -16,32 +17,32 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
     {
         private readonly IContainer _container;
         private bool _disposed = false;
+        private readonly DockerConfiguration _dockerConfig;
 
         public TestcontainersZookeeperContainer(
-            string image = "confluentinc/cp-zookeeper", // Use exact image from example without version
+            DockerConfiguration dockerConfig,
+            ZookeeperConfiguration zookeeperConfig,
             INetwork? network = null)
         {
-            Console.WriteLine($"🔧 Configurando Zookeeper con imagen: {image}");
+            _dockerConfig = dockerConfig;
+            Console.WriteLine($"Configuring Zookeeper with image: {dockerConfig.Images.Zookeeper}");
             
             var builder = new ContainerBuilder()
-                .WithImage(image)
-                .WithPortBinding(2181, 2181) // ✅ Puerto 2181:2181 como en el ejemplo
-                // ✅ Variable de entorno EXACTA del Docker Compose
-                .WithEnvironment("ZOOKEEPER_CLIENT_PORT", "2181")
-                // ✅ Configuraciones adicionales para mejorar estabilidad 
-                .WithEnvironment("ZOOKEEPER_TICK_TIME", "2000") // Tiempo base de tick
-                .WithEnvironment("ZOOKEEPER_INIT_LIMIT", "10") // Initial limit
-                .WithEnvironment("ZOOKEEPER_SYNC_LIMIT", "5") // Synchronization limit
-                // Zookeeper specific health check
+                .WithImage(dockerConfig.Images.Zookeeper)
+                .WithPortBinding(dockerConfig.Ports.Zookeeper, dockerConfig.Ports.Zookeeper)
+                .WithEnvironment("ZOOKEEPER_CLIENT_PORT", zookeeperConfig.Environment.ClientPort)
+                .WithEnvironment("ZOOKEEPER_TICK_TIME", zookeeperConfig.Environment.TickTime)
+                .WithEnvironment("ZOOKEEPER_INIT_LIMIT", zookeeperConfig.Environment.InitLimit)
+                .WithEnvironment("ZOOKEEPER_SYNC_LIMIT", zookeeperConfig.Environment.SyncLimit)
                 .WithWaitStrategy(Wait.ForUnixContainer()
-                    .UntilPortIsAvailable(2181))
+                    .UntilPortIsAvailable(dockerConfig.Ports.Zookeeper))
                 .WithCleanUp(true);
                 
             if (network != null)
             {
-                Console.WriteLine($"🌐 Zookeeper usando red compartida con alias 'zookeeper'");
+                Console.WriteLine($"Zookeeper using shared network with alias '{dockerConfig.NetworkAliases.Zookeeper}'");
                 builder = builder.WithNetwork(network)
-                    .WithNetworkAliases("zookeeper");
+                    .WithNetworkAliases(dockerConfig.NetworkAliases.Zookeeper);
             }
                 
             _container = builder.Build();
@@ -51,13 +52,13 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
         
         public bool IsRunning => _container.State == DotNet.Testcontainers.Containers.TestcontainersStates.Running;
 
-        public int Port => 2181; // ✅ Puerto fijo como en el ejemplo
+        public int Port => _dockerConfig.Ports.Zookeeper;
 
         public async Task StartAsync(CancellationToken cancellationToken = default)
         {
-            Console.WriteLine($"🚀 Iniciando Zookeeper...");
+            Console.WriteLine($"Starting Zookeeper...");
             await _container.StartAsync(cancellationToken);
-            Console.WriteLine($"✅ Zookeeper iniciado en puerto: {Port}");
+            Console.WriteLine($"Zookeeper started on port: {Port}");
         }
 
         public async Task StopAsync(CancellationToken cancellationToken = default)

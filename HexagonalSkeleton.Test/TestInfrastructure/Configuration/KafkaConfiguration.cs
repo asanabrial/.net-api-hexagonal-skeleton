@@ -9,4 +9,5 @@ public class KafkaConfiguration
     public bool CleanupAfterTest { get; set; }
     public int WaitTimeoutSeconds { get; set; }
     public string LogLevel { get; set; } = string.Empty;
+    public KafkaEnvironmentConfiguration Environment { get; set; } = new();
 }

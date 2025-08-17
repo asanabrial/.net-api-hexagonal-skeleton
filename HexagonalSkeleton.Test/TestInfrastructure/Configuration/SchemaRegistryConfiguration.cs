@@ -7,4 +7,5 @@ public class SchemaRegistryConfiguration
     public string Image { get; set; } = string.Empty;
     public bool CleanupAfterTest { get; set; }
     public int WaitTimeoutSeconds { get; set; }
+    public SchemaRegistryEnvironmentConfiguration Environment { get; set; } = new();
 }

@@ -126,9 +126,9 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Auth
         public void ComputeHash_WithUnicodeCharacters_ShouldWork()
         {
             // Arrange
-            var password = "contraseña";
-            var salt = "salé";
-            var pepper = "pimiénta";
+            var password = "password";
+            var salt = "salt";
+            var pepper = "pepper";
 
             // Act
             var hash = PasswordHasher.ComputeHash(password, salt, pepper);

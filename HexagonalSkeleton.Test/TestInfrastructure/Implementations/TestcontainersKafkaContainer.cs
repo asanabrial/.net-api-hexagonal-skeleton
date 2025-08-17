@@ -1,11 +1,11 @@
 using HexagonalSkeleton.Test.TestInfrastructure.Abstractions;
+using HexagonalSkeleton.Test.TestInfrastructure.Configuration;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
-using DotNet.Testcontainers.Configurations;
+using DotNet.Testcontainers.Networks;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNet.Testcontainers.Networks;
 
 namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
 {
@@ -16,52 +16,56 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
     {
         private readonly IContainer _container;
         private bool _disposed = false;
-        private readonly int _port = 9092;
+        private readonly int _port;
+        private readonly KafkaConfiguration _kafkaConfig;
 
         public TestcontainersKafkaContainer(
-            string image = "confluentinc/cp-kafka:6.2.0", // ✅ Usar versión anterior que no requiere KAFKA_PROCESS_ROLES
+            DockerConfiguration dockerConfig,
+            KafkaConfiguration kafkaConfig,
             INetwork? network = null)
         {
-            Console.WriteLine($"🔧 Configurando Kafka con imagen: {image}");
+            _port = dockerConfig.Ports.Kafka;
+            _kafkaConfig = kafkaConfig;
+            Console.WriteLine($"Configuring Kafka with image: {dockerConfig.Images.Kafka}");
             
             var builder = new ContainerBuilder()
-                .WithImage(image)
-                .WithPortBinding(9092, 9092) // ✅ Puerto 9092:9092 como en el ejemplo
+                .WithImage(dockerConfig.Images.Kafka)
+                .WithPortBinding(dockerConfig.Ports.Kafka, dockerConfig.Ports.Kafka)
                 // Traditional mode with Zookeeper (not KRaft)
-                .WithEnvironment("KAFKA_ZOOKEEPER_CONNECT", "zookeeper:2181")
+                .WithEnvironment("KAFKA_ZOOKEEPER_CONNECT", kafkaConfig.Environment.ZookeeperConnect)
                 // Dual listeners: INTERNAL for containers, EXTERNAL for host
-                .WithEnvironment("KAFKA_LISTENERS", "INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092")
-                .WithEnvironment("KAFKA_ADVERTISED_LISTENERS", "INTERNAL://kafka:29092,EXTERNAL://localhost:9092")
-                .WithEnvironment("KAFKA_LISTENER_SECURITY_PROTOCOL_MAP", "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT")
-                .WithEnvironment("KAFKA_INTER_BROKER_LISTENER_NAME", "INTERNAL")
-                .WithEnvironment("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1")
-                .WithEnvironment("KAFKA_LOG_CLEANER_DELETE_RETENTION_MS", "5000")
-                .WithEnvironment("KAFKA_BROKER_ID", "1")
-                .WithEnvironment("KAFKA_MIN_INSYNC_REPLICAS", "1")
-                .WithEnvironment("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "true")
-                .WithEnvironment("KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS", "0")
-                .WithEnvironment("KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR", "1")
-                .WithEnvironment("KAFKA_TRANSACTION_STATE_LOG_MIN_ISR", "1")
-                .WithEnvironment("KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS", "30000")
-                .WithEnvironment("KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS", "20000")
-                .WithEnvironment("KAFKA_SOCKET_SEND_BUFFER_BYTES", "102400")
-                .WithEnvironment("KAFKA_SOCKET_RECEIVE_BUFFER_BYTES", "102400")
-                .WithEnvironment("KAFKA_REQUEST_TIMEOUT_MS", "30000")
+                .WithEnvironment("KAFKA_LISTENERS", kafkaConfig.Environment.Listeners)
+                .WithEnvironment("KAFKA_ADVERTISED_LISTENERS", kafkaConfig.Environment.AdvertisedListeners)
+                .WithEnvironment("KAFKA_LISTENER_SECURITY_PROTOCOL_MAP", kafkaConfig.Environment.ListenerSecurityProtocolMap)
+                .WithEnvironment("KAFKA_INTER_BROKER_LISTENER_NAME", kafkaConfig.Environment.InterBrokerListenerName)
+                .WithEnvironment("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", kafkaConfig.Environment.OffsetsTopicReplicationFactor)
+                .WithEnvironment("KAFKA_LOG_CLEANER_DELETE_RETENTION_MS", kafkaConfig.Environment.LogCleanerDeleteRetentionMs)
+                .WithEnvironment("KAFKA_BROKER_ID", kafkaConfig.Environment.BrokerId)
+                .WithEnvironment("KAFKA_MIN_INSYNC_REPLICAS", kafkaConfig.Environment.MinInSyncReplicas)
+                .WithEnvironment("KAFKA_AUTO_CREATE_TOPICS_ENABLE", kafkaConfig.Environment.AutoCreateTopicsEnable)
+                .WithEnvironment("KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS", kafkaConfig.Environment.GroupInitialRebalanceDelayMs)
+                .WithEnvironment("KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR", kafkaConfig.Environment.TransactionStateLogReplicationFactor)
+                .WithEnvironment("KAFKA_TRANSACTION_STATE_LOG_MIN_ISR", kafkaConfig.Environment.TransactionStateLogMinIsr)
+                .WithEnvironment("KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS", kafkaConfig.Environment.ZookeeperSessionTimeoutMs)
+                .WithEnvironment("KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS", kafkaConfig.Environment.ZookeeperConnectionTimeoutMs)
+                .WithEnvironment("KAFKA_SOCKET_SEND_BUFFER_BYTES", kafkaConfig.Environment.SocketSendBufferBytes)
+                .WithEnvironment("KAFKA_SOCKET_RECEIVE_BUFFER_BYTES", kafkaConfig.Environment.SocketReceiveBufferBytes)
+                .WithEnvironment("KAFKA_REQUEST_TIMEOUT_MS", kafkaConfig.Environment.RequestTimeoutMs)
                 .WithWaitStrategy(Wait.ForUnixContainer()
-                    .UntilPortIsAvailable(9092))
+                    .UntilPortIsAvailable(dockerConfig.Ports.Kafka))
                 .WithCleanUp(true);
                 
             if (network != null)
             {
-                Console.WriteLine($"🌐 Kafka usando red compartida con alias 'kafka'");
+                Console.WriteLine($"Kafka using shared network with alias '{dockerConfig.NetworkAliases.Kafka}'");
                 builder = builder.WithNetwork(network)
-                    .WithNetworkAliases("kafka");
+                    .WithNetworkAliases(dockerConfig.NetworkAliases.Kafka);
             }
                 
             _container = builder.Build();
         }
 
-        public string BootstrapServers => "localhost:9092"; // ✅ Puerto fijo como en el ejemplo
+        public string BootstrapServers => _kafkaConfig.Environment.BootstrapServers;
 
         public string ContainerName => _container.Name;
         
@@ -73,9 +77,9 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
 
         public async Task StartAsync(CancellationToken cancellationToken = default)
         {
-            Console.WriteLine($"🚀 Iniciando contenedor Kafka...");
+            Console.WriteLine($"Starting Kafka container...");
             await _container.StartAsync(cancellationToken);
-            Console.WriteLine($"✅ Kafka iniciado - URL: {BootstrapServers}");
+            Console.WriteLine($"Kafka started - URL: {BootstrapServers}");
         }
 
         public async Task StopAsync(CancellationToken cancellationToken = default)

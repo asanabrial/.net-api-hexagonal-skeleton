@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace HexagonalSkeleton.Test.TestInfrastructure.Abstractions
 {
     /// <summary>
-    /// Contrato para contenedores de testing de Debezium Connect
+    /// Contract for Debezium Connect testing containers
     /// </summary>
     public interface IDebeziumConnectTestContainer : IAsyncDisposable
     {
@@ -15,32 +15,32 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Abstractions
         string ConnectUrl { get; }
         
         /// <summary>
-        /// Nombre del contenedor
+        /// Container name
         /// </summary>
         string ContainerName { get; }
         
         /// <summary>
-        /// Indica si el contenedor está ejecutándose
+        /// Indicates if the container is running
         /// </summary>
         bool IsRunning { get; }
         
         /// <summary>
-        /// Puerto mapeado del Debezium Connect
+        /// Gets the port number for Debezium Connect
         /// </summary>
         int Port { get; }
 
         /// <summary>
-        /// Inicia el contenedor de Debezium Connect
+        /// Starts the Debezium Connect container
         /// </summary>
         Task StartAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Detiene el contenedor de Debezium Connect
+        /// Stops the Debezium Connect container
         /// </summary>
         Task StopAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Verifica si el contenedor está saludable
+        /// Verifies if the container is healthy
         /// </summary>
         Task<bool> IsHealthyAsync(CancellationToken cancellationToken = default);
         

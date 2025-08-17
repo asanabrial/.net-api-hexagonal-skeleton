@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace HexagonalSkeleton.Infrastructure.CDC.Models
 {
     /// <summary>
-    /// Datos de cambio del usuario
+    /// User change data
     /// </summary>
     public class UserChangeData
     {
@@ -49,7 +49,7 @@ namespace HexagonalSkeleton.Infrastructure.CDC.Models
         [JsonPropertyName("DeletedAt")]
         public string? DeletedAtString { get; set; }
         
-        // Métodos para convertir strings a DateTime
+        // Methods to convert strings to DateTime
         public DateTime GetCreatedAt() => DateTime.TryParse(CreatedAtString, out var result) ? result : DateTime.UtcNow;
         public DateTime GetUpdatedAt() => DateTime.TryParse(UpdatedAtString, out var result) ? result : DateTime.UtcNow;
         public DateTime? GetLastLogin() => DateTime.TryParse(LastLoginString, out var result) ? result : null;

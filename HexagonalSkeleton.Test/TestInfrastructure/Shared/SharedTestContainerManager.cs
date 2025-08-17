@@ -52,8 +52,8 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Shared
                 if (_isInitialized || _disposed)
                     return;
 
-                Console.WriteLine("🚀 Iniciando contenedores compartidos para toda la suite de tests...");
-                Console.WriteLine("⏱️ Esto puede tardar 2-3 minutos la primera vez...");
+                Console.WriteLine(" Iniciando contenedores compartidos para toda la suite de tests...");
+                Console.WriteLine("This may take 2-3 minutes the first time...");
                 
                 var startTime = DateTime.UtcNow;
                 await _orchestrator.StartAllAsync(cancellationToken);
@@ -68,17 +68,17 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Shared
                     if (await _orchestrator.AreAllHealthyAsync(cancellationToken))
                     {
                         var elapsed = DateTime.UtcNow - startTime;
-                        Console.WriteLine($"✅ All CDC containers are healthy and ready in {elapsed.TotalSeconds:F1}s");
+                        Console.WriteLine($" All CDC containers are healthy and ready in {elapsed.TotalSeconds:F1}s");
                         _isInitialized = true;
                         return;
                     }
                     
                     retryCount++;
-                    Console.WriteLine($"⏳ Checking container health... ({retryCount}/{maxRetries})");
+                    Console.WriteLine($" Checking container health... ({retryCount}/{maxRetries})");
                     await Task.Delay(retryDelay, cancellationToken);
                 }
                 
-                throw new TimeoutException($"Los contenedores no alcanzaron estado saludable después de {maxRetries * retryDelay / 1000}s");
+                throw new TimeoutException($"Containers did not reach healthy state after {maxRetries * retryDelay / 1000}s");
             }
             finally
             {
@@ -92,7 +92,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Shared
         public async Task ConfigureDebeziumConnectorAsync(string connectorName = "shared-postgres-connector", CancellationToken cancellationToken = default)
         {
             if (!_isInitialized)
-                throw new InvalidOperationException("Los contenedores deben estar inicializados antes de configurar Debezium");
+                throw new InvalidOperationException("Containers must be initialized before configuring Debezium");
 
             try
             {
@@ -101,11 +101,11 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Shared
                     _orchestrator.PostgreSql.ConnectionString,
                     cancellationToken);
                 
-                Console.WriteLine($"✅ Conector Debezium '{connectorName}' configurado correctamente");
+                Console.WriteLine($" Debezium connector '{connectorName}' configured successfully");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"⚠️ Warning: Error configurando conector Debezium: {ex.Message}");
+                Console.WriteLine($" Warning: Error configuring Debezium connector: {ex.Message}");
                 throw;
             }
         }
@@ -129,7 +129,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Shared
                 if (_disposed)
                     return;
 
-                Console.WriteLine("🛑 Deteniendo contenedores compartidos...");
+                Console.WriteLine(" Deteniendo contenedores compartidos...");
                 
                 if (_isInitialized)
                 {
@@ -137,7 +137,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Shared
                 }
                 
                 _disposed = true;
-                Console.WriteLine("✅ Contenedores compartidos detenidos");
+                Console.WriteLine(" Contenedores compartidos detenidos");
             }
             finally
             {

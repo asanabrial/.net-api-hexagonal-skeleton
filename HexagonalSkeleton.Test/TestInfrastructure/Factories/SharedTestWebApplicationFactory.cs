@@ -5,45 +5,45 @@ using System.Threading.Tasks;
 namespace HexagonalSkeleton.Test.TestInfrastructure.Factories
 {
     /// <summary>
-    /// Test Web Application Factory que utiliza contenedores compartidos para mejor rendimiento
-    /// Todos los tests en la suite compartirán la misma instancia de PostgreSQL, MongoDB, Kafka, etc.
+    /// Test Web Application Factory that uses shared containers for better performance
+    /// All tests in the suite will share the same instance of PostgreSQL, MongoDB, Kafka, etc.
     /// </summary>
     public class SharedTestWebApplicationFactory : AbstractTestWebApplicationFactory
     {
         /// <summary>
-        /// Expone el orquestador de contenedores para verificaciones en tests
+        /// Exposes the container orchestrator for test verifications
         /// </summary>
         public new ITestContainerOrchestrator ContainerOrchestrator => base.ContainerOrchestrator;
 
         protected override ITestContainerOrchestrator CreateContainerOrchestrator()
         {
-            // Usar el gestor compartido para obtener contenedores reutilizables
+            // Use the shared manager to get reusable containers
             return SharedTestContainerManager.Instance.Orchestrator;
         }
 
         public override async Task InitializeAsync()
         {
-            // Inicializar contenedores compartidos (solo se ejecuta una vez)
+            // Initialize shared containers (only runs once)
             await SharedTestContainerManager.Instance.InitializeAsync();
             
-            // Ejecutar inicialización base
+            // Execute base initialization
             await base.InitializeAsync();
             
-            // Configurar Debezium una sola vez para todos los tests
+            // Configure Debezium once for all tests
             try
             {
                 await SharedTestContainerManager.Instance.ConfigureDebeziumConnectorAsync("shared-test-connector");
             }
             catch
             {
-                // Si falla Debezium Connect, continuamos con TestCdcEventPublisher como fallback
+                // If Debezium Connect fails, continue with TestCdcEventPublisher as fallback
             }
         }
 
         public override async Task DisposeAsync()
         {
-            // No disponer los contenedores compartidos aquí
-            // Solo ejecutar la limpieza base sin los contenedores
+            // Don't dispose shared containers here
+            // Only run base cleanup without containers
             await base.DisposeAsync();
         }
     }

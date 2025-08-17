@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace HexagonalSkeleton.Test.Integration
 {
     /// <summary>
-    /// Test para validar que la red Docker compartida funciona correctamente
+    /// Test to validate that the shared Docker network works correctly
     /// </summary>
     [Collection("Integration Collection")]
     public class NetworkValidationTest : BaseIntegrationTest
@@ -15,10 +15,10 @@ namespace HexagonalSkeleton.Test.Integration
         public void Network_ShouldAllowBasicCommunication()
         {
             // Arrange
-            Console.WriteLine("🧪 Test de validación de red Docker compartida");
+            Console.WriteLine("Docker shared network validation test");
             
-            // Act - Los contenedores básicos ya están iniciados en InitializeAsync
-            // PostgreSQL, MongoDB y Kafka están funcionando en la red compartida
+            // Act - Basic containers are already started in InitializeAsync
+            // PostgreSQL, MongoDB y Kafka are working en la red compartida
             
             var postgresConnection = PostgreSqlConnectionString;
             var mongoConnection = MongoDbConnectionString;
@@ -33,39 +33,39 @@ namespace HexagonalSkeleton.Test.Integration
             Assert.Contains("mongodb://", mongoConnection);
             Assert.Contains("127.0.0.1:", kafkaBootstrap); // Kafka bootstrap servers format
             
-            Console.WriteLine("✅ Red Docker funcionando correctamente:");
+            Console.WriteLine(" Red Docker funcionando correctamente:");
             Console.WriteLine($"   📄 PostgreSQL: {postgresConnection}");
             Console.WriteLine($"   📄 MongoDB: {mongoConnection}");
             Console.WriteLine($"   📄 Kafka: {kafkaBootstrap}");
-            Console.WriteLine("✅ Networking entre contenedores validado!");
+            Console.WriteLine(" Networking entre contenedores validado!");
         }
         
         [Fact]
         public async Task BasicInfrastructure_ShouldWork_WithDatabaseConnections()
         {
             // Arrange
-            Console.WriteLine("🧪 Test de infraestructura básica con conexiones reales");
+            Console.WriteLine("Basic infrastructure test with real connections");
             
             using var scope = CreateScope();
             var commandDb = GetCommandDbContext();
             var queryDb = GetQueryDbContext();
             
-            // Act & Assert - Verificar que las conexiones funcionan
+            // Act & Assert - Verify that connections work
             Assert.NotNull(commandDb);
             Assert.NotNull(queryDb);
             
-            // Verificar que PostgreSQL está funcionando
+            // Verify que PostgreSQL is working
             var canConnectToPostgres = await commandDb.Database.CanConnectAsync();
-            Assert.True(canConnectToPostgres, "PostgreSQL debe estar accesible");
+            Assert.True(canConnectToPostgres, "PostgreSQL must be accesible");
             
-            // Verificar que MongoDB está funcionando
+            // Verify que MongoDB is working
             var mongoCollection = queryDb.Users;
             Assert.NotNull(mongoCollection);
             
-            Console.WriteLine("✅ Conexiones a bases de datos funcionando:");
+            Console.WriteLine(" Conexiones a bases de datos funcionando:");
             Console.WriteLine($"   📄 PostgreSQL conectado: {canConnectToPostgres}");
             Console.WriteLine($"   📄 MongoDB colección accesible: {mongoCollection != null}");
-            Console.WriteLine("✅ Infraestructura básica validada!");
+            Console.WriteLine(" Infraestructura básica validada!");
         }
     }
 }

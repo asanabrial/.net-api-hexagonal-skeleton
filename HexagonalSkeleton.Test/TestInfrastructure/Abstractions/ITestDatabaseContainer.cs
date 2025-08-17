@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace HexagonalSkeleton.Test.TestInfrastructure.Abstractions
@@ -38,25 +39,5 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Abstractions
         /// Gets the health status of the container
         /// </summary>
         Task<bool> IsHealthyAsync(CancellationToken cancellationToken = default);
-    }
-
-    /// <summary>
-    /// Specific abstraction for PostgreSQL containers
-    /// </summary>
-    public interface IPostgreSqlTestContainer : ITestDatabaseContainer
-    {
-        string DatabaseName { get; }
-        string Username { get; }
-        int Port { get; }
-    }
-
-    /// <summary>
-    /// Specific abstraction for MongoDB containers
-    /// </summary>
-    public interface IMongoDbTestContainer : ITestDatabaseContainer
-    {
-        string DatabaseName { get; }
-        string Username { get; }
-        int Port { get; }
     }
 }
