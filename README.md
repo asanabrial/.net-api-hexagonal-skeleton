@@ -1,31 +1,32 @@
 <p align="center"><img src="https://github.com/user-attachments/assets/5d55f501-ed98-4245-a0ef-b620991c35df" alt="dotnet-icon" width="150" /></p>
 
 <p align="center">
-  <strong>Production-ready API template implementing Clean Architecture, DDD, CQRS and Event-Driven patterns</strong><br/>
-  Built with modern .NET 9 technologies and enterprise best practices
+  <strong>Production-ready API template implementing Clean Architecture, DDD, CQRS with Change Data Capture</strong><br/>
+  Built with modern .NET 9 technologies and enterprise-grade data synchronization
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/.NET-9.0-purple?style=flat-square&logo=dotnet" alt=".NET 9"/>
-  <img src="https://img.shields.io/badge/PostgreSQL-Latest-336791?style=flat-square&logo=postgresql" alt="PostgreSQL"/>
-  <img src="https://img.shields.io/badge/MongoDB-Latest-47A248?style=flat-square&logo=mongodb" alt="MongoDB"/>
-  <img src="https://img.shields.io/badge/RabbitMQ-Latest-FF6600?style=flat-square&logo=rabbitmq" alt="RabbitMQ"/>
+  <img src="https://img.shields.io/badge/PostgreSQL-16-336791?style=flat-square&logo=postgresql" alt="PostgreSQL"/>
+  <img src="https://img.shields.io/badge/MongoDB-8.0-47A248?style=flat-square&logo=mongodb" alt="MongoDB"/>
+  <img src="https://img.shields.io/badge/Kafka-7.8-231F20?style=flat-square&logo=apache-kafka" alt="Kafka"/>
+  <img src="https://img.shields.io/badge/Debezium-2.5-FF5733?style=flat-square" alt="Debezium"/>
   <img src="https://img.shields.io/badge/Architecture-Hexagonal-green?style=flat-square" alt="Hexagonal"/>
-  <img src="https://img.shields.io/badge/CQRS-Event%20Driven-blue?style=flat-square" alt="CQRS"/>
+  <img src="https://img.shields.io/badge/CQRS-CDC-blue?style=flat-square" alt="CQRS"/>
 </p>
 
 ## 🎯 Key Features
 
 -   **🏗️ Hexagonal Architecture**: Clean separation with Ports & Adapters pattern
 -   **⚡ CQRS Implementation**: Separate Command (PostgreSQL) and Query (MongoDB) stores
--   **🚀 Event-Driven Architecture**: MassTransit + RabbitMQ for async messaging
+-   **� Change Data Capture**: Real-time synchronization using Debezium + Kafka
 -   **🎯 Domain-Driven Design**: Rich domain models with business rules enforcement
 -   **🧪 Testing**: 60+ test files with unit and integration coverage
 -   **🔐 JWT Authentication**: Secure API with password hashing and validation
 -   **📊 Dual Database Strategy**: PostgreSQL for writes, MongoDB for optimized reads
--   **🐋 Full Docker Stack**: PostgreSQL, MongoDB, RabbitMQ containerized
+-   **🐋 Complete Stack**: PostgreSQL, MongoDB, Kafka, Debezium fully containerized
 -   **📝 API Documentation**: Interactive Swagger/OpenAPI with detailed schemas
--   **🔄 Eventual Consistency**: RabbitMQ + MassTransit for automatic data synchronization
+-   **⚡ Event Streaming**: Kafka-based CDC for instant data synchronization
 -   **✨ Clean Code Principles**: DRY, KISS, YAGNI compliant with centralized utilities
 
 ## 🛠️ Technology Stack
@@ -35,59 +36,74 @@
 | **Framework**      | .NET 9                 |
 | **Command DB**     | PostgreSQL             |
 | **Query DB**       | MongoDB                |
-| **Message Bus**    | RabbitMQ               |
+| **Message Stream** | Apache Kafka           |
+| **CDC Platform**   | Debezium               |
 | **ORM**            | Entity Framework Core  |
 | **ODM**            | MongoDB Driver         |
 | **Mediator**       | MediatR                |
 | **Validation**     | FluentValidation       |
 | **Mapping**        | AutoMapper             |
-| **Messaging**      | MassTransit            |
 | **Authentication** | JWT Bearer             |
 | **Logging**        | Serilog                |
 | **Testing**        | xUnit + Testcontainers |
 
-### 🔥 Advanced Event-Driven Features
+### 🔥 Advanced Change Data Capture Features
 
-#### **📡 RabbitMQ + MassTransit Integration**
+#### **📡 Debezium + Kafka Integration**
 
--   **Automatic Event Publishing**: Commands automatically publish integration events
--   **Reliable Message Delivery**: Retry policies with exponential backoff
--   **Consumer Management**: Dedicated consumers for data synchronization
--   **Health Monitoring**: Built-in health checks for message infrastructure
+-   **Real-time CDC**: Database changes streamed instantly to Kafka topics
+-   **Schema Evolution**: Automatic handling of database schema changes
+-   **Fault Tolerance**: Built-in resilience with offset tracking and replay
+-   **Enterprise-Grade**: Production-ready connector configuration
 
 #### **🗄️ Dual Database Architecture**
 
 -   **PostgreSQL (Commands)**: ACID transactions for data consistency
 -   **MongoDB (Queries)**: Optimized schemas for complex filtering and search
--   **Automatic Sync**: Event consumers maintain eventual consistency
+-   **CDC Synchronization**: Real-time event streaming maintains consistency
 -   **Performance**: Read/write operations use optimal data stores
 
-#### **⚡ Real-Time Event Flow**
+#### **⚡ Real-Time Data Flow**
 
 ```mermaid
 graph LR
     A[API Command] --> B[PostgreSQL]
-    A --> C[Integration Event]
-    C --> D[RabbitMQ]
-    D --> E[Event Consumer]
+    B --> C[Debezium CDC]
+    C --> D[Kafka Topic]
+    D --> E[CDC Consumer]
     E --> F[MongoDB]
     F --> G[Optimized Queries]
 ```
 
-**Key Integration Events:**
+**Key CDC Events:**
 
--   `UserCreatedIntegrationEvent` → Syncs new user to read model
--   `UserLoggedInIntegrationEvent` → Updates last login timestamp
--   `UserUpdatedIntegrationEvent` → Maintains profile consistency
+-   `user.created` → Syncs new user to read model
+-   `user.updated` → Maintains profile consistency
+-   `user.deleted` → Handles logical deletion synchronization
 
-## 🚀 Development Experience
+## � Development Experience
 
-### VS Code / Visual Studio Ready
+### Visual Studio / VS Code Ready
 
 -   **F5 Debugging**: Full debugging with automatic Docker infrastructure setup
 -   **Hot Reload**: Real-time code changes with `dotnet watch`
 -   **IntelliSense**: Complete code completion and error detection
 -   **Task Configuration**: Pre-configured build and database startup tasks
+-   **Automated Setup**: `setup.ps1` handles migrations and CDC configuration in one command
+
+### Getting Started
+
+The `setup.ps1` script handles all initialization tasks:
+
+```powershell
+# What the script does:
+# 1. Runs EF Core migrations against PostgreSQL
+# 2. Configures Debezium CDC connector for the users table
+# 3. Sets up Kafka topic routing for real-time synchronization
+# 4. Validates all services are running correctly
+
+./setup.ps1  # One command to rule them all
+```
 
 ### Database Management
 
@@ -98,18 +114,18 @@ dotnet ef migrations add MigrationName --project HexagonalSkeleton.MigrationDb
 # Update PostgreSQL database
 dotnet ef database update --project HexagonalSkeleton.MigrationDb
 
-# MongoDB collections are automatically created by the application
+# MongoDB collections are automatically created by the CDC consumers
 ```
 
-### Event Monitoring
+### CDC Monitoring
 
 ```bash
-# Access RabbitMQ Management UI
-http://localhost:15672
-# user: hexagonal_user, password: hexagonal_password
+# Monitor Kafka topics and CDC events
+# Access Confluent Control Center or use Kafka CLI tools
+docker exec -it hexagonal-kafka kafka-topics --list --bootstrap-server localhost:9092
 
-# Monitor integration events and message flows
-# Check consumer status and message throughput
+# Check Debezium connector status
+curl -H "Accept:application/json" localhost:8083/connectors/postgres-users-connector/status
 ```
 
 <p align="center">
@@ -151,8 +167,8 @@ cd .net-api-hexagonal-skeleton
 # 2. Start the complete infrastructure stack
 docker-compose up -d --wait
 
-# 3. Run database migrations
-dotnet ef database update --project HexagonalSkeleton.MigrationDb
+# 3. Run the setup script (migrations + CDC configuration)
+./setup.ps1
 
 # 4. Start the API
 dotnet run --project HexagonalSkeleton.API
@@ -161,13 +177,14 @@ dotnet run --project HexagonalSkeleton.API
 **🎉 Ready to go!**
 
 -   **API**: http://localhost:5000/swagger
--   **RabbitMQ Management**: http://localhost:15672 (user: hexagonal_user, password: hexagonal_password)
 -   **PostgreSQL**: localhost:5432 (Commands/Writes)
 -   **MongoDB**: localhost:27017 (Queries/Reads)
+-   **Kafka**: localhost:9092 (Event Streaming)
+-   **Debezium Connect**: localhost:8083 (CDC Management)
 
 ## 🏗️ Architecture
 
-### Hexagonal Architecture with CQRS & Event Sourcing
+### Hexagonal Architecture with CQRS & CDC
 
 ```mermaid
 graph TB
@@ -181,7 +198,7 @@ graph TB
         Commands[Commands]
         Queries[Queries]
         Handlers[MediatR Handlers]
-        IntEvents[Integration Events]
+        CdcEvents[CDC Events]
     end
 
     subgraph "🎯 Domain Layer"
@@ -194,8 +211,27 @@ graph TB
     subgraph "🔧 Infrastructure Layer"
         WriteRepo[Command Repository]
         ReadRepo[Query Repository]
-        EventSync[User Sync Service]
-        MessageBus[MassTransit/RabbitMQ]
+        CdcProcessor[CDC Event Processor]
+        Kafka[Kafka + Debezium]
+    end
+
+    subgraph "🗄️ Data Stores"
+        PostgreSQL[(PostgreSQL<br/>Write Operations)]
+        MongoDB[(MongoDB<br/>Read Operations)]
+    end
+
+    Controllers --> Handlers
+    Handlers --> Commands
+    Handlers --> Queries
+    Commands --> WriteRepo
+    Queries --> ReadRepo
+    WriteRepo --> PostgreSQL
+    ReadRepo --> MongoDB
+    PostgreSQL --> Kafka
+    Kafka --> CdcProcessor
+    CdcProcessor --> MongoDB
+```
+
     end
 
     subgraph "💾 Data Stores"
@@ -242,6 +278,7 @@ graph TB
     class Entities,DomainServices,Ports,ValueObjects domainLayer
     class WriteRepo,ReadRepo,EventSync,MessageBus infraLayer
     class PostgreSQL,MongoDB,RabbitMQ dataLayer
+
 ```
 
 ### Core Patterns Implemented
@@ -258,29 +295,31 @@ graph TB
 ## 📁 Project Structure
 
 ```
-├── HexagonalSkeleton.API/          # 🌐 API Layer
-│   ├── Controllers/                # REST API endpoints
-│   ├── Models/                     # API request/response models
-│   └── Config/                     # DI container configuration
-├── HexagonalSkeleton.Application/  # 📋 Application Layer
-│   ├── Features/                   # CQRS commands & queries
-│   ├── Services/                   # Application services
-│   └── Events/                     # Domain event handlers
-├── HexagonalSkeleton.Domain/       # 🎯 Domain Layer
-│   ├── Entities/                   # Domain entities (User.cs)
-│   ├── Services/                   # Domain services
-│   ├── Specifications/             # Business rules
-│   ├── Common/                     # Shared utilities (AgeCalculator)
-│   └── Ports/                      # Interface contracts
+
+├── HexagonalSkeleton.API/ # 🌐 API Layer
+│ ├── Controllers/ # REST API endpoints
+│ ├── Models/ # API request/response models
+│ └── Config/ # DI container configuration
+├── HexagonalSkeleton.Application/ # 📋 Application Layer
+│ ├── Features/ # CQRS commands & queries
+│ ├── Services/ # Application services
+│ └── Events/ # Domain event handlers
+├── HexagonalSkeleton.Domain/ # 🎯 Domain Layer
+│ ├── Entities/ # Domain entities (User.cs)
+│ ├── Services/ # Domain services
+│ ├── Specifications/ # Business rules
+│ ├── Common/ # Shared utilities (AgeCalculator)
+│ └── Ports/ # Interface contracts
 ├── HexagonalSkeleton.Infrastructure/ # 🔧 Infrastructure Layer
-│   ├── Persistence/                # Database context & repositories
-│   ├── Auth/                       # JWT implementation
-│   └── Services/                   # External service adapters
-└── HexagonalSkeleton.Test/         # 🧪 Testing
-    ├── Unit/                       # Unit tests (60+ test files)
-    ├── Integration/                # Integration tests
-    └── TestInfrastructure/         # Testing utilities
-```
+│ ├── Persistence/ # Database context & repositories
+│ ├── Auth/ # JWT implementation
+│ └── Services/ # External service adapters
+└── HexagonalSkeleton.Test/ # 🧪 Testing
+├── Unit/ # Unit tests (60+ test files)
+├── Integration/ # Integration tests
+└── TestInfrastructure/ # Testing utilities
+
+````
 
 ## 🧪 Testing
 
@@ -295,7 +334,7 @@ dotnet test --collect:"XPlat Code Coverage"
 
 # Run specific test category
 dotnet test --filter "Category=Integration"
-```
+````
 
 ### Test Categories
 
@@ -396,31 +435,42 @@ dotnet ef database update --project HexagonalSkeleton.MigrationDb
 | `/api/profile`               | GET    | Get own profile             | MongoDB       |
 | `/api/profile/personal-info` | PATCH  | Update personal information | PostgreSQL    |
 
-### 🔄 Event-Driven Synchronization
+### 🔄 CDC-Based Synchronization
 
 **How it works:**
 
 1. **Write Operations** → PostgreSQL (Commands)
-2. **Integration Events** → RabbitMQ via MassTransit
-3. **Event Consumers** → Sync to MongoDB (Queries)
+2. **CDC Capture** → Debezium streams changes to Kafka
+3. **Event Processing** → CDC consumers sync to MongoDB (Queries)
 4. **Read Operations** → MongoDB (Optimized for queries)
 
 **📖 Full API documentation with request/response schemas at `/swagger`**.
 
 ## 🎯 Why This Architecture?
 
-This template demonstrates **production-ready** enterprise software development:
+This template demonstrates **production-ready** enterprise software development with a modern twist on data synchronization:
 
 ### 🔥 Technical Excellence
 
 -   **Scalability**: CQRS enables independent scaling of read/write operations
 -   **Performance**: Dual databases optimized for specific access patterns
--   **Reliability**: Event-driven architecture with guaranteed message delivery via RabbitMQ
+-   **Reliability**: CDC provides guaranteed data consistency without application-level event handling
+-   **Real-time**: Debezium streams database changes instantly, no polling or delays
 -   **Maintainability**: Clean Architecture with clear separation of concerns
 -   **Testability**: Comprehensive test coverage with dependency injection
--   **Resilience**: Retry policies and error handling for distributed systems
+-   **Resilience**: Database-level change capture ensures no missed events
 -   **Code Quality**: DRY, KISS, YAGNI principles with centralized utilities
 -   **Business Logic**: Domain-driven design with rich business rules enforcement
+
+### 💡 Why CDC over Domain Events?
+
+While domain events are excellent for business workflows, **Change Data Capture offers superior data synchronization**:
+
+-   **Zero Application Impact**: Database changes are captured transparently
+-   **Guaranteed Delivery**: No risk of events being lost due to application failures
+-   **Schema Evolution**: Handles database changes automatically
+-   **Operational Simplicity**: Less application code to maintain and debug
+-   **Better Performance**: No additional database writes for event publishing
 
 ### 💼 Enterprise Benefits
 
@@ -434,18 +484,20 @@ This template demonstrates **production-ready** enterprise software development:
 
 Perfect for demonstrating expertise in:
 
--   **Modern .NET Development** (9.0 with latest packages)
--   **Distributed Systems** (CQRS + Event Sourcing patterns)
--   **Event-Driven Architecture** (RabbitMQ + MassTransit)
--   **Database Design** (PostgreSQL + MongoDB optimization)
+-   **Modern .NET Development** (9.0 with latest packages and C# 13 features)
+-   **Distributed Systems** (CQRS + Change Data Capture patterns)
+-   **Event Streaming Architecture** (Kafka + Debezium for real-time synchronization)
+-   **Database Design** (PostgreSQL + MongoDB optimization strategies)
 -   **Enterprise Patterns** (Hexagonal Architecture, DDD, SOLID principles)
 -   **Clean Code Principles** (DRY, KISS, YAGNI with practical examples)
 -   **Domain-Driven Design** (Business rules, age calculations, specifications)
--   **Comprehensive Testing** (Unit, integration, API testing with 60+ test files)
+-   **Advanced Testing** (Unit, integration, CDC testing with 60+ test files)
+-   **DevOps & Containers** (Docker Compose, automated setup scripts)
+-   **Performance Engineering** (Database-level synchronization vs application events)
 
 ---
 
-## 🔄 CQRS & Event Flow
+## 🔄 CQRS & CDC Flow
 
 ### How it Works
 
@@ -454,27 +506,27 @@ sequenceDiagram
     participant API as API Controller
     participant CMD as Command Handler
     participant PG as PostgreSQL
-    participant EVT as MassTransit
-    participant RMQ as RabbitMQ
-    participant CONS as Event Consumer
+    participant DBZ as Debezium
+    participant KAFKA as Kafka
+    participant CONS as CDC Consumer
     participant MONGO as MongoDB
 
     API->>CMD: RegisterUserCommand
     CMD->>PG: Save User Entity
-    CMD->>EVT: Publish UserCreatedEvent
-    EVT->>RMQ: Queue Integration Event
-    RMQ->>CONS: Consume Event
+    PG->>DBZ: WAL Change Detected
+    DBZ->>KAFKA: Publish CDC Event
+    KAFKA->>CONS: Stream Event
     CONS->>MONGO: Sync to Read Model
 
-    Note over API,MONGO: Eventual Consistency Achieved
+    Note over API,MONGO: Real-time Consistency Achieved
 ```
 
-### Event-Driven Sync Process
+### CDC Synchronization Process
 
 1. **Command Execution**: Write operations go to PostgreSQL with full ACID compliance
-2. **Event Publishing**: MassTransit automatically publishes integration events to RabbitMQ
-3. **Reliable Delivery**: RabbitMQ ensures message delivery with retry policies
-4. **Event Consumption**: Dedicated consumers sync data to MongoDB read models
+2. **Change Capture**: Debezium monitors PostgreSQL Write-Ahead Log (WAL) for changes
+3. **Event Streaming**: Changes are streamed to Kafka topics in real-time
+4. **Event Processing**: Dedicated CDC consumers process events and update MongoDB
 5. **Query Optimization**: Read operations use optimized MongoDB collections with indexes
 
 ---
