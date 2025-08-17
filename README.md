@@ -1,10 +1,6 @@
-<p align="center"## Key Features
-
--   **Clean Architecture**: Ports & Adapters pattern with dependency inversion
--   **CQRS + CDC**: Real-time sync between PostgreSQL (commands) and MongoDB (queries)
--   **Domain-Driven Design**: Business rules live in the domain, not scattered across layers
--   **Comprehensive Testing**: 60+ tests including integration tests with Testcontainers
--   **Modern .NET Stack**: .NET 9, JWT auth, automated Docker setuptps://github.com/user-attachments/assets/5d55f501-ed98-4245-a0ef-b620991c35df" alt="dotnet-icon" width="150" /></p>
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/5d55f501-ed98-4245-a0ef-b620991c35df" alt="dotnet-icon" width="150" />
+</p>
 
 <p align="center">
   <strong>Production-ready API template implementing Clean Architecture, DDD, CQRS with Change Data Capture</strong><br/>
