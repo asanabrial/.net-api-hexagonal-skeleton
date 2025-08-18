@@ -67,8 +67,6 @@ graph LR
     F --> G[Optimized Queries]
 ```
 
-````
-
 **Key CDC Events:**
 
 -   `user.created` → Syncs new user to read model
@@ -83,16 +81,6 @@ graph LR
 
 Used by Netflix, Uber, LinkedIn, and many others for real-time data synchronization.
 
-## Development Experience
-
-### Visual Studio / VS Code Ready
-
--   **F5 Debugging**: Full debugging with automatic Docker infrastructure setup
--   **Hot Reload**: Real-time code changes with `dotnet watch`
--   **IntelliSense**: Complete code completion and error detection
--   **Task Configuration**: Pre-configured build and database startup tasks
--   **Automated Setup**: `setup.ps1` handles migrations and CDC configuration in one command
-
 ### Getting Started
 
 The `setup.ps1` script handles all initialization tasks:
@@ -105,7 +93,7 @@ The `setup.ps1` script handles all initialization tasks:
 # 4. Validates all services are running correctly
 
 ./setup.ps1  # One command to rule them all
-````
+```
 
 ### Database Management
 
