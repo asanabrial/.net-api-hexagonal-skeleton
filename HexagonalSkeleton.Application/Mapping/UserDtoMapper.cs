@@ -20,17 +20,20 @@ namespace HexagonalSkeleton.Application.Mapping
         {
             ArgumentNullException.ThrowIfNull(user);
 
+            var name = NameParts(user);
+            var (latitude, longitude) = Coordinates(user);
+
             return new GetUserDto
             {
                 Id = user.Id,
-                FirstName = user.FullName.FirstName,
-                LastName = user.FullName.LastName,
-                FullName = user.FullName.GetFullName(),
+                FirstName = name.First,
+                LastName = name.Last,
+                FullName = name.Full,
                 Email = user.Email.Value,
                 PhoneNumber = user.PhoneNumber.Value,
                 Birthdate = user.Birthdate,
-                Latitude = user.Location != null ? user.Location.Latitude : (double?)null,
-                Longitude = user.Location != null ? user.Location.Longitude : (double?)null,
+                Latitude = latitude,
+                Longitude = longitude,
                 AboutMe = user.AboutMe,
                 LastLogin = user.LastLogin,
                 CreatedAt = user.CreatedAt,
@@ -47,17 +50,20 @@ namespace HexagonalSkeleton.Application.Mapping
         {
             ArgumentNullException.ThrowIfNull(user);
 
+            var name = NameParts(user);
+            var (latitude, longitude) = Coordinates(user);
+
             return new GetAllUsersDto
             {
                 Id = user.Id,
-                FirstName = user.FullName.FirstName,
-                LastName = user.FullName.LastName,
-                FullName = user.FullName.GetFullName(),
+                FirstName = name.First,
+                LastName = name.Last,
+                FullName = name.Full,
                 Email = user.Email.Value,
                 PhoneNumber = user.PhoneNumber.Value,
                 Birthdate = user.Birthdate,
-                Latitude = user.Location != null ? user.Location.Latitude : (double?)null,
-                Longitude = user.Location != null ? user.Location.Longitude : (double?)null,
+                Latitude = latitude,
+                Longitude = longitude,
                 AboutMe = user.AboutMe,
                 LastLogin = user.LastLogin,
                 CreatedAt = user.CreatedAt,
@@ -72,17 +78,20 @@ namespace HexagonalSkeleton.Application.Mapping
         {
             ArgumentNullException.ThrowIfNull(user);
 
+            var name = NameParts(user);
+            var (latitude, longitude) = Coordinates(user);
+
             return new AuthenticatedUserDto
             {
                 Id = user.Id,
-                FirstName = user.FullName.FirstName,
-                LastName = user.FullName.LastName,
-                FullName = user.FullName.GetFullName(),
+                FirstName = name.First,
+                LastName = name.Last,
+                FullName = name.Full,
                 Email = user.Email.Value,
                 PhoneNumber = user.PhoneNumber.Value,
                 Birthdate = user.Birthdate,
-                Latitude = user.Location != null ? user.Location.Latitude : (double?)null,
-                Longitude = user.Location != null ? user.Location.Longitude : (double?)null,
+                Latitude = latitude,
+                Longitude = longitude,
                 AboutMe = user.AboutMe,
                 LastLogin = user.LastLogin,
                 CreatedAt = user.CreatedAt,
@@ -97,17 +106,20 @@ namespace HexagonalSkeleton.Application.Mapping
         {
             ArgumentNullException.ThrowIfNull(user);
 
+            var name = NameParts(user);
+            var (latitude, longitude) = Coordinates(user);
+
             return new UserProfileDto
             {
                 Id = user.Id,
-                FirstName = user.FullName.FirstName,
-                LastName = user.FullName.LastName,
-                FullName = user.FullName.GetFullName(),
+                FirstName = name.First,
+                LastName = name.Last,
+                FullName = name.Full,
                 Email = user.Email.Value,
                 PhoneNumber = user.PhoneNumber.Value,
                 Birthdate = user.Birthdate,
-                Latitude = user.Location != null ? user.Location.Latitude : (double?)null,
-                Longitude = user.Location != null ? user.Location.Longitude : (double?)null,
+                Latitude = latitude,
+                Longitude = longitude,
                 AboutMe = user.AboutMe,
                 LastLogin = user.LastLogin,
                 CreatedAt = user.CreatedAt,
@@ -122,22 +134,42 @@ namespace HexagonalSkeleton.Application.Mapping
         {
             ArgumentNullException.ThrowIfNull(user);
 
+            var name = NameParts(user);
+            var (latitude, longitude) = Coordinates(user);
+
             return new UpdateUserDto
             {
                 Id = user.Id,
-                FirstName = user.FullName.FirstName,
-                LastName = user.FullName.LastName,
-                FullName = user.FullName.GetFullName(),
+                FirstName = name.First,
+                LastName = name.Last,
+                FullName = name.Full,
                 Email = user.Email.Value,
                 PhoneNumber = user.PhoneNumber.Value,
                 Birthdate = user.Birthdate,
-                Latitude = user.Location != null ? (double?)user.Location.Latitude : null,
-                Longitude = user.Location != null ? (double?)user.Location.Longitude : null,
+                Latitude = latitude,
+                Longitude = longitude,
                 AboutMe = user.AboutMe,
                 LastLogin = user.LastLogin,
                 CreatedAt = user.CreatedAt,
                 UpdatedAt = user.UpdatedAt
             };
         }
+
+        // ---- Shared flattening helpers ----
+
+        /// <summary>
+        /// Flattens the FullName value object into its first, last, and composed parts.
+        /// </summary>
+        private static (string First, string Last, string Full) NameParts(User user) =>
+            (user.FullName.FirstName, user.FullName.LastName, user.FullName.GetFullName());
+
+        /// <summary>
+        /// Reads the optional Location value object into nullable coordinates,
+        /// preserving the original null-tolerant mapping behaviour.
+        /// </summary>
+        private static (double? Latitude, double? Longitude) Coordinates(User user) =>
+            user.Location != null
+                ? (user.Location.Latitude, user.Location.Longitude)
+                : (null, null);
     }
 }

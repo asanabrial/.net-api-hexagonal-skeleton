@@ -97,21 +97,10 @@ namespace HexagonalSkeleton.API.Mapping
         {
             ArgumentNullException.ThrowIfNull(dto);
 
-            return new UserResponse
-            {
-                Id = dto.Id,
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                Email = dto.Email,
-                PhoneNumber = dto.PhoneNumber,
-                Birthdate = dto.Birthdate,
-                Latitude = dto.Latitude,
-                Longitude = dto.Longitude,
-                AboutMe = dto.AboutMe,
-                LastLogin = dto.LastLogin,
-                CreatedAt = dto.CreatedAt,
-                UpdatedAt = dto.UpdatedAt
-            };
+            return BuildUserResponse(
+                dto.Id, dto.FirstName, dto.LastName, dto.Email, dto.PhoneNumber,
+                dto.Birthdate, dto.Latitude, dto.Longitude, dto.AboutMe,
+                dto.LastLogin, dto.CreatedAt, dto.UpdatedAt);
         }
 
         /// <summary>Maps a user-list DTO to the user response.</summary>
@@ -119,21 +108,10 @@ namespace HexagonalSkeleton.API.Mapping
         {
             ArgumentNullException.ThrowIfNull(dto);
 
-            return new UserResponse
-            {
-                Id = dto.Id,
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                Email = dto.Email,
-                PhoneNumber = dto.PhoneNumber,
-                Birthdate = dto.Birthdate,
-                Latitude = dto.Latitude,
-                Longitude = dto.Longitude,
-                AboutMe = dto.AboutMe,
-                LastLogin = dto.LastLogin,
-                CreatedAt = dto.CreatedAt,
-                UpdatedAt = dto.UpdatedAt
-            };
+            return BuildUserResponse(
+                dto.Id, dto.FirstName, dto.LastName, dto.Email, dto.PhoneNumber,
+                dto.Birthdate, dto.Latitude, dto.Longitude, dto.AboutMe,
+                dto.LastLogin, dto.CreatedAt, dto.UpdatedAt);
         }
 
         /// <summary>Maps a profile DTO to the user response.</summary>
@@ -141,21 +119,10 @@ namespace HexagonalSkeleton.API.Mapping
         {
             ArgumentNullException.ThrowIfNull(dto);
 
-            return new UserResponse
-            {
-                Id = dto.Id,
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                Email = dto.Email,
-                PhoneNumber = dto.PhoneNumber,
-                Birthdate = dto.Birthdate,
-                Latitude = dto.Latitude,
-                Longitude = dto.Longitude,
-                AboutMe = dto.AboutMe,
-                LastLogin = dto.LastLogin,
-                CreatedAt = dto.CreatedAt,
-                UpdatedAt = dto.UpdatedAt
-            };
+            return BuildUserResponse(
+                dto.Id, dto.FirstName, dto.LastName, dto.Email, dto.PhoneNumber,
+                dto.Birthdate, dto.Latitude, dto.Longitude, dto.AboutMe,
+                dto.LastLogin, dto.CreatedAt, dto.UpdatedAt);
         }
 
         /// <summary>Maps an update-result DTO to the user response.</summary>
@@ -163,22 +130,44 @@ namespace HexagonalSkeleton.API.Mapping
         {
             ArgumentNullException.ThrowIfNull(dto);
 
-            return new UserResponse
-            {
-                Id = dto.Id,
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                Email = dto.Email,
-                PhoneNumber = dto.PhoneNumber,
-                Birthdate = dto.Birthdate,
-                Latitude = dto.Latitude,
-                Longitude = dto.Longitude,
-                AboutMe = dto.AboutMe,
-                LastLogin = dto.LastLogin,
-                CreatedAt = dto.CreatedAt,
-                UpdatedAt = dto.UpdatedAt
-            };
+            return BuildUserResponse(
+                dto.Id, dto.FirstName, dto.LastName, dto.Email, dto.PhoneNumber,
+                dto.Birthdate, dto.Latitude, dto.Longitude, dto.AboutMe,
+                dto.LastLogin, dto.CreatedAt, dto.UpdatedAt);
         }
+
+        /// <summary>
+        /// Builds a UserResponse from the scalar fields shared by every user DTO.
+        /// The per-use-case DTOs stay distinct; only the field copy is centralised here.
+        /// </summary>
+        private static UserResponse BuildUserResponse(
+            Guid id,
+            string firstName,
+            string lastName,
+            string email,
+            string? phoneNumber,
+            DateTime? birthdate,
+            double? latitude,
+            double? longitude,
+            string? aboutMe,
+            DateTime? lastLogin,
+            DateTime createdAt,
+            DateTime? updatedAt) =>
+            new UserResponse
+            {
+                Id = id,
+                FirstName = firstName,
+                LastName = lastName,
+                Email = email,
+                PhoneNumber = phoneNumber,
+                Birthdate = birthdate,
+                Latitude = latitude,
+                Longitude = longitude,
+                AboutMe = aboutMe,
+                LastLogin = lastLogin,
+                CreatedAt = createdAt,
+                UpdatedAt = updatedAt
+            };
 
         /// <summary>Maps a deletion DTO to the deletion response.</summary>
         public static DeleteUserResponse ToResponse(this UserDeletionDto dto)
