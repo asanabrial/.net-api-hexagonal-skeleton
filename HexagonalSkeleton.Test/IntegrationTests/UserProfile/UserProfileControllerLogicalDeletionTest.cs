@@ -1,7 +1,6 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
-using FluentAssertions;
 using HexagonalSkeleton.API.Models.Users;
 using HexagonalSkeleton.API.Models.Auth;
 using HexagonalSkeleton.Domain.Ports;
@@ -62,11 +61,11 @@ public class UserProfileControllerLogicalDeletionTest : BaseWebIntegrationTest, 
 
         // Wait for CDC pipeline to synchronize user from PostgreSQL to MongoDB (elegant polling)
         var userSyncSuccess = await _mongoHelper.WaitForUserExistsAsync(userId, TimeSpan.FromSeconds(10));
-        userSyncSuccess.Should().BeTrue("User should be synchronized to MongoDB via CDC");
+        Assert.True(userSyncSuccess, "User should be synchronized to MongoDB via CDC");
 
         // Act 1 - Verify profile is accessible before deletion
         var profileResponse = await _client.GetAsync("/api/profile");
-        profileResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        Assert.Equal(HttpStatusCode.OK, profileResponse.StatusCode);
 
         // Act 2 - Delete the user (logical deletion) using the proper command
         using var scope = _factory.Services.CreateScope();
@@ -75,7 +74,7 @@ public class UserProfileControllerLogicalDeletionTest : BaseWebIntegrationTest, 
 
         // Wait for CDC to synchronize the deletion (elegant polling)
         var deletionSyncSuccess = await _mongoHelper.WaitForUserDeletedAsync(userId, TimeSpan.FromSeconds(10));
-        deletionSyncSuccess.Should().BeTrue("User deletion should be synchronized to MongoDB via CDC");
+        Assert.True(deletionSyncSuccess, "User deletion should be synchronized to MongoDB via CDC");
 
         // Act 3 - Try to access profile after deletion
         var deletedProfileResponse = await _client.GetAsync("/api/profile");
@@ -83,7 +82,7 @@ public class UserProfileControllerLogicalDeletionTest : BaseWebIntegrationTest, 
         // Assert - Should return 401 Unauthorized because the authentication system validates user existence in real-time
         // When a user is logically deleted, they are filtered out by the read repository,
         // causing the JWT validation to fail as the user is no longer found in the system
-        deletedProfileResponse.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        Assert.Equal(HttpStatusCode.Unauthorized, deletedProfileResponse.StatusCode);
     }
 
     [Fact]
@@ -145,17 +144,17 @@ public class UserProfileControllerLogicalDeletionTest : BaseWebIntegrationTest, 
         var profileResponse = await _client.GetAsync("/api/profile");
 
         // Assert - Should return 200 OK with user data
-        profileResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        
+        Assert.Equal(HttpStatusCode.OK, profileResponse.StatusCode);
+
         var profileContent = await profileResponse.Content.ReadAsStringAsync();
         var profileData = JsonSerializer.Deserialize<UserResponse>(profileContent, 
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         
-        profileData.Should().NotBeNull();
-        profileData!.Email.Should().Be(createUserRequest.Email);
-        profileData.FirstName.Should().Be(createUserRequest.FirstName);
-        profileData.LastName.Should().Be(createUserRequest.LastName);
-        profileData.PhoneNumber.Should().Be(createUserRequest.PhoneNumber);
+        Assert.NotNull(profileData);
+        Assert.Equal(createUserRequest.Email, profileData.Email);
+        Assert.Equal(createUserRequest.FirstName, profileData.FirstName);
+        Assert.Equal(createUserRequest.LastName, profileData.LastName);
+        Assert.Equal(createUserRequest.PhoneNumber, profileData.PhoneNumber);
     }
 
         /// <summary>
