@@ -3,7 +3,7 @@ using HexagonalSkeleton.Application.Features.UserRegistration.Dto;
 using HexagonalSkeleton.Application.Features.UserAuthentication.Dto;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain.Services;
-using MediatR;
+using HexagonalSkeleton.Application.Common.Messaging;
 
 namespace HexagonalSkeleton.Application.Features.UserRegistration.Commands
 {    public class RegisterUserCommandHandler(

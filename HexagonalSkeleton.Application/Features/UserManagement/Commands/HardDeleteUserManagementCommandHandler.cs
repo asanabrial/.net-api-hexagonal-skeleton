@@ -1,7 +1,7 @@
 using FluentValidation;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
-using MediatR;
+using HexagonalSkeleton.Application.Common.Messaging;
 using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 
 namespace HexagonalSkeleton.Application.Features.UserManagement.Commands

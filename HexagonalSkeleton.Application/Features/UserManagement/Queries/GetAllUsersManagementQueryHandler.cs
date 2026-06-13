@@ -2,7 +2,7 @@ using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Application.Common.Pagination;
 using HexagonalSkeleton.Application.Services;
-using MediatR;
+using HexagonalSkeleton.Application.Common.Messaging;
 using AutoMapper;
 using FluentValidation;
 

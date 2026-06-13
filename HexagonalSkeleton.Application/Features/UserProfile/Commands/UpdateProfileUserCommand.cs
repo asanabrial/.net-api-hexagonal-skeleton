@@ -1,5 +1,5 @@
 using HexagonalSkeleton.Application.Features.UserProfile.Dto;
-using MediatR;
+using HexagonalSkeleton.Application.Common.Messaging;
 
 namespace HexagonalSkeleton.Application.Features.UserProfile.Commands
 {

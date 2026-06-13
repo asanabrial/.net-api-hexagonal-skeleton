@@ -1,6 +1,6 @@
 using System.Reflection;
 using FluentValidation;
-using MediatR;
+using HexagonalSkeleton.Application.Common.Messaging;
 
 namespace HexagonalSkeleton.API.Config
 {
@@ -12,7 +12,7 @@ namespace HexagonalSkeleton.API.Config
             // Auto-descubre assemblies que contengan handlers o validators
             var applicationAssemblies = GetApplicationAssemblies();
 
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies([.. applicationAssemblies]));
+            services.AddRequestHandlers([.. applicationAssemblies]);
             services.AddValidatorsFromAssemblies(applicationAssemblies);
 
             return services;
@@ -24,11 +24,11 @@ namespace HexagonalSkeleton.API.Config
                 .Where(assembly =>
                     // Solo assemblies de nuestro proyecto
                     assembly.FullName!.StartsWith("HexagonalSkeleton.Application", StringComparison.OrdinalIgnoreCase) &&
-                    // Que contengan handlers de MediatR o validators
-                    (HasMediatRHandlers(assembly) || HasFluentValidators(assembly)));
+                    // Que contengan handlers o validators
+                    (HasRequestHandlers(assembly) || HasFluentValidators(assembly)));
         }
 
-        private static bool HasMediatRHandlers(Assembly assembly)
+        private static bool HasRequestHandlers(Assembly assembly)
         {
             try
             {
@@ -37,9 +37,7 @@ namespace HexagonalSkeleton.API.Config
                     !type.IsInterface &&
                     type.GetInterfaces().Any(i =>
                         i.IsGenericType &&
-                        (i.GetGenericTypeDefinition() == typeof(IRequestHandler<,>) ||
-                         i.GetGenericTypeDefinition() == typeof(IRequestHandler<>) ||
-                         i.GetGenericTypeDefinition() == typeof(INotificationHandler<>))));
+                        i.GetGenericTypeDefinition() == typeof(IRequestHandler<,>)));
             }
             catch
             {

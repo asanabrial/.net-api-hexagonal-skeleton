@@ -1,7 +1,7 @@
 using FluentValidation;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
-using MediatR;
+using HexagonalSkeleton.Application.Common.Messaging;
 using AutoMapper;
 using HexagonalSkeleton.Application.Features.UserAuthentication.Dto;
 using Microsoft.Extensions.Logging;
@@ -16,7 +16,6 @@ namespace HexagonalSkeleton.Application.Features.UserAuthentication.Commands
     public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthenticationDto>
     {
         private readonly IValidator<LoginCommand> _validator;
-        private readonly IPublisher _publisher;
         private readonly IUserReadRepository _userReadRepository;
         private readonly IUserWriteRepository _userWriteRepository;
         private readonly IAuthenticationService _authenticationService;
@@ -25,7 +24,6 @@ namespace HexagonalSkeleton.Application.Features.UserAuthentication.Commands
 
         public LoginCommandHandler(
             IValidator<LoginCommand> validator,
-            IPublisher publisher,
             IUserReadRepository userReadRepository,
             IUserWriteRepository userWriteRepository,
             IAuthenticationService authenticationService,
@@ -33,7 +31,6 @@ namespace HexagonalSkeleton.Application.Features.UserAuthentication.Commands
             ILogger<LoginCommandHandler> logger)
         {
             _validator = validator;
-            _publisher = publisher;
             _userReadRepository = userReadRepository;
             _userWriteRepository = userWriteRepository;
             _authenticationService = authenticationService;

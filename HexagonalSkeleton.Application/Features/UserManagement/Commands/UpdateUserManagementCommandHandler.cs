@@ -3,7 +3,7 @@ using FluentValidation;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 using HexagonalSkeleton.Domain.Ports;
-using MediatR;
+using HexagonalSkeleton.Application.Common.Messaging;
 
 namespace HexagonalSkeleton.Application.Features.UserManagement.Commands
 {    

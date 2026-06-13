@@ -1,4 +1,4 @@
-using MediatR;
+using HexagonalSkeleton.Application.Common.Messaging;
 using HexagonalSkeleton.Domain.ValueObjects;
 
 namespace HexagonalSkeleton.Application.Common.Pagination

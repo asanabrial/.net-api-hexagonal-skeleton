@@ -3,7 +3,7 @@ using HexagonalSkeleton.Domain.Specifications;
 using HexagonalSkeleton.Domain.ValueObjects;
 using HexagonalSkeleton.Domain.Ports;
 using AutoMapper;
-using MediatR;
+using HexagonalSkeleton.Application.Common.Messaging;
 
 namespace HexagonalSkeleton.Application.Common.Handlers
 {

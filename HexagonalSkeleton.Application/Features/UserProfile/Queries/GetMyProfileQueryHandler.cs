@@ -2,7 +2,7 @@ using FluentValidation;
 using HexagonalSkeleton.Application.Features.UserProfile.Dto;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
-using MediatR;
+using HexagonalSkeleton.Application.Common.Messaging;
 using AutoMapper;
 
 namespace HexagonalSkeleton.Application.Features.UserProfile.Queries

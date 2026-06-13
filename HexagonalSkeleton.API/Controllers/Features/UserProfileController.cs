@@ -1,7 +1,7 @@
 using HexagonalSkeleton.API.Identity;
 using HexagonalSkeleton.API.Models.Users;
 using AutoMapper;
-using MediatR;
+using HexagonalSkeleton.Application.Common.Messaging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using HexagonalSkeleton.Application.Features.UserProfile.Commands;

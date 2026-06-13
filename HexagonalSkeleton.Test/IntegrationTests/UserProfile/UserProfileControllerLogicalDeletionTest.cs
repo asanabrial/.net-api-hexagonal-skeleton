@@ -8,7 +8,7 @@ using HexagonalSkeleton.Test.Integration.Infrastructure;
 using HexagonalSkeleton.Test.TestInfrastructure.Factories;
 using HexagonalSkeleton.Test.TestInfrastructure.Helpers;
 using Microsoft.Extensions.DependencyInjection;
-using MediatR;
+using HexagonalSkeleton.Application.Common.Messaging;
 using Xunit;
 using AutoMapper;
 

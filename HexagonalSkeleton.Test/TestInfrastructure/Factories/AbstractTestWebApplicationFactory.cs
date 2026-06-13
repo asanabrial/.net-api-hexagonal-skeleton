@@ -17,7 +17,7 @@ using MongoDB.Driver;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using AutoMapper;
 using FluentValidation;
-using MediatR;
+using HexagonalSkeleton.Application.Common.Messaging;
 using System;
 using System.Threading.Tasks;
 using HexagonalSkeleton.Domain.Ports;
@@ -245,9 +245,9 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Factories
         /// </summary>
         private static void ConfigureTestServices(IServiceCollection services)
         {
-            // MediatR para CQRS
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(
-                typeof(HexagonalSkeleton.Application.Features.UserProfile.Commands.UpdateProfileUserCommand).Assembly));
+            // In-house mediator for CQRS
+            services.AddRequestHandlers(
+                typeof(HexagonalSkeleton.Application.Features.UserProfile.Commands.UpdateProfileUserCommand).Assembly);
 
             // AutoMapper para mapeos
             services.AddAutoMapper(
