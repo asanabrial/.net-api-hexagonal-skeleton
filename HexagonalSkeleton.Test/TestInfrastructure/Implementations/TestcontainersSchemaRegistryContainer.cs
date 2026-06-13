@@ -40,7 +40,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
                 .WithEnvironment("SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR", _schemaRegistryConfig.Environment.KafkastoreTopicReplicationFactor)
                 // Health check specific for Schema Registry
                 .WithWaitStrategy(Wait.ForUnixContainer()
-                    .UntilPortIsAvailable((ushort)_dockerConfig.Ports.SchemaRegistry)
+                    .UntilInternalTcpPortIsAvailable((ushort)_dockerConfig.Ports.SchemaRegistry)
                     .UntilHttpRequestIsSucceeded(r => r.ForPort((ushort)_dockerConfig.Ports.SchemaRegistry).ForPath("/subjects")))
                 .WithCleanUp(_schemaRegistryConfig.CleanupAfterTest);
                 

@@ -35,7 +35,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
                 .WithEnvironment("ZOOKEEPER_INIT_LIMIT", zookeeperConfig.Environment.InitLimit)
                 .WithEnvironment("ZOOKEEPER_SYNC_LIMIT", zookeeperConfig.Environment.SyncLimit)
                 .WithWaitStrategy(Wait.ForUnixContainer()
-                    .UntilPortIsAvailable(dockerConfig.Ports.Zookeeper))
+                    .UntilInternalTcpPortIsAvailable(dockerConfig.Ports.Zookeeper))
                 .WithCleanUp(true);
                 
             if (network != null)

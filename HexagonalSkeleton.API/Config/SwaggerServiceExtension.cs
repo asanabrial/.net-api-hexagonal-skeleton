@@ -1,4 +1,4 @@
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 namespace HexagonalSkeleton.API.Config
 {
@@ -26,15 +26,8 @@ namespace HexagonalSkeleton.API.Config
             var securityReq = new OpenApiSecurityRequirement()
             {
                 {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    new string[] {}
+                    new OpenApiSecuritySchemeReference("Bearer"),
+                    new List<string>()
                 }
             };
 
@@ -58,7 +51,7 @@ namespace HexagonalSkeleton.API.Config
             {
                 o.SwaggerDoc("v1", info);
                 o.AddSecurityDefinition("Bearer", securityScheme);
-                o.AddSecurityRequirement(securityReq);
+                o.AddSecurityRequirement(_ => securityReq);
             });
 
             return services;

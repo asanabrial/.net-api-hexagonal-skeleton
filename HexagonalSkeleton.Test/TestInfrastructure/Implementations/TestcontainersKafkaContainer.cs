@@ -52,7 +52,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
                 .WithEnvironment("KAFKA_SOCKET_RECEIVE_BUFFER_BYTES", kafkaConfig.Environment.SocketReceiveBufferBytes)
                 .WithEnvironment("KAFKA_REQUEST_TIMEOUT_MS", kafkaConfig.Environment.RequestTimeoutMs)
                 .WithWaitStrategy(Wait.ForUnixContainer()
-                    .UntilPortIsAvailable(dockerConfig.Ports.Kafka))
+                    .UntilInternalTcpPortIsAvailable(dockerConfig.Ports.Kafka))
                 .WithCleanUp(true);
                 
             if (network != null)
