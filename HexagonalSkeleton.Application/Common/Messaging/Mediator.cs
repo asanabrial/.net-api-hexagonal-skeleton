@@ -10,6 +10,9 @@ namespace HexagonalSkeleton.Application.Common.Messaging;
 /// </summary>
 internal sealed class Mediator(IServiceProvider provider) : ISender
 {
+    // Cache is static and process-wide on purpose: wrappers are stateless strategies keyed by
+    // request type. They capture no handler or container — the handler is resolved from the
+    // per-call IServiceProvider in Handle(), so sharing across scopes/containers is safe.
     private static readonly ConcurrentDictionary<Type, HandlerWrapper> Wrappers = new();
 
     public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
