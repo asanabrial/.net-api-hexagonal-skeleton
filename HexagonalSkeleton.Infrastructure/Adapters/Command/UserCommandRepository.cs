@@ -100,6 +100,32 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Command
             }
         }
 
+        public async Task RemoveAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Hard deleting user with ID: {UserId}", id);
+
+            try
+            {
+                // Physical delete: operate regardless of the IsDeleted state so an already
+                // soft-deleted user can still be permanently removed.
+                var userEntity = await _dbContext.Users
+                    .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+
+                if (userEntity == null)
+                {
+                    throw new InvalidOperationException($"User with ID {id} not found");
+                }
+
+                _dbContext.Users.Remove(userEntity);
+                await _dbContext.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to hard delete user with ID: {UserId}", id);
+                throw;
+            }
+        }
+
         public async Task SetLastLoginAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("Setting last login for user ID: {UserId}", userId);

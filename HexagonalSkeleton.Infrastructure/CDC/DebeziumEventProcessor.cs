@@ -1,6 +1,7 @@
 using System.Text.Json;
 using HexagonalSkeleton.Infrastructure.CDC.Configuration;
 using HexagonalSkeleton.Infrastructure.CDC.Models;
+using HexagonalSkeleton.Infrastructure.Mapping;
 using HexagonalSkeleton.Infrastructure.Persistence.Query;
 using HexagonalSkeleton.Infrastructure.Persistence.Query.Documents;
 using Microsoft.Extensions.Logging;
@@ -125,29 +126,7 @@ namespace HexagonalSkeleton.Infrastructure.CDC
             {
                 _logger.LogInformation("👤 Creating user in MongoDB: {UserId}", userData.Id);
 
-                var userQueryDocument = new UserQueryDocument
-                {
-                    Id = userData.Id,
-                    FullName = new FullNameDocument
-                    {
-                        FirstName = userData.FirstName,
-                        LastName = userData.LastName
-                    },
-                    Email = userData.Email,
-                    PhoneNumber = userData.PhoneNumber,
-                    Birthdate = userData.GetBirthdate(),
-                    Location = new LocationDocument
-                    {
-                        Latitude = userData.Latitude ?? 0.0,
-                        Longitude = userData.Longitude ?? 0.0
-                    },
-                    AboutMe = userData.AboutMe ?? string.Empty,
-                    CreatedAt = userData.GetCreatedAt(),
-                    UpdatedAt = userData.GetUpdatedAt(),
-                    IsDeleted = userData.IsDeleted,
-                    DeletedAt = userData.GetDeletedAt(),
-                    LastLogin = userData.GetLastLogin()
-                };
+                var userQueryDocument = BuildDocumentFromChangeData(userData);
 
                 var filter = Builders<UserQueryDocument>.Filter.Eq(x => x.Id, userData.Id);
                 await _queryDbContext.Users.ReplaceOneAsync(
@@ -181,29 +160,7 @@ namespace HexagonalSkeleton.Infrastructure.CDC
             {
                 _logger.LogInformation("🔄 Updating user in MongoDB: {UserId}", userData.Id);
 
-                var userQueryDocument = new UserQueryDocument
-                {
-                    Id = userData.Id,
-                    FullName = new FullNameDocument
-                    {
-                        FirstName = userData.FirstName,
-                        LastName = userData.LastName
-                    },
-                    Email = userData.Email,
-                    PhoneNumber = userData.PhoneNumber,
-                    Birthdate = userData.GetBirthdate(),
-                    Location = new LocationDocument
-                    {
-                        Latitude = userData.Latitude ?? 0.0,
-                        Longitude = userData.Longitude ?? 0.0
-                    },
-                    AboutMe = userData.AboutMe ?? string.Empty,
-                    CreatedAt = userData.GetCreatedAt(),
-                    UpdatedAt = userData.GetUpdatedAt(),
-                    IsDeleted = userData.IsDeleted,
-                    DeletedAt = userData.GetDeletedAt(),
-                    LastLogin = userData.GetLastLogin()
-                };
+                var userQueryDocument = BuildDocumentFromChangeData(userData);
 
                 var filter = Builders<UserQueryDocument>.Filter.Eq(x => x.Id, userData.Id);
                 var result = await _queryDbContext.Users.ReplaceOneAsync(
@@ -246,7 +203,11 @@ namespace HexagonalSkeleton.Infrastructure.CDC
                 _logger.LogInformation("Marking user as deleted in MongoDB: {UserId}", userData.Id);
 
                 var filter = Builders<UserQueryDocument>.Filter.Eq(x => x.Id, userData.Id);
-                var update = Builders<UserQueryDocument>.Update.Set(x => x.IsDeleted, true);
+                // Keep DeletedAt consistent with the command side, which always sets a timestamp on delete.
+                var deletedAt = userData.GetDeletedAt() ?? DateTime.UtcNow;
+                var update = Builders<UserQueryDocument>.Update
+                    .Set(x => x.IsDeleted, true)
+                    .Set(x => x.DeletedAt, deletedAt);
 
                 var result = await _queryDbContext.Users.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
 
@@ -266,6 +227,53 @@ namespace HexagonalSkeleton.Infrastructure.CDC
                 _logger.LogError(ex, "Error deleting user in MongoDB: {UserId}, Error: {Error}", userData.Id, ex.Message);
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Builds a read-model document from CDC change data, populating the computed Age and
+        /// ProfileCompleteness fields so they stay consistent with the command-side mappers.
+        /// </summary>
+        private static UserQueryDocument BuildDocumentFromChangeData(UserChangeData userData)
+        {
+            var birthdate = userData.GetBirthdate();
+            var latitude = userData.Latitude ?? 0.0;
+            var longitude = userData.Longitude ?? 0.0;
+            var aboutMe = userData.AboutMe ?? string.Empty;
+
+            return new UserQueryDocument
+            {
+                Id = userData.Id,
+                FullName = new FullNameDocument
+                {
+                    FirstName = userData.FirstName,
+                    LastName = userData.LastName,
+                    DisplayName = $"{userData.FirstName} {userData.LastName}"
+                },
+                Email = userData.Email,
+                PhoneNumber = userData.PhoneNumber,
+                Birthdate = birthdate,
+                Location = new LocationDocument
+                {
+                    Latitude = latitude,
+                    Longitude = longitude
+                },
+                AboutMe = aboutMe,
+                CreatedAt = userData.GetCreatedAt(),
+                UpdatedAt = userData.GetUpdatedAt(),
+                IsDeleted = userData.IsDeleted,
+                DeletedAt = userData.GetDeletedAt(),
+                LastLogin = userData.GetLastLogin(),
+                Age = UserQueryDocumentMapper.CalculateAge(birthdate),
+                ProfileCompleteness = UserQueryDocumentMapper.CalculateProfileCompleteness(
+                    userData.Email,
+                    userData.FirstName,
+                    userData.LastName,
+                    userData.PhoneNumber,
+                    birthdate,
+                    latitude,
+                    longitude,
+                    aboutMe)
+            };
         }
 
         /// <summary>

@@ -5,6 +5,7 @@ using HexagonalSkeleton.Infrastructure.Mapping;
 using HexagonalSkeleton.Infrastructure.Persistence.Query;
 using HexagonalSkeleton.Infrastructure.Persistence.Query.Documents;
 using MongoDB.Driver;
+using MongoDB.Driver.GeoJsonObjectModel;
 using MongoDB.Bson;
 using Microsoft.Extensions.Logging;
 
@@ -197,17 +198,32 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Query
             try
             {
                 var filterBuilder = Builders<UserQueryDocument>.Filter;
-                var geoFilter = filterBuilder.GeoWithinCenterSphere(
-                    u => u.Location,
-                    longitude, latitude, radiusKm / 6378.1); // Earth's radius in km
                 var activeFilter = filterBuilder.Eq(u => u.IsDeleted, false);
-                var combinedFilter = filterBuilder.And(geoFilter, activeFilter);
 
-                var totalCount = await _queryContext.Users.CountDocumentsAsync(combinedFilter, cancellationToken: cancellationToken);
+                // Geospatial query must run against the GeoJSON point backed by the 2dsphere index
+                // (location.coordinates), not the flat LocationDocument POCO. This mirrors the working
+                // pattern in UserReadRepositoryMongoAdapter.FindNearbyUsersAsync.
+                var point = new GeoJsonPoint<GeoJson2DGeographicCoordinates>(
+                    new GeoJson2DGeographicCoordinates(longitude, latitude));
+                var maxDistanceMeters = radiusKm * 1000;
+
+                // NearSphere returns documents already sorted by distance, but it cannot be used with
+                // CountDocumentsAsync. GeoWithinCenterSphere over the same field is count-compatible, so
+                // it is used to compute the total for pagination.
+                var nearFilter = filterBuilder.And(
+                    filterBuilder.NearSphere(u => u.Location, point, maxDistanceMeters),
+                    activeFilter);
+
+                var radiusInRadians = radiusKm / 6378.1; // Earth's radius in km
+                var withinFilter = filterBuilder.And(
+                    filterBuilder.GeoWithinCenterSphere(
+                        u => u.Location, longitude, latitude, radiusInRadians),
+                    activeFilter);
+
+                var totalCount = await _queryContext.Users.CountDocumentsAsync(withinFilter, cancellationToken: cancellationToken);
 
                 var users = await _queryContext.Users
-                    .Find(combinedFilter)
-                    .Sort(Builders<UserQueryDocument>.Sort.Descending(u => u.CreatedAt))
+                    .Find(nearFilter)
                     .Skip(paginationParams.Skip)
                     .Limit(paginationParams.Take)
                     .ToListAsync(cancellationToken);

@@ -61,7 +61,10 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Query
         /// </summary>
         public async Task<User?> GetUserByEmailAsync(string email, CancellationToken cancellationToken = default)
         {
-            var filter = Builders<UserQueryDocument>.Filter.Eq(u => u.Email, email) &
+            // Stored emails are always lowercased by the Email value object, so normalize the lookup
+            // to keep behaviour consistent with ExistsByEmailAsync.
+            var normalizedEmail = email.ToLowerInvariant();
+            var filter = Builders<UserQueryDocument>.Filter.Eq(u => u.Email, normalizedEmail) &
                          Builders<UserQueryDocument>.Filter.Eq(u => u.IsDeleted, false);
             
             var document = await _dbContext.Users

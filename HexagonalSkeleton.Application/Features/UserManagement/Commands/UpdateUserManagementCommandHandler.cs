@@ -21,9 +21,9 @@ namespace HexagonalSkeleton.Application.Features.UserManagement.Commands
             if (!result.IsValid)
                 throw new Exceptions.ValidationException(result.ToDictionary());
 
-            // Get the existing user (including deleted ones for domain validation)
+            // Get the existing user (including deleted ones so we can reject updates on them with 404)
             var user = await userWriteRepository.GetByIdUnfilteredAsync(request.Id, cancellationToken);
-            if (user == null)
+            if (user == null || user.IsDeleted)
                 throw new NotFoundException("User", request.Id);
 
             // Update user properties using domain methods

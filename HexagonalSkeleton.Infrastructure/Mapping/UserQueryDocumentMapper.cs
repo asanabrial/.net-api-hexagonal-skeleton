@@ -162,45 +162,63 @@ namespace HexagonalSkeleton.Infrastructure.Mapping
                 phone
             };
 
-        private static int? CalculateAge(DateTime? birthdate)
+        internal static int? CalculateAge(DateTime? birthdate)
         {
             if (!birthdate.HasValue) return null;
 
             return AgeCalculator.CalculateAge(birthdate.Value, DateTime.UtcNow.Date);
         }
 
-        private static double CalculateProfileCompleteness(User user)
+        /// <summary>
+        /// Computes profile completeness (0-100) from the flat fields shared by the command entity
+        /// and CDC change data. Kept as a single source of truth so the CDC sync path stays consistent
+        /// with the command-side mappers.
+        /// </summary>
+        internal static double CalculateProfileCompleteness(
+            string? email,
+            string? firstName,
+            string? lastName,
+            string? phoneNumber,
+            DateTime? birthdate,
+            double latitude,
+            double longitude,
+            string? aboutMe)
         {
             var fields = new[]
             {
-                !string.IsNullOrWhiteSpace(user.Email?.Value),
-                !string.IsNullOrWhiteSpace(user.FullName?.FirstName),
-                !string.IsNullOrWhiteSpace(user.FullName?.LastName),
-                !string.IsNullOrWhiteSpace(user.PhoneNumber?.Value),
-                user.Birthdate.HasValue,
-                user.Location?.Latitude != 0 && user.Location?.Longitude != 0,
-                !string.IsNullOrWhiteSpace(user.AboutMe)
+                !string.IsNullOrWhiteSpace(email),
+                !string.IsNullOrWhiteSpace(firstName),
+                !string.IsNullOrWhiteSpace(lastName),
+                !string.IsNullOrWhiteSpace(phoneNumber),
+                birthdate.HasValue,
+                latitude != 0 && longitude != 0,
+                !string.IsNullOrWhiteSpace(aboutMe)
             };
 
             var completedFields = fields.Count(f => f);
             return (double)completedFields / fields.Length * 100;
         }
 
-        private static double CalculateProfileCompletenessFromEntity(UserCommandEntity entity)
-        {
-            var fields = new[]
-            {
-                !string.IsNullOrWhiteSpace(entity.Email),
-                !string.IsNullOrWhiteSpace(entity.FirstName),
-                !string.IsNullOrWhiteSpace(entity.LastName),
-                !string.IsNullOrWhiteSpace(entity.PhoneNumber),
-                entity.Birthdate.HasValue,
-                entity.Latitude != 0 && entity.Longitude != 0,
-                !string.IsNullOrWhiteSpace(entity.AboutMe)
-            };
+        private static double CalculateProfileCompleteness(User user) =>
+            CalculateProfileCompleteness(
+                user.Email?.Value,
+                user.FullName?.FirstName,
+                user.FullName?.LastName,
+                user.PhoneNumber?.Value,
+                user.Birthdate,
+                user.Location?.Latitude ?? 0,
+                user.Location?.Longitude ?? 0,
+                user.AboutMe);
 
-            var completedFields = fields.Count(f => f);
-            return (double)completedFields / fields.Length * 100;
-        }
+        private static double CalculateProfileCompletenessFromEntity(UserCommandEntity entity) =>
+            CalculateProfileCompleteness(
+                entity.Email,
+                entity.FirstName,
+                entity.LastName,
+                entity.PhoneNumber,
+                entity.Birthdate,
+                entity.Latitude,
+                entity.Longitude,
+                entity.AboutMe);
     }
 }

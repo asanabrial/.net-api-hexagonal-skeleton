@@ -10,7 +10,17 @@ namespace HexagonalSkeleton.Domain.Ports
     {
         Task<Guid> CreateAsync(User user, CancellationToken cancellationToken = default);
         Task UpdateAsync(User user, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Soft delete: marks the user as deleted (IsDeleted = true) without removing the row.
+        /// </summary>
         Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Hard delete: physically removes the user row from the store.
+        /// Unlike <see cref="DeleteAsync"/>, this operates regardless of the current IsDeleted state.
+        /// </summary>
+        Task RemoveAsync(Guid id, CancellationToken cancellationToken = default);
         Task SetLastLoginAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<User?> GetTrackedByIdAsync(Guid id, CancellationToken cancellationToken = default);
         

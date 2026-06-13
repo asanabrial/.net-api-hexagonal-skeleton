@@ -21,13 +21,14 @@ namespace HexagonalSkeleton.Application.Features.UserManagement.Commands
             if (!validationResult.IsValid)
                 throw new Exceptions.ValidationException(validationResult.ToDictionary());
 
-            // Check if user exists (including deleted ones) before attempting deletion
+            // Check if user exists (including already soft-deleted ones) before attempting deletion.
+            // A hard delete is valid even on a soft-deleted user, so we only need an existence check here.
             var user = await userWriteRepository.GetByIdUnfilteredAsync(request.Id, cancellationToken);
             if (user == null)
                 throw new NotFoundException("User", request.Id);
 
-            // Perform the deletion
-            await userWriteRepository.DeleteAsync(request.Id, cancellationToken);            // Return deletion result
+            // Perform a real physical deletion (hard delete) - distinct from the soft delete path.
+            await userWriteRepository.RemoveAsync(request.Id, cancellationToken);            // Return deletion result
             return new UserDeletionDto 
             { 
                 UserId = request.Id
