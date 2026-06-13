@@ -60,6 +60,12 @@ namespace HexagonalSkeleton.API.Config
                         logger.LogError("JWT Authentication failed: {Exception}", context.Exception.Message);
                         return Task.CompletedTask;
                     },
+                    // Deliberate security tradeoff: we hit the read repository on every
+                    // authenticated request to confirm the user still exists and is active.
+                    // This enables immediate revocation of soft-deleted users (a still-valid
+                    // JWT is rejected as soon as the account is removed) at the cost of one DB
+                    // lookup per request. Covered by an integration test. Do not "optimize"
+                    // this away without an alternative revocation mechanism.
                     OnTokenValidated = async context =>
                     {
                         // Log successful token validation

@@ -16,20 +16,17 @@ namespace HexagonalSkeleton.Application.Features.UserAuthentication.Commands
     public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthenticationDto>
     {
         private readonly IValidator<LoginCommand> _validator;
-        private readonly IUserReadRepository _userReadRepository;
         private readonly IUserWriteRepository _userWriteRepository;
         private readonly IAuthenticationService _authenticationService;
         private readonly ILogger<LoginCommandHandler> _logger;
 
         public LoginCommandHandler(
             IValidator<LoginCommand> validator,
-            IUserReadRepository userReadRepository,
             IUserWriteRepository userWriteRepository,
             IAuthenticationService authenticationService,
             ILogger<LoginCommandHandler> logger)
         {
             _validator = validator;
-            _userReadRepository = userReadRepository;
             _userWriteRepository = userWriteRepository;
             _authenticationService = authenticationService;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -46,8 +43,10 @@ namespace HexagonalSkeleton.Application.Features.UserAuthentication.Commands
             
             if (user == null)
             {
+                // Use the same generic failure as a wrong password to avoid account enumeration:
+                // returning 404 for unknown emails would reveal which addresses are registered.
                 _logger.LogWarning("User not found with email: {Email} in write repository", request.Email);
-                throw new NotFoundException("User", request.Email);
+                throw new AuthenticationException("Invalid email or password");
             }
             
             _logger.LogInformation("User found in write repository: ID={UserId}, Email={Email}, HasSalt={HasSalt}, HasHash={HasHash}", 

@@ -2,6 +2,7 @@ using HexagonalSkeleton.Infrastructure.Persistence;
 using HexagonalSkeleton.Infrastructure.Persistence.Command;
 using HexagonalSkeleton.Infrastructure.Persistence.Query;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using MongoDB.Driver;
 
 namespace HexagonalSkeleton.API.Config
@@ -16,10 +17,10 @@ namespace HexagonalSkeleton.API.Config
         /// Configures all CQRS databases (command and query stores)
         /// Entry point for database configuration
         /// </summary>
-        public static IServiceCollection AddCqrsDatabases(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddCqrsDatabases(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
         {
             // Configure command database (PostgreSQL)
-            services.AddCommandDatabaseInternal(configuration);
+            services.AddCommandDatabaseInternal(configuration, environment);
             
             // Configure query database (MongoDB)
             services.AddQueryDatabaseInternal(configuration);
@@ -31,10 +32,10 @@ namespace HexagonalSkeleton.API.Config
         /// Configures the command (write) database with PostgreSQL
         /// Internal method to avoid naming conflicts
         /// </summary>
-        private static IServiceCollection AddCommandDatabaseInternal(this IServiceCollection services, IConfiguration configuration)
+        private static IServiceCollection AddCommandDatabaseInternal(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
         {
             var connectionStr = configuration.GetConnectionString("HexagonalSkeleton");
-            
+
             if (string.IsNullOrEmpty(connectionStr))
             {
                 throw new InvalidOperationException("Connection string 'HexagonalSkeleton' not found in configuration.");
@@ -44,13 +45,21 @@ namespace HexagonalSkeleton.API.Config
             // CommandDbContext will be the only context for write operations using PostgreSQL
             services.AddDbContext<CommandDbContext>(
                 dbContextOptions =>
+                {
                     dbContextOptions.UseNpgsql(
-                        connectionStr, 
+                        connectionStr,
                         options => options.MigrationsAssembly("HexagonalSkeleton.MigrationDb"))
-                    // The following options help with debugging
-                    .LogTo(Console.WriteLine, LogLevel.Information)
-                    .EnableSensitiveDataLogging()
-                    .EnableDetailedErrors()
+                        // The following options help with debugging
+                        .LogTo(Console.WriteLine, LogLevel.Information)
+                        .EnableDetailedErrors();
+
+                    // Sensitive data logging exposes SQL parameter values (passwords, tokens).
+                    // Restrict it to Development so credentials never reach production logs.
+                    if (environment.IsDevelopment())
+                    {
+                        dbContextOptions.EnableSensitiveDataLogging();
+                    }
+                }
             );
 
             return services;

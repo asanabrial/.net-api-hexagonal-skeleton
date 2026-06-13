@@ -33,7 +33,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddOptions();
 
 // Configure CQRS databases - Using updated extension method
-builder.Services.AddCqrsDatabases(builder.Configuration);
+builder.Services.AddCqrsDatabases(builder.Configuration, builder.Environment);
 
 // CQRS services configuration
 builder.Services.AddCqrsServices();
