@@ -1,6 +1,6 @@
-using AutoMapper;
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.Services;
+using HexagonalSkeleton.Infrastructure.Mapping;
 using HexagonalSkeleton.Infrastructure.Persistence.Query;
 using HexagonalSkeleton.Infrastructure.Persistence.Query.Documents;
 using MongoDB.Driver;
@@ -15,17 +15,14 @@ namespace HexagonalSkeleton.Infrastructure.Services.Sync
     public class UserSyncService : IUserSyncService
     {
         private readonly QueryDbContext _queryDbContext;
-        private readonly IMapper _mapper;
         private readonly ILogger<UserSyncService> _logger;
         private readonly IMongoCollection<UserQueryDocument> _usersCollection;
 
         public UserSyncService(
             QueryDbContext queryDbContext,
-            IMapper mapper,
             ILogger<UserSyncService> logger)
         {
             _queryDbContext = queryDbContext ?? throw new ArgumentNullException(nameof(queryDbContext));
-            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _usersCollection = _queryDbContext.Users ?? throw new InvalidOperationException("Users collection is not initialized");
         }
@@ -40,7 +37,7 @@ namespace HexagonalSkeleton.Infrastructure.Services.Sync
             {
                 _logger.LogInformation("Starting sync for user {UserId}", user.Id);
 
-                var userDocument = _mapper.Map<UserQueryDocument>(user);
+                var userDocument = user.ToDocument();
                 
                 // Use upsert to handle both create and update scenarios
                 var filter = Builders<UserQueryDocument>.Filter.Eq(u => u.Id, user.Id);
@@ -75,7 +72,7 @@ namespace HexagonalSkeleton.Infrastructure.Services.Sync
 
                 foreach (var user in userList)
                 {
-                    var userDocument = _mapper.Map<UserQueryDocument>(user);
+                    var userDocument = user.ToDocument();
                     var filter = Builders<UserQueryDocument>.Filter.Eq(u => u.Id, user.Id);
                     var replaceOne = new ReplaceOneModel<UserQueryDocument>(filter, userDocument)
                     {

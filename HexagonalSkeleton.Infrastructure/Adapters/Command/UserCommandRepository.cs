@@ -1,6 +1,6 @@
-using AutoMapper;
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.Ports;
+using HexagonalSkeleton.Infrastructure.Mapping;
 using HexagonalSkeleton.Infrastructure.Persistence.Command;
 using HexagonalSkeleton.Infrastructure.Persistence.Command.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -16,16 +16,13 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Command
     public class UserCommandRepository : IUserWriteRepository
     {
         private readonly CommandDbContext _dbContext;
-        private readonly IMapper _mapper;
         private readonly ILogger<UserCommandRepository> _logger;
 
         public UserCommandRepository(
-            CommandDbContext dbContext, 
-            IMapper mapper, 
+            CommandDbContext dbContext,
             ILogger<UserCommandRepository> logger)
         {
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -35,7 +32,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Command
 
             try
             {
-                var userEntity = _mapper.Map<UserCommandEntity>(user);
+                var userEntity = user.ToEntity();
                 _dbContext.Users.Add(userEntity);
                 await _dbContext.SaveChangesAsync(cancellationToken);
 
@@ -62,8 +59,8 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Command
                     throw new InvalidOperationException($"User with ID {user.Id} not found or deleted");
                 }
 
-                // Map domain object to entity
-                _mapper.Map(user, existingEntity);
+                // Map domain object onto the tracked entity (in-place to preserve EF change tracking)
+                user.MapInto(existingEntity);
                 existingEntity.UpdatedAt = DateTime.UtcNow;
 
                 await _dbContext.SaveChangesAsync(cancellationToken);
@@ -144,8 +141,8 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Command
                     return null;
                 }
 
-                var user = _mapper.Map<User>(userEntity);
-                
+                var user = userEntity.ToDomain();
+
                 return user;
             }
             catch (Exception ex)
@@ -171,8 +168,8 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Command
                     return null;
                 }
 
-                var user = _mapper.Map<User>(userEntity);
-                
+                var user = userEntity.ToDomain();
+
                 return user;
             }
             catch (Exception ex)
@@ -211,8 +208,8 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Command
                     return null;
                 }
 
-                var user = _mapper.Map<User>(userEntity);
-                
+                var user = userEntity.ToDomain();
+
                 return user;
             }
             catch (Exception ex)

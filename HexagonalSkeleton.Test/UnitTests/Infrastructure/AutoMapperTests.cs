@@ -1,94 +1,59 @@
-using AutoMapper;
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Infrastructure.Persistence.Query.Documents;
 using HexagonalSkeleton.Infrastructure.Mapping;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using MongoDB.Driver;
 using Xunit;
 
 namespace HexagonalSkeleton.Test.Mapping
 {
-    public class AutoMapperTests
+    /// <summary>
+    /// Tests for the hand-written Infrastructure mappers that replaced AutoMapper.
+    /// Covers the MongoDB read document -> domain User reconstruction.
+    /// </summary>
+    public class UserQueryDocumentMapperTests
     {
-        private readonly IMapper _mapper;
-
-        public AutoMapperTests()
+        private static UserQueryDocument BuildDocument(string email) => new()
         {
-            var configuration = new MapperConfiguration(cfg =>
+            Id = Guid.NewGuid(),
+            Email = email,
+            FullName = new FullNameDocument
             {
-                cfg.AddProfile<InfrastructureMappingProfile>();
-            });
-            // Verify all mappings are properly configured
-            configuration.AssertConfigurationIsValid();
-            _mapper = new Mapper(configuration);
-        }
+                FirstName = "John",
+                LastName = "Doe",
+                DisplayName = "John Doe"
+            },
+            PhoneNumber = "+1234567890",
+            Birthdate = DateTime.UtcNow.AddYears(-25),
+            Location = new LocationDocument
+            {
+                Latitude = 40.7128,
+                Longitude = -74.006
+            },
+            AboutMe = "Test about me",
+            CreatedAt = DateTime.UtcNow,
+            IsDeleted = false
+        };
 
         [Fact]
-        public void Should_Map_UserQueryDocument_To_User()
+        public void ToDomain_MapsDocumentToUser()
         {
-            // Arrange
-            var document = new UserQueryDocument
-            {
-                Id = Guid.NewGuid(),
-                Email = "test@example.com",
-                FullName = new FullNameDocument
-                {
-                    FirstName = "John",
-                    LastName = "Doe",
-                    DisplayName = "John Doe"
-                },
-                PhoneNumber = "+1234567890",
-                Birthdate = DateTime.UtcNow.AddYears(-25),
-                Location = new LocationDocument
-                {
-                    Latitude = 40.7128,
-                    Longitude = -74.006
-                },
-                AboutMe = "Test about me",
-                CreatedAt = DateTime.UtcNow,
-                IsDeleted = false
-            };
+            var document = BuildDocument("test@example.com");
 
-            // Act & Assert
-            var user = _mapper.Map<User>(document);
+            var user = document.ToDomain();
+
             Assert.NotNull(user);
             Assert.Equal(document.Id, user.Id);
             Assert.Equal(document.Email, user.Email.Value);
+            Assert.Equal("John", user.FullName.FirstName);
+            Assert.Equal("Doe", user.FullName.LastName);
         }
 
         [Fact]
-        public void Should_Map_List_Of_UserQueryDocument_To_List_Of_User()
+        public void ToDomain_MapsEachDocumentInList()
         {
-            // Arrange
-            var documents = new List<UserQueryDocument>
-            {
-                new UserQueryDocument
-                {
-                    Id = Guid.NewGuid(),
-                    Email = "test1@example.com",
-                    FullName = new FullNameDocument
-                    {
-                        FirstName = "John",
-                        LastName = "Doe",
-                        DisplayName = "John Doe"
-                    },
-                    PhoneNumber = "+1234567890",
-                    Birthdate = DateTime.UtcNow.AddYears(-25),
-                    Location = new LocationDocument
-                    {
-                        Latitude = 40.7128,
-                        Longitude = -74.006
-                    },
-                    AboutMe = "Test about me",
-                    CreatedAt = DateTime.UtcNow,
-                    IsDeleted = false
-                }
-            };
+            var documents = new List<UserQueryDocument> { BuildDocument("test1@example.com") };
 
-            // Act & Assert
-            var users = _mapper.Map<List<User>>(documents);
-            Assert.NotNull(users);
+            var users = documents.Select(d => d.ToDomain()).ToList();
+
             Assert.Single(users);
             Assert.Equal(documents[0].Email, users[0].Email.Value);
         }

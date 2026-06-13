@@ -1,8 +1,8 @@
-using AutoMapper;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.ValueObjects;
 using HexagonalSkeleton.Domain.Specifications;
+using HexagonalSkeleton.Infrastructure.Mapping;
 using HexagonalSkeleton.Infrastructure.Persistence.Query;
 using HexagonalSkeleton.Infrastructure.Persistence.Query.Documents;
 using HexagonalSkeleton.Infrastructure.Services;
@@ -20,18 +20,15 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Query
     public class UserReadRepositoryMongoAdapter : IUserReadRepository, IUserExistenceChecker, IUserSearchService, IUserReader
     {
         private readonly QueryDbContext _dbContext;
-        private readonly IMapper _mapper;
         private readonly IMongoFilterBuilder _filterBuilder;
         private readonly IMongoSortBuilder _sortBuilder;
 
         public UserReadRepositoryMongoAdapter(
-            QueryDbContext dbContext, 
-            IMapper mapper,
+            QueryDbContext dbContext,
             IMongoFilterBuilder filterBuilder,
             IMongoSortBuilder sortBuilder)
         {
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _filterBuilder = filterBuilder ?? throw new ArgumentNullException(nameof(filterBuilder));
             _sortBuilder = sortBuilder ?? throw new ArgumentNullException(nameof(sortBuilder));
         }
@@ -56,7 +53,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Query
                 .Find(filter)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            return document != null ? _mapper.Map<User>(document) : null;
+            return document?.ToDomain();
         }
 
         /// <summary>
@@ -71,7 +68,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Query
                 .Find(filter)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            return document != null ? _mapper.Map<User>(document) : null;
+            return document?.ToDomain();
         }
 
         /// <summary>
@@ -104,7 +101,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Query
                 .ToListAsync(cancellationToken);
 
             // Map to domain entities
-            var users = _mapper.Map<List<User>>(documents);
+            var users = documents.Select(d => d.ToDomain()).ToList();
 
             // Create paged result
             return new PagedResult<User>(users, (int)totalCount, pagination);
@@ -142,7 +139,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Query
                 .Find(filter)
                 .ToListAsync(cancellationToken);
 
-            return _mapper.Map<List<User>>(documents);
+            return documents.Select(d => d.ToDomain()).ToList();
         }
         
         // Implementation of IUserReadRepository methods
@@ -164,7 +161,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Query
                 .Find(filter)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            return document != null ? _mapper.Map<User>(document) : null;
+            return document?.ToDomain();
         }
 
         public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
@@ -179,7 +176,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Query
                 .Find(filter)
                 .ToListAsync(cancellationToken);
 
-            return _mapper.Map<List<User>>(documents);
+            return documents.Select(d => d.ToDomain()).ToList();
         }
 
         public async Task<PagedResult<User>> GetUsersAsync(PaginationParams pagination, CancellationToken cancellationToken = default)
@@ -202,7 +199,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Query
                 .ToListAsync(cancellationToken);
 
             // Map to domain entities
-            var users = _mapper.Map<List<User>>(documents);
+            var users = documents.Select(d => d.ToDomain()).ToList();
 
             // Create paged result
             return new PagedResult<User>(users, (int)totalCount, pagination);
@@ -243,7 +240,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Query
                 .ToListAsync(cancellationToken);
                 
             // Map and return
-            var users = _mapper.Map<List<User>>(documents);
+            var users = documents.Select(d => d.ToDomain()).ToList();
             return new PagedResult<User>(users, (int)totalCount, pagination);
         }
 
@@ -256,7 +253,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Query
                 .Find(filter)
                 .ToListAsync(cancellationToken);
                 
-            return _mapper.Map<List<User>>(documents);
+            return documents.Select(d => d.ToDomain()).ToList();
         }
 
         public async Task<int> CountUsersAsync(ISpecification<User> specification, CancellationToken cancellationToken = default)

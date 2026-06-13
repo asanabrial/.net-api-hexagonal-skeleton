@@ -1,12 +1,12 @@
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain.Ports.Dtos;
 using HexagonalSkeleton.Domain.ValueObjects;
+using HexagonalSkeleton.Infrastructure.Mapping;
 using HexagonalSkeleton.Infrastructure.Persistence.Query;
 using HexagonalSkeleton.Infrastructure.Persistence.Query.Documents;
 using MongoDB.Driver;
 using MongoDB.Bson;
 using Microsoft.Extensions.Logging;
-using AutoMapper;
 
 namespace HexagonalSkeleton.Infrastructure.Adapters.Query
 {
@@ -19,16 +19,13 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Query
     public class UserQueryRepository : IUserQueryRepository
     {
         private readonly QueryDbContext _queryContext;
-        private readonly IMapper _mapper;
         private readonly ILogger<UserQueryRepository> _logger;
 
         public UserQueryRepository(
             QueryDbContext queryContext,
-            IMapper mapper,
             ILogger<UserQueryRepository> logger)
         {
             _queryContext = queryContext ?? throw new ArgumentNullException(nameof(queryContext));
-            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -52,7 +49,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Query
                     .Limit(paginationParams.Take)
                     .ToListAsync(cancellationToken);
 
-                var userDtos = _mapper.Map<List<UserQueryDto>>(users);
+                var userDtos = users.Select(u => u.ToQueryDto()).ToList();
 
                 return new PagedResult<UserQueryDto>(userDtos, (int)totalCount, paginationParams);
             }
@@ -78,7 +75,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Query
                     .Find(filter)
                     .FirstOrDefaultAsync(cancellationToken);
 
-                return user != null ? _mapper.Map<UserQueryDto>(user) : null;
+                return user?.ToQueryDto();
             }
             catch (Exception ex)
             {
@@ -102,7 +99,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Query
                     .Find(filter)
                     .FirstOrDefaultAsync(cancellationToken);
 
-                return user != null ? _mapper.Map<UserQueryDto>(user) : null;
+                return user?.ToQueryDto();
             }
             catch (Exception ex)
             {
@@ -176,7 +173,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Query
                     .Limit(paginationParams.Take)
                     .ToListAsync(cancellationToken);
 
-                var userDtos = _mapper.Map<List<UserQueryDto>>(users);
+                var userDtos = users.Select(u => u.ToQueryDto()).ToList();
 
                 return new PagedResult<UserQueryDto>(userDtos, (int)totalCount, paginationParams);
             }
@@ -215,7 +212,7 @@ namespace HexagonalSkeleton.Infrastructure.Adapters.Query
                     .Limit(paginationParams.Take)
                     .ToListAsync(cancellationToken);
 
-                var userDtos = _mapper.Map<List<UserQueryDto>>(users);
+                var userDtos = users.Select(u => u.ToQueryDto()).ToList();
 
                 return new PagedResult<UserQueryDto>(userDtos, (int)totalCount, paginationParams);
             }

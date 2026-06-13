@@ -1,5 +1,4 @@
 using HexagonalSkeleton.API.Mapping;
-using HexagonalSkeleton.Infrastructure.Mapping;
 using HexagonalSkeleton.Application.Mapping;
 
 namespace HexagonalSkeleton.API.Config
@@ -21,10 +20,8 @@ namespace HexagonalSkeleton.API.Config
                 config.AllowNullDestinationValues = true;
                 config.AllowNullCollections = true;
             },
-            // Scan multiple assemblies for profiles and [AutoMap] attributes
+            // Scan remaining assemblies for profiles and [AutoMap] attributes
             typeof(ApiMappingProfile).Assembly,                    // API assembly
-            typeof(InfrastructureMappingProfile).Assembly,         // Infrastructure assembly  
-            typeof(CqrsMappingProfile).Assembly,                   // CQRS mapping profile
             typeof(ApplicationMappingProfile).Assembly             // Application assembly (for [AutoMap] attributes)
             );
             
