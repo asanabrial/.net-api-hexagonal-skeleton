@@ -2,8 +2,8 @@ using FluentValidation;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Application.Common.Messaging;
-using AutoMapper;
 using HexagonalSkeleton.Application.Features.UserAuthentication.Dto;
+using HexagonalSkeleton.Application.Mapping;
 using Microsoft.Extensions.Logging;
 
 namespace HexagonalSkeleton.Application.Features.UserAuthentication.Commands
@@ -19,7 +19,6 @@ namespace HexagonalSkeleton.Application.Features.UserAuthentication.Commands
         private readonly IUserReadRepository _userReadRepository;
         private readonly IUserWriteRepository _userWriteRepository;
         private readonly IAuthenticationService _authenticationService;
-        private readonly IMapper _mapper;
         private readonly ILogger<LoginCommandHandler> _logger;
 
         public LoginCommandHandler(
@@ -27,14 +26,12 @@ namespace HexagonalSkeleton.Application.Features.UserAuthentication.Commands
             IUserReadRepository userReadRepository,
             IUserWriteRepository userWriteRepository,
             IAuthenticationService authenticationService,
-            IMapper mapper,
             ILogger<LoginCommandHandler> logger)
         {
             _validator = validator;
             _userReadRepository = userReadRepository;
             _userWriteRepository = userWriteRepository;
             _authenticationService = authenticationService;
-            _mapper = mapper;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }        public async Task<AuthenticationDto> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
@@ -82,7 +79,7 @@ namespace HexagonalSkeleton.Application.Features.UserAuthentication.Commands
             var tokenInfo = await _authenticationService.GenerateJwtTokenAsync(user.Id, cancellationToken);
             
             // Map user data to DTO and create authentication response
-            var userDto = _mapper.Map<AuthenticatedUserDto>(user);
+            var userDto = user.ToAuthenticatedUserDto();
             return new AuthenticationDto
             {
                 AccessToken = tokenInfo.Token,

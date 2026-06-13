@@ -6,7 +6,6 @@ using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
-using AutoMapper;
 using HexagonalSkeleton.Application.Features.UserManagement.Queries;
 
 namespace HexagonalSkeleton.Test.Application.Features.UserManagement.Queries;
@@ -15,19 +14,16 @@ public class GetUserManagementQueryHandlerTest
 {
     private readonly Mock<IValidator<GetUserManagementQuery>> _mockValidator;
     private readonly Mock<IUserReadRepository> _mockUserReadRepository;
-    private readonly Mock<IMapper> _mockMapper;
     private readonly GetUserManagementQueryHandler _handler;
 
     public GetUserManagementQueryHandlerTest()
     {
         _mockValidator = new Mock<IValidator<GetUserManagementQuery>>();
         _mockUserReadRepository = new Mock<IUserReadRepository>();
-        _mockMapper = new Mock<IMapper>();
 
         _handler = new GetUserManagementQueryHandler(
             _mockValidator.Object,
-            _mockUserReadRepository.Object,
-            _mockMapper.Object);
+            _mockUserReadRepository.Object);
     }
 
     [Fact]
@@ -47,22 +43,7 @@ public class GetUserManagementQueryHandlerTest
             .Setup(r => r.GetByIdUnfilteredAsync(userId, cancellationToken))
             .ReturnsAsync(user);
 
-        var expectedResult = new GetUserDto
-        {
-            Id = user.Id,
-            FirstName = user.FullName.FirstName,
-            LastName = user.FullName.LastName,
-            FullName = user.FullName.GetFullName(),
-            Email = user.Email.Value,
-            IsDeleted = user.IsDeleted,
-            DeletedAt = user.DeletedAt
-        };
-
-        _mockMapper
-            .Setup(m => m.Map<GetUserDto>(user))
-            .Returns(expectedResult);
-
-        // Act
+        // Act - the handler now runs the real mapping
         var result = await _handler.Handle(query, cancellationToken);
 
         // Assert
@@ -148,22 +129,7 @@ public class GetUserManagementQueryHandlerTest
             .Setup(r => r.GetByIdUnfilteredAsync(userId, cancellationToken))
             .ReturnsAsync(deletedUser);
 
-        var expectedResult = new GetUserDto
-        {
-            Id = deletedUser.Id,
-            FirstName = deletedUser.FullName.FirstName,
-            LastName = deletedUser.FullName.LastName,
-            FullName = deletedUser.FullName.GetFullName(),
-            Email = deletedUser.Email.Value,
-            IsDeleted = true,
-            DeletedAt = deletedUser.DeletedAt
-        };
-
-        _mockMapper
-            .Setup(m => m.Map<GetUserDto>(deletedUser))
-            .Returns(expectedResult);
-
-        // Act
+        // Act - the handler now runs the real mapping
         var result = await _handler.Handle(query, cancellationToken);
 
         // Assert

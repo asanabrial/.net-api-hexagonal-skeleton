@@ -3,7 +3,7 @@ using HexagonalSkeleton.Application.Features.UserProfile.Dto;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Application.Common.Messaging;
-using AutoMapper;
+using HexagonalSkeleton.Application.Mapping;
 
 namespace HexagonalSkeleton.Application.Features.UserProfile.Queries
 {
@@ -14,8 +14,7 @@ namespace HexagonalSkeleton.Application.Features.UserProfile.Queries
     /// </summary>
     public class GetMyProfileQueryHandler(
         IValidator<GetMyProfileQuery> validator,
-        IUserReadRepository userReadRepository,
-        IMapper mapper)
+        IUserReadRepository userReadRepository)
         : IRequestHandler<GetMyProfileQuery, UserProfileDto>
     {
         public async Task<UserProfileDto> Handle(GetMyProfileQuery request, CancellationToken cancellationToken)
@@ -32,7 +31,7 @@ namespace HexagonalSkeleton.Application.Features.UserProfile.Queries
             if (user == null)
                 throw new NotFoundException("User profile not found or user has been deleted", request.UserId);
 
-            return mapper.Map<UserProfileDto>(user);
+            return user.ToUserProfileDto();
         }
     }
 }

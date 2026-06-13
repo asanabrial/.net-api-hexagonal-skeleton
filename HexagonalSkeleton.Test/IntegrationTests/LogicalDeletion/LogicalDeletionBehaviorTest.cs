@@ -8,7 +8,6 @@ using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Test.Unit.User.Domain;
 using Moq;
 using Xunit;
-using AutoMapper;
 using DomainUser = HexagonalSkeleton.Domain.User;
 
 namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
@@ -19,8 +18,7 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
         private readonly Mock<IValidator<UpdateProfileUserCommand>> _mockUpdateValidator;
         private readonly Mock<IValidator<SoftDeleteUserManagementCommand>> _mockDeleteValidator;
         private readonly Mock<IUserWriteRepository> _mockUserWriteRepository;
-        private readonly Mock<IMapper> _mockMapper;
-        
+
         private readonly UpdateProfileUserCommandHandler _updateHandler;
         private readonly SoftDeleteUserManagementCommandHandler _deleteHandler;
 
@@ -29,12 +27,10 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
             _mockUpdateValidator = new Mock<IValidator<UpdateProfileUserCommand>>();
             _mockDeleteValidator = new Mock<IValidator<SoftDeleteUserManagementCommand>>();
             _mockUserWriteRepository = new Mock<IUserWriteRepository>();
-            _mockMapper = new Mock<IMapper>();
-            
+
             _updateHandler = new UpdateProfileUserCommandHandler(
                 _mockUpdateValidator.Object,
-                _mockUserWriteRepository.Object,
-                _mockMapper.Object);
+                _mockUserWriteRepository.Object);
                 
             _deleteHandler = new SoftDeleteUserManagementCommandHandler(
                 _mockDeleteValidator.Object,
@@ -137,22 +133,14 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
             _mockUserWriteRepository.Setup(x => x.UpdateAsync(user, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            // Configure el mapper mock para devolver algo válido
-            _mockMapper.Setup(x => x.Map<HexagonalSkeleton.Application.Features.UserProfile.Dto.UserProfileDto>(It.IsAny<DomainUser>()))
-                .Returns(new HexagonalSkeleton.Application.Features.UserProfile.Dto.UserProfileDto
-                {
-                    Id = userId,
-                    FirstName = "Jane",
-                    LastName = "Smith",
-                    Email = user.Email.Value,
-                    Birthdate = new DateTime(1985, 5, 15)
-                });
-
-            // Act
+            // Act - the handler now runs the real mapping
             var result = await _updateHandler.Handle(updateCommand, CancellationToken.None);
 
-            // Assert
+            // Assert - real mapping reflects the updated user state
             Assert.NotNull(result);
+            Assert.Equal(userId, result.Id);
+            Assert.Equal("Jane", result.FirstName);
+            Assert.Equal("Smith", result.LastName);
             Assert.Equal("Jane", user.FullName.FirstName);
             Assert.Equal("Smith", user.FullName.LastName);
             Assert.False(user.IsDeleted); // Still active

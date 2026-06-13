@@ -3,7 +3,7 @@ using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Application.Common.Pagination;
 using HexagonalSkeleton.Application.Services;
 using HexagonalSkeleton.Application.Common.Messaging;
-using AutoMapper;
+using HexagonalSkeleton.Application.Mapping;
 using FluentValidation;
 
 namespace HexagonalSkeleton.Application.Features.UserManagement.Queries
@@ -16,8 +16,7 @@ namespace HexagonalSkeleton.Application.Features.UserManagement.Queries
     public class GetAllUsersManagementQueryHandler(
         IValidator<GetAllUsersManagementQuery> validator,
         IUserReadRepository userReadRepository,
-        IUserSpecificationService specificationService,
-        IMapper mapper)
+        IUserSpecificationService specificationService)
         : IRequestHandler<GetAllUsersManagementQuery, PagedQueryResult<GetAllUsersDto>>
     {
         /// <summary>
@@ -67,11 +66,10 @@ namespace HexagonalSkeleton.Application.Features.UserManagement.Queries
 
         /// <summary>
         /// Maps domain entities to DTOs for the application layer
-        /// Uses AutoMapper for consistent mapping
         /// </summary>
         private PagedQueryResult<GetAllUsersDto> MapToResult(Domain.ValueObjects.PagedResult<Domain.User> pagedDomainResult)
         {
-            var userDtos = mapper.Map<List<GetAllUsersDto>>(pagedDomainResult.Items);
+            var userDtos = pagedDomainResult.Items.Select(u => u.ToGetAllUsersDto()).ToList();
             return PagedQueryResult<GetAllUsersDto>.FromDomain(pagedDomainResult, userDtos);
         }
     }

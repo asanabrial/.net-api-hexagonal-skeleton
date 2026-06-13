@@ -7,7 +7,6 @@ using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Test.Unit.User.Domain;
 using Moq;
 using Xunit;
-using AutoMapper;
 using DomainUser = HexagonalSkeleton.Domain.User;
 using HexagonalSkeleton.Application.Features.UserProfile.Commands;
 
@@ -16,18 +15,15 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
     {
         private readonly Mock<IValidator<UpdateProfileUserCommand>> _mockValidator;
         private readonly Mock<IUserWriteRepository> _mockUserWriteRepository;
-        private readonly Mock<IMapper> _mockMapper;
         private readonly UpdateProfileUserCommandHandler _handler;
 
         public UpdateProfileUserCommandHandlerTest()
         {
             _mockValidator = new Mock<IValidator<UpdateProfileUserCommand>>();
             _mockUserWriteRepository = new Mock<IUserWriteRepository>();
-            _mockMapper = new Mock<IMapper>();
             _handler = new UpdateProfileUserCommandHandler(
                 _mockValidator.Object,
-                _mockUserWriteRepository.Object,
-                _mockMapper.Object);
+                _mockUserWriteRepository.Object);
         }
 
         [Fact]
@@ -51,24 +47,14 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
                 .ReturnsAsync(user);            _mockUserWriteRepository.Setup(x => x.UpdateAsync(user, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            var expectedResult = new UserProfileDto
-            {
-                Id = user.Id,
-                FirstName = "Jane",
-                LastName = "Smith",
-                Birthdate = new DateTime(1985, 5, 15),
-                Email = user.Email.Value,
-                LastLogin = user.LastLogin
-            };
-
-            _mockMapper.Setup(x => x.Map<UserProfileDto>(It.IsAny<DomainUser>()))
-                .Returns(expectedResult);
-
-            // Act
+            // Act - the handler now runs the real mapping
             var result = await _handler.Handle(command, CancellationToken.None);
 
-            // Assert
+            // Assert - real mapping reflects the updated user state
             Assert.NotNull(result);
+            Assert.Equal(user.Id, result.Id);
+            Assert.Equal("Jane", result.FirstName);
+            Assert.Equal("Smith", result.LastName);
 
             // Verify the user profile was updated
             Assert.Equal("Jane", user.FullName.FirstName);
@@ -162,22 +148,11 @@ namespace HexagonalSkeleton.Test.Application.Features.UserProfile.Commands
                 .ReturnsAsync(user);            _mockUserWriteRepository.Setup(x => x.UpdateAsync(user, It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            var expectedResult = new UserProfileDto
-            {
-                Id = user.Id,
-                FirstName = firstName,
-                LastName = lastName,
-                Birthdate = new DateTime(1990, 1, 1),
-                Email = user.Email.Value,
-                LastLogin = user.LastLogin
-            };
-
-            _mockMapper.Setup(x => x.Map<UserProfileDto>(It.IsAny<DomainUser>()))
-                .Returns(expectedResult);
-
-            // Act
+            // Act - the handler now runs the real mapping
             var result = await _handler.Handle(command, CancellationToken.None);            // Assert
             Assert.NotNull(result);
+            Assert.Equal(firstName, result.FirstName);
+            Assert.Equal(lastName, result.LastName);
             Assert.Equal(firstName, user.FullName.FirstName);
             Assert.Equal(lastName, user.FullName.LastName);
         }

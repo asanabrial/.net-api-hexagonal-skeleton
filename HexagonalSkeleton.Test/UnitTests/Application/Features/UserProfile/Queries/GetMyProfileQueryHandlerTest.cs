@@ -3,7 +3,6 @@ using HexagonalSkeleton.Application.Features.UserProfile.Dto;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
 using FluentValidation;
-using AutoMapper;
 using Moq;
 using Xunit;
 using DomainUser = HexagonalSkeleton.Domain.User;
@@ -14,18 +13,15 @@ namespace HexagonalSkeleton.Test.Unit.Application.Features.UserProfile.Queries
     {
         private readonly Mock<IValidator<GetMyProfileQuery>> _mockValidator;
         private readonly Mock<IUserReadRepository> _mockUserReadRepository;
-        private readonly Mock<IMapper> _mockMapper;
         private readonly GetMyProfileQueryHandler _handler;
 
         public GetMyProfileQueryHandlerTest()
         {
             _mockValidator = new Mock<IValidator<GetMyProfileQuery>>();
             _mockUserReadRepository = new Mock<IUserReadRepository>();
-            _mockMapper = new Mock<IMapper>();
             _handler = new GetMyProfileQueryHandler(
                 _mockValidator.Object,
-                _mockUserReadRepository.Object,
-                _mockMapper.Object);
+                _mockUserReadRepository.Object);
         }
 
         [Fact]
@@ -47,33 +43,23 @@ namespace HexagonalSkeleton.Test.Unit.Application.Features.UserProfile.Queries
                 56.78,
                 "About me");
 
-            var expectedResult = new UserProfileDto
-            {
-                Id = userId,
-                FirstName = "John",
-                LastName = "Doe",
-                Email = "john.doe@example.com",
-                PhoneNumber = "+1234567890"
-            };
-
             _mockValidator.Setup(x => x.ValidateAsync(query, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new FluentValidation.Results.ValidationResult());
 
             _mockUserReadRepository.Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);
 
-            _mockMapper.Setup(x => x.Map<UserProfileDto>(user))
-                .Returns(expectedResult);
-
-            // Act
+            // Act - the handler now runs the real mapping
             var result = await _handler.Handle(query, CancellationToken.None);
 
-            // Assert
+            // Assert - values must match what the real mapper produces from the input user
             Assert.NotNull(result);
-            Assert.Equal(expectedResult.Id, result.Id);
-            Assert.Equal(expectedResult.FirstName, result.FirstName);
-            Assert.Equal(expectedResult.LastName, result.LastName);
-            Assert.Equal(expectedResult.Email, result.Email);
+            Assert.Equal(user.Id, result.Id);
+            Assert.Equal("John", result.FirstName);
+            Assert.Equal("Doe", result.LastName);
+            Assert.Equal("John Doe", result.FullName);
+            Assert.Equal("john.doe@example.com", result.Email);
+            Assert.Equal("+1234567890", result.PhoneNumber);
         }
 
         [Fact]

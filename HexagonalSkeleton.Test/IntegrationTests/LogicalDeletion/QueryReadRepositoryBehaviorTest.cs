@@ -7,7 +7,6 @@ using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Test.Unit.User.Domain;
 using Moq;
 using Xunit;
-using AutoMapper;
 using DomainUser = HexagonalSkeleton.Domain.User;
 using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 
@@ -18,20 +17,17 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
     {
         private readonly Mock<IValidator<GetUserQuery>> _mockValidator;
         private readonly Mock<IUserReadRepository> _mockUserReadRepository;
-        private readonly Mock<IMapper> _mockMapper;
-        
+
         private readonly GetUserQueryHandler _queryHandler;
 
         public QueryReadRepositoryBehaviorTest()
         {
             _mockValidator = new Mock<IValidator<GetUserQuery>>();
             _mockUserReadRepository = new Mock<IUserReadRepository>();
-            _mockMapper = new Mock<IMapper>();
-            
+
             _queryHandler = new GetUserQueryHandler(
                 _mockValidator.Object,
-                _mockUserReadRepository.Object,
-                _mockMapper.Object);
+                _mockUserReadRepository.Object);
         }
 
         [Fact]
@@ -57,9 +53,8 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
             
             // Verify that the read repository was called
             _mockUserReadRepository.Verify(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
-            
-            // Verify that the mapper was never called because there was no user
-            _mockMapper.Verify(x => x.Map<GetUserDto>(It.IsAny<DomainUser>()), Times.Never);
+
+            // No mapping happens because the user was not found (the handler throws first)
         }
 
         [Fact]
@@ -80,19 +75,7 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
             _mockUserReadRepository.Setup(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);
 
-            var expectedDto = new GetUserDto
-            {
-                Id = userId,
-                FirstName = user.FullName.FirstName,
-                LastName = user.FullName.LastName,
-                Email = user.Email.Value,
-                Birthdate = user.Birthdate
-            };
-
-            _mockMapper.Setup(x => x.Map<GetUserDto>(user))
-                .Returns(expectedDto);
-
-            // Act
+            // Act - the handler now runs the real mapping
             var result = await _queryHandler.Handle(query, CancellationToken.None);
 
             // Assert
@@ -100,9 +83,8 @@ namespace HexagonalSkeleton.Test.Integration.LogicalDeletion
             Assert.Equal(userId, result.Id);
             Assert.Equal(user.FullName.FirstName, result.FirstName);
             Assert.Equal(user.Email.Value, result.Email);
-            
+
             _mockUserReadRepository.Verify(x => x.GetByIdAsync(userId, It.IsAny<CancellationToken>()), Times.Once);
-            _mockMapper.Verify(x => x.Map<GetUserDto>(user), Times.Once);
         }
 
         [Fact]

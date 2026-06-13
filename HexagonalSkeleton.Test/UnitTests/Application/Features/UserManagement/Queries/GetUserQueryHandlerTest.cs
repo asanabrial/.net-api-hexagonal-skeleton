@@ -6,7 +6,6 @@ using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Domain;
-using AutoMapper;
 using HexagonalSkeleton.Application.Features.UserManagement.Queries;
 
 namespace HexagonalSkeleton.Test.Application.Features.UserManagement.Queries;
@@ -15,19 +14,16 @@ public class GetUserQueryHandlerTest
 {
     private readonly Mock<IValidator<GetUserQuery>> _mockValidator;
     private readonly Mock<IUserReadRepository> _mockUserReadRepository;
-    private readonly Mock<IMapper> _mockMapper;
     private readonly GetUserQueryHandler _handler;
 
     public GetUserQueryHandlerTest()
     {
         _mockValidator = new Mock<IValidator<GetUserQuery>>();
         _mockUserReadRepository = new Mock<IUserReadRepository>();
-        _mockMapper = new Mock<IMapper>();
 
         _handler = new GetUserQueryHandler(
             _mockValidator.Object,
-            _mockUserReadRepository.Object,
-            _mockMapper.Object);
+            _mockUserReadRepository.Object);
     }    [Fact]
     public async Task Handle_ValidQuery_ShouldReturnUser()
     {
@@ -41,21 +37,9 @@ public class GetUserQueryHandlerTest
             .Setup(v => v.ValidateAsync(It.IsAny<GetUserQuery>(), cancellationToken))
             .ReturnsAsync(new FluentValidation.Results.ValidationResult());        _mockUserReadRepository
             .Setup(r => r.GetByIdAsync(userId, cancellationToken))
-            .ReturnsAsync(user);        var expectedResult = new GetUserDto
-        {
-            Id = user.Id,
-            FirstName = user.FullName.FirstName,
-            LastName = user.FullName.LastName,
-            Birthdate = user.Birthdate,
-            Email = user.Email.Value,
-            LastLogin = user.LastLogin
-        };
+            .ReturnsAsync(user);
 
-        _mockMapper
-            .Setup(m => m.Map<GetUserDto>(It.IsAny<User>()))
-            .Returns(expectedResult);
-
-        // Act
+        // Act - the handler now runs the real mapping
         var result = await _handler.Handle(query, cancellationToken);
 
         // Assert

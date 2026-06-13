@@ -22,7 +22,7 @@ namespace HexagonalSkeleton.API.Config
             },
             // Scan remaining assemblies for profiles and [AutoMap] attributes
             typeof(ApiMappingProfile).Assembly,                    // API assembly
-            typeof(ApplicationMappingProfile).Assembly             // Application assembly (for [AutoMap] attributes)
+            typeof(UserDtoMapper).Assembly                         // Application assembly (for [AutoMap] attributes)
             );
             
             return services;

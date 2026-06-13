@@ -1,15 +1,14 @@
-using AutoMapper;
 using FluentValidation;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Application.Features.UserProfile.Dto;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Application.Common.Messaging;
+using HexagonalSkeleton.Application.Mapping;
 
 namespace HexagonalSkeleton.Application.Features.UserProfile.Commands
 {    public class UpdateProfileUserCommandHandler(
         IValidator<UpdateProfileUserCommand> validator,
-        IUserWriteRepository userWriteRepository,
-        IMapper mapper)
+        IUserWriteRepository userWriteRepository)
         : IRequestHandler<UpdateProfileUserCommand, UserProfileDto>
     {        public async Task<UserProfileDto> Handle(UpdateProfileUserCommand request, CancellationToken cancellationToken)
         {
@@ -32,8 +31,8 @@ namespace HexagonalSkeleton.Application.Features.UserProfile.Commands
             
             await userWriteRepository.UpdateAsync(user, cancellationToken);
             
-            // Map user data to DTO using AutoMapper
-            return mapper.Map<UserProfileDto>(user);
+            // Map user data to DTO
+            return user.ToUserProfileDto();
         }
     }
 }

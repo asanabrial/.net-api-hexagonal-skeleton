@@ -1,9 +1,9 @@
 using FluentValidation;
-using AutoMapper;
 using HexagonalSkeleton.Application.Features.UserManagement.Dto;
 using HexagonalSkeleton.Application.Exceptions;
 using HexagonalSkeleton.Domain.Ports;
 using HexagonalSkeleton.Application.Common.Messaging;
+using HexagonalSkeleton.Application.Mapping;
 
 namespace HexagonalSkeleton.Application.Features.UserManagement.Queries
 {
@@ -15,16 +15,13 @@ namespace HexagonalSkeleton.Application.Features.UserManagement.Queries
     {
         private readonly IValidator<GetUserManagementQuery> _validator;
         private readonly IUserReadRepository _userReadRepository;
-        private readonly IMapper _mapper;
 
         public GetUserManagementQueryHandler(
             IValidator<GetUserManagementQuery> validator,
-            IUserReadRepository userReadRepository,
-            IMapper mapper)
+            IUserReadRepository userReadRepository)
         {
             _validator = validator;
             _userReadRepository = userReadRepository;
-            _mapper = mapper;
         }
 
         public async Task<GetUserDto> Handle(GetUserManagementQuery request, CancellationToken cancellationToken)
@@ -38,7 +35,7 @@ namespace HexagonalSkeleton.Application.Features.UserManagement.Queries
                 throw new NotFoundException($"User with identifier '{request.Id}' was not found");
             }
 
-            return _mapper.Map<GetUserDto>(user);
+            return user.ToGetUserDto();
         }
     }
 }

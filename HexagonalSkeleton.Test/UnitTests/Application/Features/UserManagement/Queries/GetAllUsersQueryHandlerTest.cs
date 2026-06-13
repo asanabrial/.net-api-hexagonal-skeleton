@@ -7,7 +7,6 @@ using HexagonalSkeleton.Domain;
 using HexagonalSkeleton.Domain.ValueObjects;
 using HexagonalSkeleton.Domain.Specifications;
 using HexagonalSkeleton.Application.Services;
-using AutoMapper;
 using FluentValidation;
 using FluentValidation.Results;
 using HexagonalSkeleton.Application.Features.UserManagement.Queries;
@@ -23,7 +22,6 @@ public class GetAllUsersManagementQueryHandlerTest
     private readonly Mock<IValidator<GetAllUsersManagementQuery>> _mockValidator;
     private readonly Mock<IUserReadRepository> _mockUserReadRepository;
     private readonly Mock<IUserSpecificationService> _mockSpecificationService;
-    private readonly Mock<IMapper> _mockMapper;
     private readonly GetAllUsersManagementQueryHandler _handler;
 
     public GetAllUsersManagementQueryHandlerTest()
@@ -31,12 +29,10 @@ public class GetAllUsersManagementQueryHandlerTest
         _mockValidator = new Mock<IValidator<GetAllUsersManagementQuery>>();
         _mockUserReadRepository = new Mock<IUserReadRepository>();
         _mockSpecificationService = new Mock<IUserSpecificationService>();
-        _mockMapper = new Mock<IMapper>();
         _handler = new GetAllUsersManagementQueryHandler(
-            _mockValidator.Object, 
-            _mockUserReadRepository.Object, 
-            _mockSpecificationService.Object,
-            _mockMapper.Object);
+            _mockValidator.Object,
+            _mockUserReadRepository.Object,
+            _mockSpecificationService.Object);
 
         // Setup validator to return valid by default
         _mockValidator
@@ -69,17 +65,7 @@ public class GetAllUsersManagementQueryHandlerTest
             .Setup(r => r.GetUsersAsync(It.IsAny<ISpecification<User>>(), It.IsAny<PaginationParams>(), cancellationToken))
             .ReturnsAsync(pagedResult);
 
-        var expectedUserDtos = new List<GetAllUsersDto>
-        {
-            new GetAllUsersDto { Id = users[0].Id },
-            new GetAllUsersDto { Id = users[1].Id }
-        };
-
-        _mockMapper
-            .Setup(m => m.Map<List<GetAllUsersDto>>(It.IsAny<IReadOnlyList<User>>()))
-            .Returns(expectedUserDtos);
-
-        // Act
+        // Act - the handler now runs the real mapping
         var result = await _handler.Handle(query, cancellationToken);
 
         // Assert
@@ -110,16 +96,7 @@ public class GetAllUsersManagementQueryHandlerTest
             .Setup(r => r.GetUsersAsync(It.IsAny<ISpecification<User>>(), It.IsAny<PaginationParams>(), cancellationToken))
             .ReturnsAsync(pagedResult);
 
-        var expectedUserDtos = new List<GetAllUsersDto>
-        {
-            new GetAllUsersDto { Id = users[0].Id }
-        };
-
-        _mockMapper
-            .Setup(m => m.Map<List<GetAllUsersDto>>(It.IsAny<IReadOnlyList<User>>()))
-            .Returns(expectedUserDtos);
-
-        // Act
+        // Act - the handler now runs the real mapping
         var result = await _handler.Handle(query, cancellationToken);
 
         // Assert
@@ -146,11 +123,7 @@ public class GetAllUsersManagementQueryHandlerTest
             .Setup(r => r.GetUsersAsync(It.IsAny<ISpecification<User>>(), It.IsAny<PaginationParams>(), cancellationToken))
             .ReturnsAsync(pagedResult);
 
-        _mockMapper
-            .Setup(m => m.Map<List<GetAllUsersDto>>(It.IsAny<IReadOnlyList<User>>()))
-            .Returns(new List<GetAllUsersDto>());
-
-        // Act
+        // Act - the handler now runs the real mapping
         var result = await _handler.Handle(query, cancellationToken);
 
         // Assert
@@ -181,16 +154,7 @@ public class GetAllUsersManagementQueryHandlerTest
             .Setup(r => r.GetUsersAsync(It.IsAny<ISpecification<User>>(), It.IsAny<PaginationParams>(), cancellationToken))
             .ReturnsAsync(pagedResult);
 
-        var userDtos = new List<GetAllUsersDto>
-        {
-            new GetAllUsersDto { Id = Guid.NewGuid(), PhoneNumber = phoneNumber }
-        };
-
-        _mockMapper
-            .Setup(m => m.Map<List<GetAllUsersDto>>(It.IsAny<IReadOnlyList<User>>()))
-            .Returns(userDtos);
-
-        // Act
+        // Act - the handler now runs the real mapping
         var result = await _handler.Handle(query, cancellationToken);
 
         // Assert
@@ -221,16 +185,7 @@ public class GetAllUsersManagementQueryHandlerTest
             .Setup(r => r.GetUsersAsync(It.IsAny<ISpecification<User>>(), It.IsAny<PaginationParams>(), cancellationToken))
             .ReturnsAsync(pagedResult);
 
-        var userDtos = new List<GetAllUsersDto>
-        {
-            new GetAllUsersDto { Id = Guid.NewGuid(), Email = email }
-        };
-
-        _mockMapper
-            .Setup(m => m.Map<List<GetAllUsersDto>>(It.IsAny<IReadOnlyList<User>>()))
-            .Returns(userDtos);
-
-        // Act
+        // Act - the handler now runs the real mapping
         var result = await _handler.Handle(query, cancellationToken);
 
         // Assert

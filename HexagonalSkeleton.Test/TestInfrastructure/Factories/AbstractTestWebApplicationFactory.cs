@@ -252,7 +252,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Factories
             // AutoMapper para mapeos
             services.AddAutoMapper(
                 typeof(HexagonalSkeleton.API.Mapping.ApiMappingProfile),
-                typeof(HexagonalSkeleton.Application.Mapping.ApplicationMappingProfile));
+                typeof(HexagonalSkeleton.Application.Mapping.UserDtoMapper));
 
             // Validadores
             services.AddValidatorsFromAssembly(
