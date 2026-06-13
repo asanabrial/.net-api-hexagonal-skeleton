@@ -1,4 +1,3 @@
-using AutoMapper;
 using HexagonalSkeleton.Application.Features.UserRegistration.Dto;
 
 namespace HexagonalSkeleton.API.Models.Users
@@ -6,7 +5,6 @@ namespace HexagonalSkeleton.API.Models.Users
     /// <summary>
     /// Basic user information included in authentication response
     /// </summary>
-    [AutoMap(typeof(RegisterUserInfoDto), ReverseMap = true)]
     public class AuthenticatedUserInfoResponse
     {
         public Guid Id { get; set; }

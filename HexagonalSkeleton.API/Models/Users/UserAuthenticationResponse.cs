@@ -1,4 +1,3 @@
-using AutoMapper;
 using HexagonalSkeleton.Application.Features.UserAuthentication.Dto;
 using HexagonalSkeleton.Application.Features.UserRegistration.Dto;
 using HexagonalSkeleton.API.Models.Users;
@@ -7,7 +6,6 @@ namespace HexagonalSkeleton.API.Models.Auth
 {    /// <summary>
      /// Response model for successful user authentication with registration
      /// </summary>
-    [AutoMap(typeof(RegisterUserDto), ReverseMap = true)]
     public class UserAuthenticationResponse
     {
         /// <summary>

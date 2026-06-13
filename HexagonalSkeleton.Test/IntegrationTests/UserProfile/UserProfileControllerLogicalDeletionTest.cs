@@ -10,7 +10,6 @@ using HexagonalSkeleton.Test.TestInfrastructure.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using HexagonalSkeleton.Application.Common.Messaging;
 using Xunit;
-using AutoMapper;
 
 namespace HexagonalSkeleton.Test.Integration.UserProfile;
 

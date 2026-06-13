@@ -1,6 +1,6 @@
 using HexagonalSkeleton.API.Identity;
 using HexagonalSkeleton.API.Models.Users;
-using AutoMapper;
+using HexagonalSkeleton.API.Mapping;
 using HexagonalSkeleton.Application.Common.Messaging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,12 +21,10 @@ namespace HexagonalSkeleton.API.Controllers.Features
     public class UserProfileController : ControllerBase
     {
         private readonly ISender _mediator;
-        private readonly IMapper _mapper;
 
-        public UserProfileController(ISender mediator, IMapper mapper)
+        public UserProfileController(ISender mediator)
         {
             _mediator = mediator;
-            _mapper = mapper;
         }
 
         /// <summary>
@@ -40,7 +38,7 @@ namespace HexagonalSkeleton.API.Controllers.Features
         public async Task<IActionResult> GetMyProfile()
         {
             var result = await _mediator.Send(new GetMyProfileQuery(User.GetUserId()));
-            return Ok(_mapper.Map<UserResponse>(result));
+            return Ok(result.ToResponse());
         }
 
         /// <summary>
@@ -54,10 +52,10 @@ namespace HexagonalSkeleton.API.Controllers.Features
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> UpdatePersonalInfo(UpdateProfileRequest request)
         {
-            var command = _mapper.Map<UpdateProfileUserCommand>(request);
+            var command = request.ToCommand();
             command.Id = User.GetUserId();
             var result = await _mediator.Send(command);
-            return Ok(_mapper.Map<UserResponse>(result));
+            return Ok(result.ToResponse());
         }
     }
 }

@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using AutoMapper;
 using HexagonalSkeleton.Application.Features.UserAuthentication.Commands;
 
 namespace HexagonalSkeleton.API.Models.Auth
@@ -7,7 +6,6 @@ namespace HexagonalSkeleton.API.Models.Auth
     /// <summary>
     /// Request model for user authentication
     /// </summary>
-    [AutoMap(typeof(LoginCommand), ReverseMap = true)]
     public class LoginRequest
     {
         /// <summary>

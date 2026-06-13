@@ -20,9 +20,6 @@ builder.Services.AddAuthentication(builder.Configuration);
 // CQRS Architecture Configuration
 builder.Services.AddCqrsLayer();
 
-// AutoMapper with API profiles
-builder.Services.AddAutoMapperProfiles();
-
 builder.Services.AddControllers();
 
 builder.Host.UseSerilog(configureLogger: (context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));

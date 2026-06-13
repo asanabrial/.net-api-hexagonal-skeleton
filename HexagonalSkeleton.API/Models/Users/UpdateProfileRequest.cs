@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using AutoMapper;
 using HexagonalSkeleton.Application.Features.UserProfile.Commands;
 
 namespace HexagonalSkeleton.API.Models.Users
@@ -7,7 +6,6 @@ namespace HexagonalSkeleton.API.Models.Users
     /// <summary>
     /// Request model for updating user profile (partial update)
     /// </summary>
-    [AutoMap(typeof(UpdateProfileUserCommand), ReverseMap = true)]
     public class UpdateProfileRequest
     {
         /// <summary>

@@ -1,7 +1,7 @@
 using HexagonalSkeleton.API.Identity;
 using HexagonalSkeleton.API.Models.Users;
 using HexagonalSkeleton.API.Models.Common;
-using AutoMapper;
+using HexagonalSkeleton.API.Mapping;
 using HexagonalSkeleton.Application.Common.Messaging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,12 +23,10 @@ namespace HexagonalSkeleton.API.Controllers.Features
     public class UserManagementController : ControllerBase
     {
         private readonly ISender _mediator;
-        private readonly IMapper _mapper;
 
-        public UserManagementController(ISender mediator, IMapper mapper)
+        public UserManagementController(ISender mediator)
         {
             _mediator = mediator;
-            _mapper = mapper;
         }
 
         /// <summary>
@@ -43,7 +41,7 @@ namespace HexagonalSkeleton.API.Controllers.Features
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _mediator.Send(new GetUserManagementQuery(id));
-            return Ok(_mapper.Map<UserResponse>(result));
+            return Ok(result.ToResponse());
         }
 
         /// <summary>
@@ -67,9 +65,9 @@ namespace HexagonalSkeleton.API.Controllers.Features
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetAll([FromQuery] GetAllUsersRequest request)
         {
-            var query = _mapper.Map<GetAllUsersManagementQuery>(request);
+            var query = request.ToQuery();
             var result = await _mediator.Send(query);
-            return Ok(_mapper.Map<PagedResponse<UserResponse>>(result));
+            return Ok(result.ToResponse(dto => dto.ToResponse()));
         }
 
         /// <summary>
@@ -84,9 +82,9 @@ namespace HexagonalSkeleton.API.Controllers.Features
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update(UpdateUserRequest request)
         {
-            var command = _mapper.Map<UpdateUserManagementCommand>(request);
+            var command = request.ToCommand();
             var result = await _mediator.Send(command);
-            return Ok(_mapper.Map<UserResponse>(result));
+            return Ok(result.ToResponse());
         }
 
         /// <summary>
@@ -102,10 +100,10 @@ namespace HexagonalSkeleton.API.Controllers.Features
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateProfile(Guid id, UpdateProfileRequest request)
         {
-            var command = _mapper.Map<UpdateProfileUserCommand>(request);
+            var command = request.ToCommand();
             command.Id = id;
             var result = await _mediator.Send(command);
-            return Ok(_mapper.Map<UserResponse>(result));
+            return Ok(result.ToResponse());
         }
 
         /// <summary>
@@ -135,7 +133,7 @@ namespace HexagonalSkeleton.API.Controllers.Features
         public async Task<IActionResult> SoftDelete(Guid id)
         {
             var result = await _mediator.Send(new SoftDeleteUserManagementCommand(id));
-            return Ok(_mapper.Map<DeleteUserResponse>(result));
+            return Ok(result.ToResponse());
         }
     }
 }

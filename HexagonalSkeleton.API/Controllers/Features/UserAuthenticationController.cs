@@ -1,6 +1,6 @@
 using HexagonalSkeleton.API.Models.Auth;
 using HexagonalSkeleton.API.Models.Users;
-using AutoMapper;
+using HexagonalSkeleton.API.Mapping;
 using HexagonalSkeleton.Application.Common.Messaging;
 using Microsoft.AspNetCore.Mvc;
 using HexagonalSkeleton.Application.Features.UserAuthentication.Commands;
@@ -19,12 +19,10 @@ namespace HexagonalSkeleton.API.Controllers.Features
     public class UserAuthenticationController : ControllerBase
     {
         private readonly ISender _mediator;
-        private readonly IMapper _mapper;
 
-        public UserAuthenticationController(ISender mediator, IMapper mapper)
+        public UserAuthenticationController(ISender mediator)
         {
             _mediator = mediator;
-            _mapper = mapper;
         }
 
         /// <summary>
@@ -39,9 +37,9 @@ namespace HexagonalSkeleton.API.Controllers.Features
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> Login(LoginRequest request)
         {
-            var command = _mapper.Map<LoginCommand>(request);
+            var command = request.ToCommand();
             var result = await _mediator.Send(command);
-            return Ok(_mapper.Map<LoginResponse>(result));
+            return Ok(result.ToResponse());
         }
 
         /// <summary>
@@ -57,10 +55,10 @@ namespace HexagonalSkeleton.API.Controllers.Features
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> Register(CreateUserRequest request)
         {
-            var command = _mapper.Map<RegisterUserCommand>(request);
+            var command = request.ToCommand();
             var result = await _mediator.Send(command);
-            
-            var response = _mapper.Map<AuthenticatedRegistrationResponse>(result);
+
+            var response = result.ToResponse();
             
             return Created($"/api/users/{result.User.Id}", response);
         }

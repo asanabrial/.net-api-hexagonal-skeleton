@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using AutoMapper;
 using HexagonalSkeleton.Application.Features.UserManagement.Queries;
 
 namespace HexagonalSkeleton.API.Models.Users
@@ -9,7 +8,6 @@ namespace HexagonalSkeleton.API.Models.Users
     /// Supports multiple filter criteria that can be combined for powerful searches
     /// Follows Request-Response pattern with clear validation rules
     /// </summary>
-    [AutoMap(typeof(GetAllUsersManagementQuery), ReverseMap = true)]
     public class GetAllUsersRequest
     {
         /// <summary>

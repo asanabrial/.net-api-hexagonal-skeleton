@@ -15,7 +15,6 @@ using HexagonalSkeleton.Test.TestInfrastructure.Implementations;
 using HexagonalSkeleton.Test.TestInfrastructure.Helpers;
 using MongoDB.Driver;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using AutoMapper;
 using FluentValidation;
 using HexagonalSkeleton.Application.Common.Messaging;
 using System;
@@ -248,11 +247,6 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Factories
             // In-house mediator for CQRS
             services.AddRequestHandlers(
                 typeof(HexagonalSkeleton.Application.Features.UserProfile.Commands.UpdateProfileUserCommand).Assembly);
-
-            // AutoMapper para mapeos
-            services.AddAutoMapper(
-                typeof(HexagonalSkeleton.API.Mapping.ApiMappingProfile),
-                typeof(HexagonalSkeleton.Application.Mapping.UserDtoMapper));
 
             // Validadores
             services.AddValidatorsFromAssembly(
