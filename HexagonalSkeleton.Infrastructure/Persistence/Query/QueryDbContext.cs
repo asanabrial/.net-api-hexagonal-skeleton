@@ -45,15 +45,6 @@ namespace HexagonalSkeleton.Infrastructure.Persistence.Query
         }
 
         /// <summary>
-        /// Checks if we're running in a test environment to avoid MongoDB operations
-        /// </summary>
-        private bool IsTestEnvironment()
-        {
-            // Check if we're in a test environment (database name contains "Test" or we're using in-memory)
-            return _database?.DatabaseNamespace?.DatabaseName?.Contains("Test", StringComparison.OrdinalIgnoreCase) ?? false;
-        }
-
-        /// <summary>
         /// Users collection optimized for read operations
         /// </summary>
         public IMongoCollection<UserQueryDocument> Users => 

@@ -1,11 +1,9 @@
-using Confluent.Kafka;
 using HexagonalSkeleton.Infrastructure.CDC;
 using HexagonalSkeleton.Infrastructure.CDC.Configuration;
 using HexagonalSkeleton.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace HexagonalSkeleton.API.Config
 {
@@ -24,20 +22,8 @@ namespace HexagonalSkeleton.API.Config
         {
             // Configure CDC options
             services.Configure<CdcOptions>(configuration.GetSection(CdcOptions.SectionName));
-            
-        // Configure Kafka Producer from CDC configuration
-        services.Configure<ProducerConfig>(options =>
-        {
-            // This configuration will be evaluated at DI resolution time, not registration time
-            // However, for test scenarios, we need to ensure dynamic config is available
-            // We'll implement delayed configuration in the service constructor instead
-        });        // Configure Kafka Consumer from CDC configuration
-        services.Configure<ConsumerConfig>(options =>
-        {
-            // This configuration will be evaluated at DI resolution time, not registration time
-            // However, for test scenarios, we need to ensure dynamic config is available
-            // We'll implement delayed configuration in the service constructor instead
-        });            // Registrar servicios CDC
+
+            // Register CDC services
             services.AddScoped<DebeziumEventProcessor>(); // Changed to Scoped to match QueryDbContext lifetime
             services.AddHostedService<DebeziumConsumerService>();
 

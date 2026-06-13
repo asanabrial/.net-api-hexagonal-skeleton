@@ -16,18 +16,15 @@ namespace HexagonalSkeleton.Infrastructure.Adapters
     public class AuthenticationService : IAuthenticationService
     {
         private readonly IApplicationSettings _appSettings;
-        private readonly IUserReadRepository _userReadRepository;
         private readonly IUserWriteRepository _userWriteRepository;
         private readonly ILogger<AuthenticationService> _logger;
 
         public AuthenticationService(
-            IApplicationSettings appSettings, 
-            IUserReadRepository userReadRepository,
+            IApplicationSettings appSettings,
             IUserWriteRepository userWriteRepository,
             ILogger<AuthenticationService> logger)
         {
             _appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
-            _userReadRepository = userReadRepository ?? throw new ArgumentNullException(nameof(userReadRepository));
             _userWriteRepository = userWriteRepository ?? throw new ArgumentNullException(nameof(userWriteRepository));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }        /// <summary>

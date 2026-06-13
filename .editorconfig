@@ -1,0 +1,31 @@
+# EditorConfig for the .NET hexagonal teaching skeleton
+# https://editorconfig.org
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# CRLF is enforced repo-wide on this Windows-hosted project to stop LF/CRLF git churn.
+[*.cs]
+end_of_line = crlf
+charset = utf-8
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Surface non-nullable members that are never initialized so the team fixes them early.
+dotnet_diagnostic.CS8618.severity = warning
+
+# Neutral, uncontroversial C# style preferences.
+csharp_style_namespace_declarations = file_scoped:suggestion
+csharp_style_prefer_primary_constructors = true:suggestion
+
+[*.{json,yml,yaml}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false

@@ -50,23 +50,5 @@ namespace HexagonalSkeleton.Infrastructure.Persistence.Command.Entities
         public DateTime? DeletedAt { get; set; }
         public DateTime? LastLogin { get; set; }
         public bool IsDeleted { get; set; }
-
-        /// <summary>
-        /// Update timestamp for audit purposes
-        /// </summary>
-        public void UpdateTimestamp()
-        {
-            UpdatedAt = DateTime.UtcNow;
-        }
-
-        /// <summary>
-        /// Soft delete the entity
-        /// </summary>
-        public void Delete()
-        {
-            IsDeleted = true;
-            DeletedAt = DateTime.UtcNow;
-            UpdateTimestamp();
-        }
     }
 }

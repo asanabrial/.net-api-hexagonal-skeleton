@@ -11,7 +11,6 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
     public class AuthenticationServiceTest
     {
         private readonly Mock<IApplicationSettings> _mockAppSettings;
-        private readonly Mock<IUserReadRepository> _mockUserReadRepository;
         private readonly Mock<IUserWriteRepository> _mockUserWriteRepository;
         private readonly Mock<ILogger<AuthenticationService>> _mockLogger;
         private readonly AuthenticationService _authenticationService;
@@ -19,12 +18,10 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
         public AuthenticationServiceTest()
         {
             _mockAppSettings = new Mock<IApplicationSettings>();
-            _mockUserReadRepository = new Mock<IUserReadRepository>();
             _mockUserWriteRepository = new Mock<IUserWriteRepository>();
             _mockLogger = new Mock<ILogger<AuthenticationService>>();
             _authenticationService = new AuthenticationService(
-                _mockAppSettings.Object, 
-                _mockUserReadRepository.Object,
+                _mockAppSettings.Object,
                 _mockUserWriteRepository.Object,
                 _mockLogger.Object);
 
@@ -39,29 +36,19 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
         public void Constructor_WithNullAppSettings_ShouldThrowArgumentNullException()
         {
             // Act & Assert
-            var exception = Assert.Throws<ArgumentNullException>(() => 
-                new AuthenticationService(null!, _mockUserReadRepository.Object, _mockUserWriteRepository.Object, _mockLogger.Object));
-            
+            var exception = Assert.Throws<ArgumentNullException>(() =>
+                new AuthenticationService(null!, _mockUserWriteRepository.Object, _mockLogger.Object));
+
             Assert.Equal("appSettings", exception.ParamName);
         }
 
         [Fact]
-        public void Constructor_WithNullUserReadRepository_ShouldThrowArgumentNullException()
-        {
-            // Act & Assert
-            var exception = Assert.Throws<ArgumentNullException>(() => 
-                new AuthenticationService(_mockAppSettings.Object, null!, _mockUserWriteRepository.Object, _mockLogger.Object));
-            
-            Assert.Equal("userReadRepository", exception.ParamName);
-        }
-        
-        [Fact]
         public void Constructor_WithNullUserWriteRepository_ShouldThrowArgumentNullException()
         {
             // Act & Assert
-            var exception = Assert.Throws<ArgumentNullException>(() => 
-                new AuthenticationService(_mockAppSettings.Object, _mockUserReadRepository.Object, null!, _mockLogger.Object));
-            
+            var exception = Assert.Throws<ArgumentNullException>(() =>
+                new AuthenticationService(_mockAppSettings.Object, null!, _mockLogger.Object));
+
             Assert.Equal("userWriteRepository", exception.ParamName);
         }
 
@@ -69,9 +56,9 @@ namespace HexagonalSkeleton.Test.Unit.Infrastructure.Adapters
         public void Constructor_WithNullLogger_ShouldThrowArgumentNullException()
         {
             // Act & Assert
-            var exception = Assert.Throws<ArgumentNullException>(() => 
-                new AuthenticationService(_mockAppSettings.Object, _mockUserReadRepository.Object, _mockUserWriteRepository.Object, null!));
-            
+            var exception = Assert.Throws<ArgumentNullException>(() =>
+                new AuthenticationService(_mockAppSettings.Object, _mockUserWriteRepository.Object, null!));
+
             Assert.Equal("logger", exception.ParamName);
         }
 
