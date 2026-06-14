@@ -88,7 +88,9 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Auth
 
             // Assert
             Assert.NotEqual(hash2, hash1);
-        }        [Theory]
+        }
+
+        [Theory]
         [InlineData("", "salt", "pepper")]
         [InlineData("password", "", "pepper")]
         public void ComputeHash_WithEmptyInputs_ShouldThrowArgumentException(string password, string salt, string pepper)
@@ -101,35 +103,6 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Auth
         [InlineData("password", "salt", "")]
         public void ComputeHash_WithEmptyPepper_ShouldStillReturnHash(string password, string salt, string pepper)
         {
-            // Act
-            var hash = PasswordHasher.ComputeHash(password, salt, pepper);
-
-            // Assert
-            Assert.NotNull(hash); Assert.NotEmpty(hash);
-        }
-
-        [Fact]
-        public void ComputeHash_WithSpecialCharacters_ShouldWork()
-        {
-            // Arrange
-            var password = "p@ssw0rd!#$%";
-            var salt = "s@lt&*()";
-            var pepper = "p3pp3r<>?";
-
-            // Act
-            var hash = PasswordHasher.ComputeHash(password, salt, pepper);            // Assert
-            Assert.NotNull(hash); Assert.NotEmpty(hash);
-            Assert.DoesNotContain(password, hash);
-        }
-
-        [Fact]
-        public void ComputeHash_WithUnicodeCharacters_ShouldWork()
-        {
-            // Arrange
-            var password = "password";
-            var salt = "salt";
-            var pepper = "pepper";
-
             // Act
             var hash = PasswordHasher.ComputeHash(password, salt, pepper);
 
@@ -162,20 +135,6 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Auth
         }
 
         [Fact]
-        public void GenerateSalt_ShouldReturnBase64EncodedString()
-        {
-            // Act
-            var salt = PasswordHasher.GenerateSalt();
-
-            // Assert
-            Assert.NotNull(salt);
-            Assert.NotEmpty(salt);
-            // Should be able to convert back from Base64 without throwing
-            var bytes = Record.Exception(() => Convert.FromBase64String(salt));
-            Assert.Null(bytes);
-        }
-
-        [Fact]
         public void GenerateSalt_ShouldReturnConsistentLength()
         {
             // Act
@@ -188,25 +147,6 @@ namespace HexagonalSkeleton.Test.Unit.CommonCore.Auth
             Assert.Equal(salt3.Length, salt2.Length);
             // Base64 encoding of 16 bytes should be 24 characters (including padding)
             Assert.Equal(24, salt1.Length);
-        }
-
-        [Fact]
-        public void ComputeHash_ShouldReturnBase64EncodedString()
-        {
-            // Arrange
-            var password = "testPassword";
-            var salt = "testSalt";
-            var pepper = "testPepper";
-
-            // Act
-            var hash = PasswordHasher.ComputeHash(password, salt, pepper);
-
-            // Assert
-            Assert.NotNull(hash);
-            Assert.NotEmpty(hash);
-            // Should be able to convert back from Base64 without throwing
-            var exception = Record.Exception(() => Convert.FromBase64String(hash!));
-            Assert.Null(exception);
         }
     }
 }

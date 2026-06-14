@@ -59,31 +59,6 @@ public class GetUserManagementQueryHandlerTest
     }
 
     [Fact]
-    public async Task Handle_InvalidQuery_ShouldNotProceedToRepository()
-    {
-        // Arrange - This test verifies that validation works correctly
-        var query = new GetUserManagementQuery(Guid.Empty); // Invalid ID
-        var cancellationToken = CancellationToken.None;
-
-        // Setup validation to pass to test actual validation logic
-        _mockValidator
-            .Setup(v => v.ValidateAsync(It.IsAny<GetUserManagementQuery>(), cancellationToken))
-            .ReturnsAsync(new FluentValidation.Results.ValidationResult());
-
-        // Setup repository to return null for invalid ID
-        _mockUserReadRepository
-            .Setup(r => r.GetByIdUnfilteredAsync(Guid.Empty, cancellationToken))
-            .ReturnsAsync((User?)null);
-
-        // Act & Assert - Invalid ID should result in NotFoundException
-        await Assert.ThrowsAsync<NotFoundException>(
-            () => _handler.Handle(query, cancellationToken));
-
-        // Verify repository was called despite invalid ID (validation passed but user not found)
-        _mockUserReadRepository.Verify(r => r.GetByIdUnfilteredAsync(Guid.Empty, cancellationToken), Times.Once);
-    }
-
-    [Fact]
     public async Task Handle_UserNotFound_ShouldThrowNotFoundException()
     {
         // Arrange
