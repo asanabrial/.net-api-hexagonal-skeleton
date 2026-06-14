@@ -4,11 +4,11 @@
 
 <p align="center">
   <strong>Production-ready API template implementing Clean Architecture, DDD, CQRS with Change Data Capture</strong><br/>
-  Built with modern .NET 9 technologies and enterprise-grade data synchronization
+  Built with modern .NET 10 technologies and enterprise-grade data synchronization
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/.NET-9.0-purple?style=flat-square&logo=dotnet" alt=".NET 9"/>
+  <img src="https://img.shields.io/badge/.NET-10.0-purple?style=flat-square&logo=dotnet" alt=".NET 10"/>
   <img src="https://img.shields.io/badge/PostgreSQL-16-336791?style=flat-square&logo=postgresql" alt="PostgreSQL"/>
   <img src="https://img.shields.io/badge/MongoDB-8.0-47A248?style=flat-square&logo=mongodb" alt="MongoDB"/>
   <img src="https://img.shields.io/badge/Kafka-7.8-231F20?style=flat-square&logo=apache-kafka" alt="Kafka"/>
@@ -29,22 +29,23 @@
 -   **API Documentation**: Interactive Swagger/OpenAPI with detailed schemas
 -   **Event Streaming**: Kafka-based CDC for instant data synchronization
 -   **Clean Code Principles**: DRY, KISS, YAGNI compliant with centralized utilities
--   **Testing**: 60+ test files with unit and integration coverage
+-   **Zero Commercial Dependencies**: In-house mediator and manual mapping — no MediatR, AutoMapper, or other paid-licensed libraries
+-   **Testing**: focused unit and integration suite (256 tests) running against real containers
 
 ## Technology Stack
 
 | Category           | Technology             |
 | ------------------ | ---------------------- |
-| **Framework**      | .NET 9                 |
+| **Framework**      | .NET 10                |
 | **Command DB**     | PostgreSQL             |
 | **Query DB**       | MongoDB                |
 | **Message Stream** | Apache Kafka           |
 | **CDC Platform**   | Debezium               |
 | **ORM**            | Entity Framework Core  |
 | **ODM**            | MongoDB Driver         |
-| **Mediator**       | MediatR                |
+| **Mediator**       | In-house dispatcher    |
 | **Validation**     | FluentValidation       |
-| **Mapping**        | AutoMapper             |
+| **Mapping**        | Manual (extension methods) |
 | **Authentication** | JWT Bearer             |
 | **Logging**        | Serilog                |
 | **Testing**        | xUnit + Testcontainers |
@@ -170,7 +171,7 @@ graph TB
     subgraph "Application Layer"
         Commands[Commands]
         Queries[Queries]
-        Handlers[MediatR Handlers]
+        Handlers[Request Handlers]
         CdcEvents[CDC Events]
     end
 
@@ -239,15 +240,15 @@ graph TB
 │ ├── Auth/ # JWT implementation
 │ └── Services/ # External service adapters
 └── HexagonalSkeleton.Test/ # Testing
-    ├── Unit/ # Unit tests (60+ test files)
-    ├── Integration/ # Integration tests
+    ├── UnitTests/ # Unit tests
+    ├── IntegrationTests/ # Integration tests
     └── TestInfrastructure/ # Testing utilities
 
 ```
 
 ## Testing
 
-60+ tests covering the full stack. Integration tests use Testcontainers for real PostgreSQL, MongoDB, and Kafka instances.
+256 tests (248 unit, 8 integration) covering the full stack. Integration tests use Testcontainers for real PostgreSQL, MongoDB, Kafka, and Debezium instances.
 
 ```bash
 # Run all tests
@@ -356,12 +357,12 @@ This architecture demonstrates advanced concepts valued in enterprise software d
 
 Perfect for demonstrating expertise in:
 
--   **Modern .NET Development** (.NET 9 with latest C# 13 features)
+-   **Modern .NET Development** (.NET 10 with latest C# 14 features)
 -   **Distributed Systems** (CQRS + Change Data Capture patterns)
 -   **Event Streaming Architecture** (Kafka + Debezium for real-time sync)
 -   **Database Design** (PostgreSQL + MongoDB optimization strategies)
 -   **Enterprise Patterns** (Hexagonal Architecture, DDD, SOLID principles)
--   **Advanced Testing** (Unit, integration, CDC testing with 60+ test files)
+-   **Advanced Testing** (unit, integration, and end-to-end CDC testing with a focused 256-test suite)
 -   **DevOps & Containers** (Docker Compose, automated setup scripts)
 
 ## CQRS & CDC Flow
@@ -409,7 +410,7 @@ sequenceDiagram
 ### **Adding New Features**
 
 1. **Domain First**: Create entities, value objects, business rules
-2. **Command/Query**: Add MediatR handlers for CQRS operations
+2. **Command/Query**: Add request handlers (in-house mediator) for CQRS operations
 3. **Events**: Define integration events for cross-bounded context communication
 4. **API Layer**: Create controllers and DTOs
 5. **Sync Logic**: Update consumers for read model consistency
