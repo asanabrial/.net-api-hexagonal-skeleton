@@ -28,8 +28,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
             _kafkaConfig = kafkaConfig;
             Console.WriteLine($"Configuring Kafka with image: {dockerConfig.Images.Kafka}");
             
-            var builder = new ContainerBuilder()
-                .WithImage(dockerConfig.Images.Kafka)
+            var builder = new ContainerBuilder(dockerConfig.Images.Kafka)
                 .WithPortBinding(dockerConfig.Ports.Kafka, dockerConfig.Ports.Kafka)
                 // Traditional mode with Zookeeper (not KRaft)
                 .WithEnvironment("KAFKA_ZOOKEEPER_CONNECT", kafkaConfig.Environment.ZookeeperConnect)

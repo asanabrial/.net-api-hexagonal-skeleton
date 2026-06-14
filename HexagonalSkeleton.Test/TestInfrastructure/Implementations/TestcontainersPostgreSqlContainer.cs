@@ -27,8 +27,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
             _database = options.Database;
             _username = options.Username;
             
-            var builder = new PostgreSqlBuilder()
-                .WithImage(dockerConfig.Images.PostgreSQL)
+            var builder = new PostgreSqlBuilder(dockerConfig.Images.PostgreSQL)
                 .WithDatabase(options.Database)
                 .WithUsername(options.Username)
                 .WithPassword(options.Password)

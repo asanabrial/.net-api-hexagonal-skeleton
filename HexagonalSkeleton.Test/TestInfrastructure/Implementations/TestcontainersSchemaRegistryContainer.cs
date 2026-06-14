@@ -30,8 +30,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
             _dockerConfig = dockerConfig;
             _schemaRegistryConfig = schemaRegistryConfig;
             
-            var builder = new ContainerBuilder()
-                .WithImage(_schemaRegistryConfig.Image)
+            var builder = new ContainerBuilder(_schemaRegistryConfig.Image)
                 .WithPortBinding(_dockerConfig.Ports.SchemaRegistry, true)
                 // Schema Registry configuration from settings
                 .WithEnvironment("SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS", _schemaRegistryConfig.Environment.KafkastoreBootstrapServers)

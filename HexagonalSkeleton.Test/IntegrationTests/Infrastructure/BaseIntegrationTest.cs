@@ -51,8 +51,7 @@ namespace HexagonalSkeleton.Test.Integration.Infrastructure
                 .WithName($"integration-network-{Guid.NewGuid():N}")
                 .Build();
             
-            _postgres = new PostgreSqlBuilder()
-                .WithImage(dockerConfig.Images.PostgreSQL)
+            _postgres = new PostgreSqlBuilder(dockerConfig.Images.PostgreSQL)
                 .WithDatabase(_options.Database)
                 .WithUsername(_options.Username)
                 .WithPassword(_options.Password)
@@ -60,14 +59,12 @@ namespace HexagonalSkeleton.Test.Integration.Infrastructure
                 .WithNetworkAliases(dockerConfig.NetworkAliases.PostgreSQL)
                 .Build();
 
-            _mongodb = new MongoDbBuilder()
-                .WithImage(dockerConfig.Images.MongoDB)
+            _mongodb = new MongoDbBuilder(dockerConfig.Images.MongoDB)
                 .WithNetwork(_network)
                 .WithNetworkAliases(dockerConfig.NetworkAliases.MongoDB)
                 .Build();
                 
-            _kafka = new KafkaBuilder()
-                .WithImage(dockerConfig.Images.Kafka)
+            _kafka = new KafkaBuilder(dockerConfig.Images.Kafka)
                 .WithNetwork(_network)
                 .WithNetworkAliases(dockerConfig.NetworkAliases.Kafka)
                 .Build();

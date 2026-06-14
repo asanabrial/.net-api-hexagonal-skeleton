@@ -27,8 +27,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
             _database = options.Database;
             _username = options.Username;
             
-            var builder = new MongoDbBuilder()
-                .WithImage(dockerConfig.Images.MongoDB)
+            var builder = new MongoDbBuilder(dockerConfig.Images.MongoDB)
                 .WithUsername(options.Username)
                 .WithPassword(options.Password)
                 .WithCleanUp(options.CleanUp);

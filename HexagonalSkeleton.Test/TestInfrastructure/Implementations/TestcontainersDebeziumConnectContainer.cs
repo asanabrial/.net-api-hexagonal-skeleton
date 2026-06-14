@@ -34,8 +34,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
             _dockerConfig = dockerConfig;
             _debeziumConfig = debeziumConfig;
             
-            var builder = new ContainerBuilder()
-                .WithImage(_debeziumConfig.Image)
+            var builder = new ContainerBuilder(_debeziumConfig.Image)
                 .WithPortBinding(_dockerConfig.Ports.DebeziumConnect, _debeziumConfig.InternalPort)
                 .WithEnvironment("GROUP_ID", _debeziumConfig.Environment.GroupId)
                 .WithEnvironment("CONFIG_STORAGE_TOPIC", _debeziumConfig.Environment.ConfigStorageTopic)

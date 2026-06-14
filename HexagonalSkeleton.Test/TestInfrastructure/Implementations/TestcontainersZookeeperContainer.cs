@@ -27,8 +27,7 @@ namespace HexagonalSkeleton.Test.TestInfrastructure.Implementations
             _dockerConfig = dockerConfig;
             Console.WriteLine($"Configuring Zookeeper with image: {dockerConfig.Images.Zookeeper}");
             
-            var builder = new ContainerBuilder()
-                .WithImage(dockerConfig.Images.Zookeeper)
+            var builder = new ContainerBuilder(dockerConfig.Images.Zookeeper)
                 .WithPortBinding(dockerConfig.Ports.Zookeeper, dockerConfig.Ports.Zookeeper)
                 .WithEnvironment("ZOOKEEPER_CLIENT_PORT", zookeeperConfig.Environment.ClientPort)
                 .WithEnvironment("ZOOKEEPER_TICK_TIME", zookeeperConfig.Environment.TickTime)
